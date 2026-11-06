@@ -26,14 +26,7 @@ class Entrypoints(unittest.TestCase):
         self.env.pop("WITCHBURST_ARTIFACTS", None)
         self.user = self.work / "outer-user"
         self.user.mkdir()
-        # 최초 Godot 프로세스도 임시 사용자 경로로 한정한다.
-        if platform.system() == "Darwin":
-            self.env["HOME"] = str(self.user)
-        elif platform.system() == "Windows":
-            self.env["APPDATA"] = str(self.user)
-        else:
-            for key in ["XDG_DATA_HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME"]:
-                self.env[key] = str(self.user)
+        # 개별 저장 경로와 임시 프로젝트로 분리한다. HOME/CODEX_HOME은 유지한다.
         if platform.system() == "Darwin" and Path("/etc/ssl/cert.pem").exists():
             with (self.project / "project.godot").open("a", encoding="utf-8") as settings:
                 settings.write('\n[network]\ntls/certificate_bundle_override="/etc/ssl/cert.pem"\n')
@@ -42,7 +35,7 @@ class Entrypoints(unittest.TestCase):
 
     def direct(self):
         result = subprocess.run(
-            [self.engine, "--headless", "--path", str(self.project), "--script", "res://tests/smoke.gd"],
+            [self.engine, "--headless", "--path", str(self.project), "--log-file", str(self.work / "direct.log"), "--script", "res://tests/smoke.gd"],
             env=self.env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=120)
         self.assertEqual(self.sentinel.read_text(encoding="utf-8"), "기존 진행 보존")
         self.assertFalse(list(self.user.rglob("isolation.txt")), "최초 사용자 경로에 검사 파일을 쓰면 안 됨")

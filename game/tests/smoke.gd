@@ -3,6 +3,7 @@ extends SceneTree
 
 var failures := 0
 var checks := 0
+var fixture_id := 0
 var scene: PackedScene
 
 func _initialize() -> void:
@@ -16,8 +17,10 @@ func require(condition: bool, message: String) -> void:
 		quit(1)
 	assert(condition, message)
 
-func fresh() -> Control:
+func fresh(existing_path: String = "") -> Control:
 	var battle := scene.instantiate() as Control
+	fixture_id += 1
+	battle.save_path = existing_path if not existing_path.is_empty() else OS.get_environment("WITCHBURST_TEST_ROOT").path_join("smoke-%d.json" % fixture_id)
 	root.add_child(battle)
 	battle.set_process(false)
 	battle.sound.enabled = false
@@ -60,20 +63,12 @@ func _run() -> void:
 		_run_isolated()
 		return
 	require(not isolation.is_empty(), "검사는 tests/run.py의 격리 경로가 필요하다")
-	var actual_user := OS.get_user_data_dir()
-	if not actual_user.is_absolute_path():
-		actual_user = ProjectSettings.globalize_path("res://").path_join(actual_user)
-	actual_user = actual_user.simplify_path()
-	if not actual_user.begins_with(isolation + "/"):
-		require(false, "실제 사용자 저장 경로 격리 실패: 쓰기를 중단한다")
+	var project_path := ProjectSettings.globalize_path("res://").simplify_path()
+	if not project_path.begins_with(isolation + "/"):
+		require(false, "실제 사용자 저장 경로 격리 실패: 임시 프로젝트에서만 실행한다")
 		return
-	require(actual_user.begins_with(isolation + "/"), "실제 사용자 저장 경로 격리")
-	var marker := FileAccess.open("user://isolation.txt", FileAccess.WRITE)
-	require(marker != null, "격리 저장 경로 쓰기 가능")
-	if marker:
-		marker.store_string("자동 검사 전용")
-		marker.close()
-	print("격리 user:// = ", actual_user)
+	require(project_path.begins_with(isolation + "/"), "임시 프로젝트 경로 격리")
+	print("검사 전용 저장 루트 = ", isolation)
 	scene = load(ProjectSettings.get_setting("application/run/main_scene")) as PackedScene
 	require(scene != null, "기본 씬 실제 로드")
 	var battle := fresh()
@@ -186,6 +181,8 @@ func _run() -> void:
 	require(b.total_shots > a.total_shots, "속도 강화가 실제 발사 횟수 증가")
 	a.free()
 	b.free()
+	_growth_checks()
+	_save_checks()
 	await _input_checks()
 	print("제품 자동 검사: ", checks, "개, 실패 ", failures)
 	quit(1 if failures else 0)
@@ -223,6 +220,13 @@ func _input_checks() -> void:
 	require(not battle.dragging, "마우스 외부 해제")
 	battle.coins = 100
 	battle._refresh_ui()
+	battle.workshop_button.pressed.emit()
+	var paused_kills: int = battle.kills
+	var paused_shots: int = battle.total_shots
+	seconds(battle, 3)
+	require(battle.workshop.visible and battle.kills == paused_kills and battle.total_shots == paused_shots, "장비 메뉴 열기·전투 일시정지")
+	battle.workshop.get_node("닫기").pressed.emit()
+	require(not battle.workshop.visible, "장비 메뉴 닫고 전투 복귀")
 	var before: int = battle.levels.attack
 	var center: Vector2 = battle.upgrades.attack.get_global_rect().get_center()
 	for pressed in [true, false]:
@@ -249,4 +253,173 @@ func _input_checks() -> void:
 		battle._layout_ui()
 		require(battle.upgrades.attack.position.y > battle.field_bottom and battle.upgrades["yield"].get_global_rect().end.x <= battle.size.x, "화면 비율별 강화 영역 배치")
 		require(battle.skill_button.size.y >= 48 and battle.result_button.size.y >= 48, "주요 버튼 48 이상 터치 영역")
+	battle.free()
+
+func _growth_checks() -> void:
+	var battle := fresh()
+	require(battle.draw_tool() == -1 and not battle.craft_tool() and not battle.merge_tool(0), "재화·재료·동급 장비 부족 거부")
+	require(not battle.equip_tool(2) and not battle.unlock_spirit() and not battle.rebirth(), "미소유 장착·정령·보스 전 환생 거부")
+	# 실제 RNG의 확률 구간 양끝을 시드로 찾아 실제 뽑기 함수에 통과시킨다.
+	var rng := RandomNumberGenerator.new()
+	for boundary in [1, 80, 81, 98, 99, 100]:
+		var seed_value := 0
+		while true:
+			rng.seed = seed_value
+			if rng.randi_range(1, 100) == boundary:
+				break
+			seed_value += 1
+		battle.coins = 120
+		battle.growth_random.seed = seed_value
+		var previous: Array = battle.inventory.duplicate()
+		var expected := 0 if boundary <= 80 else (1 if boundary <= 98 else 2)
+		require(battle.draw_tool() == expected and battle.inventory[expected] == previous[expected] + 1 and battle.coins == 108, "실제 뽑기 확률 경계 %d·장비 획득·가격" % boundary)
+	battle.free()
+	battle = fresh()
+	battle.materials = 10
+	require(battle.craft_tool() and battle.craft_tool() and battle.materials == 4 and battle.inventory == [2, 0, 0], "정화 재료 6으로 실제 장비 2개 제작")
+	var damage: float = battle.attack_damage()
+	var small: int = battle.power_tier()
+	require(battle.merge_tool(0) and battle.inventory == [0, 1, 0] and battle.equipped == 1, "동급 2개 소모·상위 1개 자동 장착")
+	require(battle.attack_damage() > damage and battle.power_tier() > small and battle.projectile_radius(battle.power_tier()) > battle.projectile_radius(small), "합성 장비가 화력·외형·발사체 크기에 반영")
+	require(not battle.merge_tool(-1) and not battle.merge_tool(2) and not battle.merge_tool(0), "잘못된 등급·최대 등급·재료 없는 합성 거부")
+	require(battle.equip_tool(-1), "기본 지팡이 장착")
+	damage = battle.attack_damage()
+	battle.equip_tool(1)
+	require(battle.attack_damage() > damage, "장착 변경이 공격 배율에 반영")
+	battle._fire()
+	require(battle.bullets[-1].damage == battle.attack_damage() and battle.bullets[-1].tier == battle.power_tier(), "실제 전투 발사체에 장착 공격·외형 전달")
+	var enemy: Dictionary = battle.enemies[0]
+	var hp: float = enemy.hp
+	seconds(battle, 0.7)
+	require(enemy.hp < hp, "장비 발사체 이동·실제 적 피해")
+	require(battle.unlock_spirit() and battle.materials == 0 and not battle.unlock_spirit(), "정령 잎4 소모·중복 해금 거부")
+	var linked: int = battle.spirit_shots
+	for i in range(3):
+		battle._fire()
+	require(battle.spirit_shots == linked + 1 and battle.bullets.any(func(b: Dictionary) -> bool: return b.get("spirit", false) and is_equal_approx(b.damage, battle.attack_damage() * 0.65)), "정령 매 3발 연계탄 실제 생성·65% 피해")
+	battle.free()
+	# 첫 플레이 전체 경로: 재화 주입 없이 제작·합성·뽑기·정령·보스·환생.
+	battle = fresh()
+	battle.growth_random.seed = 725194
+	var drawn := false
+	var crafted := 0
+	var merged := false
+	var simulated := 0.0
+	while battle.phase != battle.Phase.WON and simulated < 240:
+		if not battle.spirit and battle.materials >= 4:
+			battle.unlock_spirit()
+		if not merged and battle.inventory[0] < 2 and battle.materials >= 3:
+			if battle.craft_tool():
+				crafted += 1
+		if not merged and battle.inventory[0] >= 2:
+			merged = battle.merge_tool(0)
+		if not drawn and battle.coins >= battle.DRAW_COST:
+			battle.draw_tool()
+			drawn = true
+		if battle.levels.attack < 4:
+			battle.buy_upgrade("attack")
+		else:
+			battle.buy_upgrade("speed")
+		if battle.phase == battle.Phase.LOST:
+			battle.restart_battle()
+		battle.advance(1.0 / 30)
+		simulated += 1.0 / 30
+	require(drawn and crafted > 0 and merged and battle.spirit and battle.equipped >= 1 and battle.phase == battle.Phase.WON and battle.boss_cleared, "자연 보상만으로 뽑기·제작·합성·정령·보스 첫 승리")
+	var owner: String = battle.local_owner_id
+	var progress_path: String = battle.save_path
+	battle.pending_coins = 10
+	require(battle.rebirth(), "첫 보스 뒤 환생")
+	require(battle.coins == 0 and battle.materials == 0 and battle.levels == {"attack": 0, "speed": 0, "yield": 0} and battle.inventory == [0, 0, 0] and battle.equipped == -1 and battle.pending_coins == 0 and not battle.boss_cleared, "환생 별빛·재료·강화·장비·미수령 보상·승리 자격 초기화")
+	require(battle.spirit and battle.rebirths == 1 and battle.local_owner_id == owner and battle.phase == battle.Phase.FOREST and battle.kills == 0 and is_equal_approx(battle.attack_damage(), 7.5), "환생 정령·소유자 보존·영구 공격25%·첫 전투 재시작")
+	require(not battle.rebirth(), "승리 자격 소모 후 중복 환생 거부")
+	battle.free()
+	battle = fresh(progress_path)
+	require(battle.rebirths == 1 and battle.spirit and battle.local_owner_id == owner and battle.inventory == [0, 0, 0] and battle.levels.attack == 0, "환생 후 새 씬의 실제 파일 reload도 보존·초기화 동일")
+	print("성장 루프 자연 첫 승리·환생: ", snappedf(simulated, 0.1), " 시뮬레이션 초 (사람 재미 NOT_MEASURED)")
+	battle.free()
+
+func _save_checks() -> void:
+	var battle := fresh()
+	var filename: String = battle.save_path
+	battle.coins = 151
+	battle.materials = 19
+	battle.craft_tool()
+	battle.unlock_spirit()
+	battle.buy_upgrade("attack")
+	var state: Dictionary = battle.progress_data()
+	require(battle.save_progress(), "실제 JSON 원자 저장 성공")
+	require(FileAccess.file_exists(filename) and FileAccess.file_exists(filename + ".bak") and not FileAccess.file_exists(filename + ".tmp"), "실제 파일·최신 백업 생성·임시 파일 교체")
+	battle.free()
+	battle = fresh(filename)
+	require(battle.coins == state.coins and battle.materials == state.materials and battle.levels == state.levels and battle.inventory == state.inventory and battle.equipped == state.equipped and battle.spirit == state.spirit and battle.local_owner_id == state.local_owner_id, "메모리 공유 없는 새 씬 JSON reload")
+	var store = battle.store
+	# 실제 게임이 사용하는 저장 클래스의 디스크 로드·보상 기준을 조작한다.
+	state = battle.progress_data()
+	state.reward_cursor = 100000
+	state.saved_at = 100000
+	state.pending_coins = 0
+	state.rebirths = 0
+	require(store.write(state), "오프라인 파일 기준 fixture 저장")
+	var loaded: Dictionary = store.load_progress(100000 + 86400 * 3)
+	require(loaded.pending_coins == 2880 and loaded.reward_cursor == 100000 + 86400 * 3, "오프라인 3일도 최대24시간·분당2 별빛")
+	loaded = store.load_progress(100000 + 86400 * 3)
+	require(loaded.pending_coins == 2880, "같은 시각 중복 파일 로드 보상 추가 없음")
+	loaded = store.load_progress(100000 + 86400 * 4)
+	require(loaded.pending_coins == 2880, "미수령 보상을 남긴 재접속도 누적24시간 상한")
+	battle._apply_progress(loaded)
+	var coins_before: int = battle.coins
+	require(battle.claim_offline() and battle.coins == coins_before + 2880 and not battle.claim_offline(), "수령은 한 번만·실제 저장 확정")
+	battle._load_progress()
+	require(battle.pending_coins == 0 and battle.coins == coins_before + 2880, "수령 뒤 reload 재지급 없음")
+	# 종료 저장으로 기준이 전진한 뒤 짧은 재접속을 반복해도 보상 없음.
+	state.reward_cursor = 100000
+	state.saved_at = 100000
+	store.write(state)
+	for timestamp in [99999, -100, 100020, 100040, 100059]:
+		loaded = store.load_progress(timestamp)
+		require(loaded.pending_coins == 0, "음수·시간 역행·짧은 재접속 보상 없음: %d" % timestamp)
+	state.reward_cursor = 500000
+	state.saved_at = 500000
+	store.write(state)
+	loaded = store.load_progress(100000)
+	require(loaded.pending_coins == 0 and loaded.reward_cursor == 500000, "미래 저장시계 기준 후퇴·즉시 보상 금지")
+	loaded = store.load_progress(500060)
+	require(loaded.pending_coins == 2, "미래 기준을 실제로 지나면 새 구간만 지급")
+	battle._apply_progress(loaded)
+	battle.save_progress(500120)
+	loaded = store.load_progress(500140)
+	require(loaded.pending_coins == 2, "종료 저장 시점 이전 활성 구간을 오프라인으로 재산정하지 않음")
+	var broken := FileAccess.open(filename, FileAccess.WRITE)
+	broken.store_string("{broken")
+	broken.close()
+	loaded = store.load_progress(600000)
+	require(store.recovered and store.valid(loaded) and loaded.local_owner_id == state.local_owner_id and loaded.pending_coins == 0, "불량 JSON 최신 백업 복구·보상 재발행 금지")
+	var invalid: Dictionary = loaded.duplicate(true)
+	invalid.inventory = [1, -1, 0]
+	require(not store.valid(invalid) and not store.write(invalid), "음수 장비 저장 거부")
+	invalid = loaded.duplicate(true)
+	invalid.levels.attack = "문자"
+	require(not store.valid(invalid), "잘못된 필드 타입 거부")
+	invalid = loaded.duplicate(true)
+	invalid.schema_version = 999
+	require(not store.valid(invalid), "미지원 schema version 거부")
+	# 디렉터리가 없는 테스트 전용 경로로 저장 실패를 재현한다.
+	battle._apply_progress(loaded)
+	battle.pending_coins = 12
+	coins_before = battle.coins
+	store.path = OS.get_environment("WITCHBURST_TEST_ROOT").path_join("missing/progress.json")
+	require(not battle.claim_offline() and battle.pending_coins == 12 and battle.coins == coins_before, "저장 실패 시 수령·재화 변경 롤백")
+	battle.materials = 10
+	var previous: Array = battle.inventory.duplicate()
+	require(not battle.craft_tool() and battle.materials == 10 and battle.inventory == previous, "저장 실패 시 제작 비용·장비 롤백")
+	store.path = filename
+	# 양쪽 파일이 불량이면 새 로컬 진행으로 복구하고 원문을 보존한다.
+	for target in [filename, filename + ".bak"]:
+		var invalid_file := FileAccess.open(target, FileAccess.WRITE)
+		invalid_file.store_string("not-json")
+		invalid_file.close()
+	battle.free()
+	battle = fresh(filename)
+	require(battle.coins == 0 and battle.rebirths == 0 and battle.store.valid(battle.progress_data()), "주·백업 모두 불량이어도 새 진행 복구")
+	require(Array(DirAccess.get_files_at(filename.get_base_dir())).any(func(entry: String) -> bool: return entry.begins_with(filename.get_file() + ".invalid-")), "불량 저장 원문 별도 보존")
 	battle.free()
