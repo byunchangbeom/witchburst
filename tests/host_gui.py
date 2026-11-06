@@ -11,7 +11,7 @@ import subprocess
 import sys
 
 
-STATES = ("01-first", "02-grown", "03-boss", "04-skill", "05-won", "06-lost")
+STATES = ("01-first", "02-grown", "03-boss", "04-skill", "05-won", "06-lost", "07-workshop", "08-rebirth")
 SIZES = ((540, 960), (540, 1200), (720, 960))
 
 
@@ -86,6 +86,9 @@ def main():
         receipt["diagnostics"] = diagnostics
         if not shutil.which("godot"):
             reason = "tool_unavailable"
+        # 화면 잠금은 OS 입력 제약이다. GPU 내부 캡처 실패로 추정하지 않는다.
+        if reason == "screen_locked":
+            reason = None
         if reason:
             receipt.update(status="ENV_UNAVAILABLE", reason_code=reason)
             return

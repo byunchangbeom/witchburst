@@ -2,6 +2,7 @@ extends SceneTree
 ## 실제 렌더러 캡처와 headless 상태 준비 검사를 명시적으로 구분한다.
 
 const SIZES := [Vector2i(540, 960), Vector2i(540, 1200), Vector2i(720, 960)]
+var fixture_id := 0
 var battle: Control
 var directory: String
 var verify_only := false
@@ -20,6 +21,8 @@ func fresh() -> void:
 	if is_instance_valid(battle):
 		battle.free()
 	battle = load("res://main.tscn").instantiate()
+	fixture_id += 1
+	battle.save_path = OS.get_environment("WITCHBURST_TEST_ROOT").path_join("capture-%d.json" % fixture_id)
 	root.add_child(battle)
 	battle.set_process(false)
 	battle.sound.enabled = false
@@ -33,12 +36,9 @@ func until_phase(target: int, limit: float) -> void:
 
 func _run() -> void:
 	var isolation := OS.get_environment("WITCHBURST_TEST_ROOT")
-	var actual_user := OS.get_user_data_dir()
-	if not actual_user.is_absolute_path():
-		actual_user = ProjectSettings.globalize_path("res://").path_join(actual_user)
-	actual_user = actual_user.simplify_path()
-	if isolation.is_empty() or not actual_user.begins_with(isolation + "/"):
-		push_error("FAIL: 격리 환경에서만 캡처 가능")
+	var project_path := ProjectSettings.globalize_path("res://").simplify_path()
+	if isolation.is_empty() or not project_path.begins_with(isolation + "/"):
+		push_error("FAIL: 격리 임시 프로젝트에서만 캡처 가능")
 		quit(1)
 		return
 	verify_only = "--verify-stages" in OS.get_cmdline_user_args()
@@ -57,16 +57,24 @@ func _run() -> void:
 	await capture_matrix("01-first", battle.Phase.FOREST)
 	# 외형 비교 fixture다. 자연 보상만의 승리는 smoke.gd에서 별도로 확인한다.
 	battle.coins = 1000
+	battle.materials = 16
 	for i in range(4):
+		require(battle.craft_tool(), "실제 코드 재료 제작")
+	require(battle.merge_tool(0) and battle.merge_tool(0) and battle.merge_tool(1), "성운포까지 동급 합성")
+	require(battle.unlock_spirit(), "실제 정령 해금")
+	for i in range(2):
 		require(battle.buy_upgrade("attack"), "공격 강화 준비")
 	for i in range(3):
 		require(battle.buy_upgrade("speed"), "속도 강화 준비")
 	require(battle.buy_upgrade("yield"), "획득 강화 준비")
 	battle.advance(0.2)
-	require(battle.power_tier() == 2 and battle.bullets.any(func(b: Dictionary) -> bool: return b.tier == 2), "성장한 마도구와 큰 탄 표시 준비")
+	require(battle.power_tier() == 3 and battle.bullets.any(func(b: Dictionary) -> bool: return b.tier == 3), "성장한 마도구와 큰 탄 표시 준비")
 	await capture_matrix("02-grown", battle.Phase.FOREST)
+	battle.toggle_workshop()
+	await capture_matrix("07-workshop", battle.Phase.FOREST)
+	battle.toggle_workshop()
 	until_phase(battle.Phase.BOSS, 100)
-	battle.advance(2.0)
+	battle.advance(0.25)
 	require(battle.boss_hp > 0 and battle.boss_time < battle.BOSS_LIMIT, "보스 HP·시간 표시 준비")
 	await capture_matrix("03-boss", battle.Phase.BOSS)
 	battle.skill_button.pressed.emit()
@@ -75,8 +83,9 @@ func _run() -> void:
 	await capture_matrix("04-skill", battle.Phase.BOSS)
 	until_phase(battle.Phase.WON, 30)
 	await capture_matrix("05-won", battle.Phase.WON)
-	battle.result_button.pressed.emit()
-	require(battle.phase == battle.Phase.FOREST and battle.round_number == 2, "승리 후 다시 전투")
+	battle.rebirth_button.pressed.emit()
+	require(battle.phase == battle.Phase.FOREST and battle.round_number == 2 and battle.rebirths == 1 and battle.spirit and battle.equipped == -1, "환생 후 초기 장비·정령 보존")
+	await capture_matrix("08-rebirth", battle.Phase.FOREST)
 	fresh()
 	until_phase(battle.Phase.LOST, 150)
 	await capture_matrix("06-lost", battle.Phase.LOST)
@@ -84,13 +93,13 @@ func _run() -> void:
 	require(battle.phase == battle.Phase.FOREST and battle.round_number == 2, "패배 후 재도전")
 	var manifest := {"display_server": DisplayServer.get_name(), "captures": records,
 		"visual_review": "NOT_MEASURED", "human_play": "NOT_MEASURED",
-		"fixture": "성장 비교는 별빛 1000 주입, 나머지는 전투 시뮬레이션"}
+		"fixture": "성장 비교는 별빛1000·잎16 주입 후 실제 제작·합성·정령 해금, 나머지 전투 시뮬레이션"}
 	var filename := "capture-stages.json" if verify_only else "capture-manifest.json"
 	var file := FileAccess.open(directory.path_join(filename), FileAccess.WRITE)
 	require(file != null, "상태 기록 저장")
 	file.store_string(JSON.stringify(manifest, "\t"))
 	file.close()
-	print("캡처 상태 준비 검사 완료 (PNG 없음)." if verify_only else "실제 렌더러 PNG 18개 저장. 독립 시각 판독은 별도 필요.")
+	print("캡처 상태 준비 검사 완료 (PNG 없음)." if verify_only else "실제 렌더러 PNG 24개 저장. 독립 시각 판독은 별도 필요.")
 	battle.free()
 	quit(0)
 
@@ -107,8 +116,13 @@ func capture_matrix(stage: String, phase: int) -> void:
 		var viewport := Rect2(Vector2.ZERO, battle.size)
 		for control in [battle.title_label, battle.status_label, battle.wallet_label, battle.hint_label,
 			battle.skill_button, battle.stats_label, battle.footer_label,
-			battle.upgrades.attack, battle.upgrades.speed, battle.upgrades.yield]:
+			battle.workshop_button, battle.upgrades.attack, battle.upgrades.speed, battle.upgrades.yield]:
 			require(viewport.encloses(control.get_rect()), "화면 내 UI 배치: " + stage)
+		if battle.workshop.visible:
+			require(viewport.encloses(battle.workshop.get_rect()), "장비 메뉴 화면 내 배치")
+			var menu_rect := Rect2(Vector2.ZERO, battle.workshop.size)
+			for control in battle.workshop.get_children():
+				require(menu_rect.encloses(control.get_rect()), "장비 메뉴 내부 컨트롤 배치")
 		if battle.result_panel.visible:
 			require(viewport.encloses(battle.result_panel.get_rect()), "화면 내 결과 창 배치")
 			var panel_rect := Rect2(Vector2.ZERO, battle.result_panel.size)
@@ -116,6 +130,7 @@ func capture_matrix(stage: String, phase: int) -> void:
 				require(panel_rect.encloses(control.get_rect()), "결과 창 내부 텍스트·버튼 배치")
 		var filename := "%s-%dx%d.png" % [stage, dimensions.x, dimensions.y]
 		var item := {"path": filename, "stage": stage, "size": [dimensions.x, dimensions.y],
+			"equipped": battle.equipped, "spirit": battle.spirit, "rebirths": battle.rebirths,
 			"phase": phase, "attack_level": battle.levels.attack, "power_tier": battle.power_tier(),
 			"shots": battle.total_shots, "hits": battle.total_hits, "rewards": battle.total_rewards,
 			"boss_hp": battle.boss_hp, "boss_time": battle.boss_time,

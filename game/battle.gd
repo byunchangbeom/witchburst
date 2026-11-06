@@ -13,6 +13,35 @@ const GOLD := Color("ffdb89")
 const MINT := Color("8af2cc")
 const LAVENDER := Color("c1a9ff")
 
+const Store = preload("res://progress_store.gd")
+const DRAW_COST := 12
+const CRAFT_COST := 3
+const SPIRIT_COST := 4
+var inventory: Array = [0, 0, 0]
+var equipped := -1
+var spirit := false
+var spirit_shots := 0
+var rebirths := 0
+var boss_cleared := false
+var local_owner_id := ""
+var reward_cursor := 0
+var saved_at := 0
+var pending_coins := 0
+var save_path := "user://progress.json"
+var store = Store.new()
+var save_status := "기기 내 자동 저장"
+var save_clock := 0.0
+var growth_random := RandomNumberGenerator.new()
+var workshop: Panel
+var workshop_button: Button
+var workshop_text: Label
+var draw_button: Button
+var craft_button: Button
+var merge_button: Button
+var spirit_button: Button
+var claim_button: Button
+var rebirth_button: Button
+var equip_buttons: Array[Button] = []
 var phase := Phase.FOREST
 var coins := 0
 var materials := 0
@@ -66,6 +95,14 @@ var field_bottom := 710.0
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	random.seed = 725194
+	growth_random.randomize()
+	# 검사 사본은 기본 사용자 저장에 접근하지 않는다.
+	var test_root := OS.get_environment("WITCHBURST_TEST_ROOT")
+	if not test_root.is_empty() and save_path == "user://progress.json":
+		save_path = test_root.path_join("test-progress.json")
+	store.path = save_path
+	_load_progress()
+	get_tree().auto_accept_quit = false
 	font = SystemFont.new()
 	font.font_names = PackedStringArray(["Apple SD Gothic Neo", "Noto Sans CJK KR", "Malgun Gothic", "NanumGothic", "sans-serif"])
 	font.allow_system_fallback = true
@@ -83,7 +120,13 @@ func _ready() -> void:
 	_refresh_ui()
 
 func attack_damage() -> float:
-	return 6.0 * pow(1.5, levels.attack)
+	return 6.0 * pow(1.5, levels.attack) * equipment_multiplier() * (1.0 + rebirths * 0.25)
+
+func equipment_multiplier() -> float:
+	return [1.3, 2.1, 3.4][equipped] if equipped >= 0 else 1.0
+
+func projectile_radius(tier: int) -> float:
+	return 4.0 + tier * 3.0
 
 func shot_interval() -> float:
 	return maxf(0.18, 1.05 / pow(1.22, levels.speed))
@@ -98,18 +141,19 @@ func upgrade_cost(kind: String) -> int:
 	return int(ceil(base * pow(1.65, levels[kind])))
 
 func power_tier() -> int:
-	if levels.attack >= 4:
-		return 2
-	return 1 if levels.attack >= 2 else 0
+	return maxi(2 if levels.attack >= 4 else (1 if levels.attack >= 2 else 0), equipped + 1)
 
 func buy_upgrade(kind: String) -> bool:
-	if not levels.has(kind):
+	if not levels.has(kind) or levels[kind] >= 20:
 		return false
 	var cost := upgrade_cost(kind)
 	if coins < cost:
 		return false
+	var before := progress_data()
 	coins -= cost
 	levels[kind] += 1
+	if not _commit_growth(before):
+		return false
 	if kind == "attack":
 		shot_clock = minf(shot_clock, 0.1)
 	_set_notice({"attack": "마법이 자랐어요! 마도구도 함께 커져요.", "speed": "정령과 박자를 맞춰, 더 빠르게!", "yield": "숲이 더 많은 별빛을 나눠줘요."}[kind])
@@ -120,6 +164,10 @@ func buy_upgrade(kind: String) -> bool:
 
 func _process(delta: float) -> void:
 	advance(delta)
+	save_clock += delta
+	if save_clock >= 5.0:
+		save_clock = 0.0
+		save_progress()
 	_refresh_ui()
 	queue_redraw()
 
@@ -144,7 +192,7 @@ func _tick(dt: float) -> void:
 		f.pos.y -= 30.0 * dt
 		f.life -= dt
 	floats = floats.filter(func(f: Dictionary) -> bool: return f.life > 0.0)
-	if phase == Phase.LOST or phase == Phase.WON:
+	if (is_instance_valid(workshop) and workshop.visible) or phase == Phase.LOST or phase == Phase.WON:
 		return
 	cooldown = maxf(0.0, cooldown - dt)
 	manual_grace = maxf(0.0, manual_grace - dt)
@@ -211,6 +259,10 @@ func _fire() -> void:
 			target = enemy
 	bullets.append({"pos": witch + Vector2(25, -26), "target": target.id, "damage": attack_damage(), "life": 2.0, "tier": power_tier()})
 	total_shots += 1
+	# 해금한 정령은 매 세 번째 사격에 연계탄을 보탠다.
+	if spirit and total_shots % 3 == 0:
+		bullets.append({"pos": witch + Vector2(-58, -18), "target": target.id, "damage": attack_damage() * 0.65, "life": 2.0, "tier": power_tier(), "spirit": true})
+		spirit_shots += 1
 	recoil = 1.0
 	_burst(witch + Vector2(25, -26), MINT, 3 + power_tier() * 2)
 	sound.play("shot")
@@ -239,6 +291,7 @@ func _hit(enemy: Dictionary, damage: float) -> void:
 		else:
 			kills += 1
 			enemies.erase(enemy)
+		save_progress()
 
 func _start_boss() -> void:
 	phase = Phase.BOSS
@@ -272,8 +325,10 @@ func _finish(won: bool) -> void:
 	active_touch = -1
 	sound.play("win" if won else "lose")
 	if won:
+		boss_cleared = true
 		enemies.clear()
-		_set_notice("숲이 다시 숨 쉬어요. 고마워요, 작은 마녀!")
+		_set_notice("숲이 다시 숨 쉬어요. 환생으로 영구 마법 +25%!")
+	save_progress()
 	_refresh_ui()
 
 func restart_battle() -> void:
@@ -320,7 +375,7 @@ func _drag_position(pos: Vector2) -> void:
 	manual_grace = 2.0
 
 func _unhandled_input(event: InputEvent) -> void:
-	if phase == Phase.LOST or phase == Phase.WON:
+	if workshop.visible or phase == Phase.LOST or phase == Phase.WON:
 		return
 	if event is InputEventScreenTouch:
 		if event.pressed and active_touch == -1 and _in_field(event.position):
@@ -350,6 +405,12 @@ func _input(event: InputEvent) -> void:
 		active_touch = -1
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		if save_progress():
+			get_tree().quit()
+	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		if not local_owner_id.is_empty():
+			save_progress()
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		dragging = false
 		active_touch = -1
@@ -419,7 +480,9 @@ func _build_ui() -> void:
 		var button := _button("", Color("254b50"))
 		button.pressed.connect(buy_upgrade.bind(kind))
 		upgrades[kind] = button
-	footer_label = _label("저장 · 합성 · 환생은 후속 제작  |  현재 실행 중 진행만 유지", 13, MUTED)
+	workshop_button = _button("장비 · 정령", Color("395569"))
+	workshop_button.pressed.connect(toggle_workshop)
+	footer_label = _label("", 13, MUTED)
 	footer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	result_panel = Panel.new()
 	result_panel.add_theme_stylebox_override("panel", _panel_style(Color("152d3b"), Color("739b94"), 24))
@@ -439,6 +502,11 @@ func _build_ui() -> void:
 	remove_child(result_button)
 	result_panel.add_child(result_button)
 	result_button.pressed.connect(restart_battle)
+	rebirth_button = _button("환생 · 영구 마법 +25%", Color("564276"))
+	remove_child(rebirth_button)
+	result_panel.add_child(rebirth_button)
+	rebirth_button.pressed.connect(rebirth)
+	_build_workshop()
 
 func _place(control: Control, rect: Rect2) -> void:
 	control.position = rect.position
@@ -457,6 +525,7 @@ func _layout_ui() -> void:
 	_place(status_label, Rect2(left, 144, width, 29))
 	_place(bar, Rect2(left, 180, width, 7))
 	_place(hint_label, Rect2(left, field_bottom - 44, width, 30))
+	_place(workshop_button, Rect2(left, field_bottom + 6, 170, 54))
 	_place(skill_button, Rect2(left + width - 208, field_bottom + 6, 208, 54))
 	_place(stats_label, Rect2(left, field_bottom + 76, width, 26))
 	var index := 0
@@ -464,10 +533,21 @@ func _layout_ui() -> void:
 		_place(upgrades[kind], Rect2(left + index * (width + 10) / 3.0, size.y - 140, (width - 20) / 3.0, 86))
 		index += 1
 	_place(footer_label, Rect2(left - 8, size.y - 40, width + 16, 24))
-	_place(result_panel, Rect2(left + 12, 265, width - 24, 235))
+	_place(result_panel, Rect2(left + 12, 240, width - 24, 330))
 	_place(result_title, Rect2(16, 24, width - 56, 45))
-	_place(result_text, Rect2(12, 79, width - 48, 63))
-	_place(result_button, Rect2(28, 158, width - 80, 54))
+	_place(result_text, Rect2(12, 79, width - 48, 108))
+	_place(result_button, Rect2(28, 196, width - 80, 54))
+	_place(rebirth_button, Rect2(28, 262, width - 80, 54))
+	_place(workshop, Rect2(left, 210, width, 460))
+	_place(workshop_text, Rect2(16, 14, width - 32, 178))
+	_place(draw_button, Rect2(16, 198, (width - 42) / 2, 52))
+	_place(craft_button, Rect2(width / 2 + 5, 198, (width - 42) / 2, 52))
+	for i in range(3):
+		_place(equip_buttons[i], Rect2(16 + i * (width - 22) / 3, 262, (width - 42) / 3, 48))
+	_place(merge_button, Rect2(16, 322, (width - 42) / 2, 52))
+	_place(spirit_button, Rect2(width / 2 + 5, 322, (width - 42) / 2, 52))
+	_place(claim_button, Rect2(16, 386, width - 120, 52))
+	_place(workshop.get_node("닫기"), Rect2(width - 94, 386, 78, 52))
 	queue_redraw()
 
 func _refresh_ui() -> void:
@@ -486,8 +566,12 @@ func _refresh_ui() -> void:
 	for kind in upgrades:
 		var names := {"attack": "공격력", "speed": "사격 속도", "yield": "획득량"}
 		upgrades[kind].text = "%s +%d\n✦ %d  강화" % [names[kind], levels[kind], upgrade_cost(kind)]
-		upgrades[kind].disabled = coins < upgrade_cost(kind)
-	hint_label.text = notice if notice_time > 0.0 else "자동 전투 중 · 마녀를 끌어 위치를 바꿀 수 있어요"
+		upgrades[kind].disabled = coins < upgrade_cost(kind) or levels[kind] >= 20
+		if levels[kind] >= 20:
+			upgrades[kind].text = names[kind] + " 최대"
+	hint_label.text = notice if notice_time > 0.0 else "자동 사격 → 강화 · 장비 합성 → 거대 마법포!"
+	footer_label.text = "%s · 가격/확률/배율은 가설" % save_status
+	_refresh_workshop()
 	skill_button.disabled = phase != Phase.BOSS or cooldown > 0.0
 	skill_button.text = "별비 · 보스에서 사용"
 	if phase == Phase.BOSS:
@@ -496,7 +580,8 @@ func _refresh_ui() -> void:
 	if result_panel.visible:
 		result_title.text = "숲이 깨어났어요!" if phase == Phase.WON else "시간이 다 됐어요"
 		result_title.add_theme_color_override("font_color", MINT if phase == Phase.WON else GOLD)
-		result_text.text = "가시왕 정화! 별빛과 정화잎을 받았어요.\n강화를 이어서 더 큰 마법을 만나보세요." if phase == Phase.WON else "재화와 강화는 그대로 남아요.\n아래에서 강화한 뒤 다시 도전해요."
+		rebirth_button.visible = boss_cleared
+		result_text.text = "가시왕 정화! 다시 전투하거나 환생해요.\n환생 초기화: 별빛·잎·강화·장비·보상\n보존: 정령·소유자·환생 수 / 영구 마법 +25%" if phase == Phase.WON else "재화·장비·강화는 그대로 남아요.\n아래 강화 / 장비·정령을 누른 뒤 재도전!"
 		result_button.text = "다시 숲으로" if phase == Phase.WON else "강화 유지 · 재도전"
 
 func _draw() -> void:
@@ -528,7 +613,7 @@ func _draw() -> void:
 		_draw_enemy(enemy)
 	for bullet in bullets:
 		var p := _world(bullet.pos)
-		var radius: float = 4.0 + bullet.tier * 3.0
+		var radius := projectile_radius(bullet.tier)
 		draw_circle(p, radius * 2.4, Color(0.5, 1.0, 0.8, 0.12))
 		draw_line(p + Vector2(0, 20 + bullet.tier * 7), p, MINT, radius, true)
 		draw_circle(p, radius, INK)
@@ -624,11 +709,11 @@ func _draw_witch() -> void:
 		draw_line(Vector2(26, -4), Vector2(26, -20), GOLD, cannon_width + 6, true)
 		draw_circle(Vector2(26, -33 - tier * 10), cannon_width * 0.52, Color("275661"))
 		draw_circle(Vector2(26, -33 - tier * 10), cannon_width * 0.3 + recoil * 3, MINT)
-		if tier == 2:
+		if tier >= 2:
 			for side in [-1, 1]:
 				_star(Vector2(26 + side * 27, -13), 8, GOLD)
 	draw_set_transform(Vector2.ZERO)
-	for i in range(1 + tier):
+	for i in range(2 if spirit else 0):
 		var spirit := p + Vector2(-58 - i * 24, -18 + sin(elapsed * 3.0 + i) * 10)
 		draw_circle(spirit, 19, Color(0.52, 0.94, 0.8, 0.12))
 		draw_circle(spirit, 11, MINT)
@@ -643,3 +728,233 @@ func _star(pos: Vector2, radius: float, color: Color) -> void:
 	for i in range(8):
 		points.append(pos + Vector2.from_angle(-PI / 2 + i * TAU / 8) * (radius if i % 2 == 0 else radius * 0.4))
 	draw_colored_polygon(points, color)
+
+func _now() -> int:
+	return int(Time.get_unix_time_from_system())
+
+func progress_data() -> Dictionary:
+	return {"schema_version": Store.VERSION, "local_owner_id": local_owner_id,
+		"saved_at": saved_at, "reward_cursor": reward_cursor, "pending_coins": pending_coins,
+		"coins": coins, "materials": materials, "levels": levels.duplicate(),
+		"inventory": inventory.duplicate(), "equipped": equipped, "spirit": spirit,
+		"rebirths": rebirths, "boss_cleared": boss_cleared}
+
+func _apply_progress(data: Dictionary) -> void:
+	local_owner_id = data.local_owner_id
+	saved_at = int(data.saved_at)
+	reward_cursor = int(data.reward_cursor)
+	pending_coins = int(data.pending_coins)
+	coins = int(data.coins)
+	materials = int(data.materials)
+	for kind in levels:
+		levels[kind] = int(data.levels[kind])
+	inventory = data.inventory.map(func(count: Variant) -> int: return int(count))
+	equipped = int(data.equipped)
+	spirit = data.spirit
+	rebirths = int(data.rebirths)
+	boss_cleared = data.boss_cleared
+
+func _load_progress(now: int = -1) -> void:
+	var timestamp := _now() if now == -1 else now
+	var data: Dictionary = store.load_progress(timestamp)
+	if data.is_empty():
+		var had_invalid := FileAccess.file_exists(save_path)
+		local_owner_id = Crypto.new().generate_random_bytes(16).hex_encode()
+		reward_cursor = maxi(0, timestamp)
+		saved_at = reward_cursor
+		save_progress(timestamp)
+		if had_invalid:
+			_set_notice("저장을 읽지 못해 새 진행을 시작해요. 원본 보존.")
+	else:
+		_apply_progress(data)
+		if store.recovered:
+			_set_notice("백업 복구: 중복 방지를 위해 접속 보상은 생략해요.")
+		elif pending_coins > 0:
+			_set_notice("돌아왔군요! 장비·정령에서 오프라인 별빛 수령")
+	if not store.error_message.is_empty():
+		save_status = "저장 실패 · 경로 확인"
+
+func save_progress(now: int = -1) -> bool:
+	if local_owner_id.is_empty():
+		return false
+	var data := progress_data()
+	var timestamp := clampi(_now() if now == -1 else now, 0, 4102444800)
+	data.saved_at = maxi(saved_at, timestamp)
+	data.reward_cursor = maxi(reward_cursor, timestamp)
+	if not store.write(data):
+		save_status = "저장 실패 · 경로 확인"
+		_set_notice(store.error_message)
+		return false
+	saved_at = data.saved_at
+	reward_cursor = data.reward_cursor
+	save_status = "기기 내 자동 저장"
+	return true
+
+func _commit_growth(before: Dictionary) -> bool:
+	if save_progress():
+		return true
+	_apply_progress(before)
+	return false
+
+func _acquire(tier: int) -> void:
+	inventory[tier] += 1
+	if equipped < tier:
+		equipped = tier
+
+func draw_tool() -> int:
+	if coins < DRAW_COST or inventory.any(func(count: Variant) -> bool: return count >= 9998):
+		return -1
+	var before := progress_data()
+	var roll := growth_random.randi_range(1, 100)
+	var tier := 0 if roll <= 80 else (1 if roll <= 98 else 2)
+	coins -= DRAW_COST
+	_acquire(tier)
+	if not _commit_growth(before):
+		return -1
+	_set_notice("%s 획득! 더 높은 등급은 자동 장착해요." % tool_name(tier))
+	sound.play("upgrade")
+	_refresh_ui()
+	return tier
+
+func craft_tool() -> bool:
+	if materials < CRAFT_COST or inventory[0] >= 9998:
+		return false
+	var before := progress_data()
+	materials -= CRAFT_COST
+	_acquire(0)
+	if not _commit_growth(before):
+		return false
+	_set_notice("정화잎으로 새싹 마도구 제작! 2개로 합성해요.")
+	sound.play("upgrade")
+	_refresh_ui()
+	return true
+
+func merge_tool(tier: int) -> bool:
+	if tier < 0 or tier >= 2 or inventory[tier] < 2 or inventory[tier + 1] >= 9998:
+		return false
+	var before := progress_data()
+	inventory[tier] -= 2
+	_acquire(tier + 1)
+	if not _commit_growth(before):
+		return false
+	_set_notice("합성 성공! %s · 커진 마법탄을 보세요." % tool_name(tier + 1))
+	sound.play("upgrade")
+	_burst(witch, GOLD, 24)
+	_refresh_ui()
+	return true
+
+func equip_tool(tier: int) -> bool:
+	if tier < -1 or tier > 2 or (tier >= 0 and inventory[tier] < 1):
+		return false
+	var before := progress_data()
+	equipped = tier
+	if not _commit_growth(before):
+		return false
+	_refresh_ui()
+	return true
+
+func unlock_spirit() -> bool:
+	if spirit or materials < SPIRIT_COST:
+		return false
+	var before := progress_data()
+	materials -= SPIRIT_COST
+	spirit = true
+	if not _commit_growth(before):
+		return false
+	_set_notice("정령 해금! 매 3번째 사격에 65% 위력의 연계탄!")
+	sound.play("upgrade")
+	_refresh_ui()
+	return true
+
+func claim_offline() -> bool:
+	if pending_coins <= 0 or coins + pending_coins > 1000000000:
+		return false
+	var before := progress_data()
+	var reward := pending_coins
+	coins += reward
+	pending_coins = 0
+	if not _commit_growth(before):
+		return false
+	_set_notice("오프라인 별빛 +%d (최대 24시간 · 가설)" % reward)
+	_refresh_ui()
+	return true
+
+func rebirth() -> bool:
+	if not boss_cleared or rebirths >= 1000:
+		return false
+	var before := progress_data()
+	coins = 0
+	materials = 0
+	levels = {"attack": 0, "speed": 0, "yield": 0}
+	inventory = [0, 0, 0]
+	equipped = -1
+	pending_coins = 0
+	boss_cleared = false
+	rebirths += 1
+	if not _commit_growth(before):
+		return false
+	phase = Phase.WON
+	restart_battle()
+	workshop.visible = false
+	_set_notice("환생 %d회 · 영구 마법 +%d%% / 정령은 함께해요!" % [rebirths, rebirths * 25])
+	return true
+
+func tool_name(tier: int) -> String:
+	return ["새싹", "달빛포", "거대 성운포"][tier] if tier >= 0 else "별 지팡이"
+
+func toggle_workshop() -> void:
+	workshop.visible = not workshop.visible
+	dragging = false
+	active_touch = -1
+	_refresh_ui()
+
+func _merge_available() -> void:
+	for tier in range(2):
+		if inventory[tier] >= 2:
+			merge_tool(tier)
+			return
+
+func _build_workshop() -> void:
+	workshop = Panel.new()
+	workshop.add_theme_stylebox_override("panel", _panel_style(Color("152d3b"), MINT))
+	workshop.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(workshop)
+	workshop_text = _label("", 16)
+	remove_child(workshop_text)
+	workshop.add_child(workshop_text)
+	draw_button = _button("뽑기 ✦12", Color("395569"))
+	craft_button = _button("제작 잎3", Color("395569"))
+	merge_button = _button("동급 2개 합성", Color("395569"))
+	spirit_button = _button("정령 해금 잎4", Color("395569"))
+	claim_button = _button("", Color("395569"))
+	var close := _button("닫기", Color("584966"))
+	close.name = "닫기"
+	for button in [draw_button, craft_button, merge_button, spirit_button, claim_button, close]:
+		remove_child(button)
+		workshop.add_child(button)
+	for tier in range(3):
+		var button := _button("", Color("395569"))
+		remove_child(button)
+		workshop.add_child(button)
+		equip_buttons.append(button)
+		button.pressed.connect(equip_tool.bind(tier))
+	draw_button.pressed.connect(draw_tool)
+	craft_button.pressed.connect(craft_tool)
+	merge_button.pressed.connect(_merge_available)
+	spirit_button.pressed.connect(unlock_spirit)
+	claim_button.pressed.connect(claim_offline)
+	close.pressed.connect(toggle_workshop)
+	workshop.visible = false
+
+func _refresh_workshop() -> void:
+	workshop_text.text = "장비 · 정령  /  메뉴 중 전투 잠시 멈춤\n✦ %d · 잎 %d / 장착: %s\n새싹 %d · 달빛포 %d · 성운포 %d\n가설: 뽑기 새싹80%% / 달빛18%% / 성운2%%\n제작: 새싹 1개 / 합성: 동급 2 → 상위 1\n환생 %d회 · 영구 마법 +%d%%\n정령: %s" % [coins, materials, tool_name(equipped), inventory[0], inventory[1], inventory[2], rebirths, rebirths * 25, "매 3발 연계탄 65%" if spirit else "잎 4개로 해금"]
+	draw_button.disabled = coins < DRAW_COST
+	craft_button.disabled = materials < CRAFT_COST
+	merge_button.disabled = inventory[0] < 2 and inventory[1] < 2
+	spirit_button.disabled = spirit or materials < SPIRIT_COST
+	spirit_button.text = "정령 연계 중" if spirit else "정령 해금 잎4"
+	for tier in range(3):
+		equip_buttons[tier].text = ("장착 중" if equipped == tier else "장착") + " · " + ["새싹", "달빛", "성운"][tier]
+		equip_buttons[tier].disabled = inventory[tier] < 1 or equipped == tier
+	claim_button.text = "접속 보상 ✦%d 수령" % pending_coins
+	claim_button.disabled = pending_coins <= 0
