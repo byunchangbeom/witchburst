@@ -35,12 +35,29 @@ func until_phase(battle: Control, target: int, limit: float) -> bool:
 		battle.advance(1.0 / 60.0)
 	return battle.phase == target
 
+func _run_isolated() -> void:
+	# Controller의 Godot 직접 실행도 같은 격리 실행기를 거친다.
+	# 여기서는 씬을 로드하거나 user://에 진행·검사 파일을 쓰지 않는다.
+	var runner := ProjectSettings.globalize_path("res://../tests/run.py").simplify_path()
+	if not FileAccess.file_exists(runner):
+		push_error("FAIL: 격리 실행기를 찾을 수 없다: " + runner)
+		quit(1)
+		return
+	print("Godot 직접 검사 → 임시 프로젝트·사용자 경로에서 다시 실행")
+	var output: Array = []
+	var status := OS.execute("python3", PackedStringArray([runner, "--engine", OS.get_executable_path()]), output, true)
+	for line in output:
+		print(line)
+	if status != 0:
+		push_error("FAIL: 격리 검사 실행기 종료 코드 %d" % status)
+	quit(0 if status == 0 else 1)
+
 func _run() -> void:
 	root.size = Vector2i(540, 960)
 	root.content_scale_size = Vector2i(540, 960)
 	var isolation := OS.get_environment("WITCHBURST_TEST_ROOT")
 	if isolation.is_empty():
-		require(false, "검사는 tests/run.py의 격리 경로가 필요하다")
+		_run_isolated()
 		return
 	require(not isolation.is_empty(), "검사는 tests/run.py의 격리 경로가 필요하다")
 	var actual_user := OS.get_user_data_dir()

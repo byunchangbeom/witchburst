@@ -22,13 +22,17 @@ godot --editor --path game
 
 ```sh
 python3 tests/run.py
+# Controller의 Godot 직접 검사도 같은 격리 실행기로 연결 (Python 3 필요)
+godot --headless --path game --script res://tests/smoke.gd
+# 진입 경로·격리 거부·실패 종료 코드 회귀 (임시 사본에서 실제 Godot 실행)
+python3 -B -m unittest discover -s tests -p 'test_entrypoints.py' -v
 # 디스플레이가 있는 환경에서 실제 렌더러 캡처 추가
 python3 tests/run.py --capture
 # 로그와 캡처를 지정 경로에 보관
 python3 tests/run.py --capture --artifacts /tmp/witchburst-review
 ```
 
-실행기는 임시 프로젝트 사본과 별도의 사용자·에디터 경로를 만들고, `user://`가 격리 경로 안인지 확인한다. 원래 프로젝트의 캐시·사용자 진행·전역 설정은 바꾸지 않는다. 검사 폴더는 종료 시 제거하고 로그·캡처는 출력한 자료 경로에 남긴다. 테스트 스크립트를 직접 실행하면 격리 가드가 실패하므로 위 실행기를 사용한다. 임포트 종료 코드가 0이어도 오류 로그가 있으면 실패하며, 제품 assert·오류·90초 타임아웃 역시 0이 아닌 코드로 반환한다.
+Python 실행기는 임시 프로젝트 사본과 별도의 사용자·에디터 경로를 만들고, `user://`가 격리 경로 안인지 확인한다. 원래 프로젝트의 캐시·사용자 진행·전역 설정은 바꾸지 않는다. 검사 폴더는 종료 시 제거하고 로그·캡처는 출력한 자료 경로에 남긴다. Godot 직접 검사는 격리 환경변수가 없으면 씬 로드·진행 파일 접근 전에 Python 실행기로 넘기고 같은 Godot 실행 파일로 임포트·제품 검사를 수행한다. 잘못 지정된 격리 경로는 쓰기 전에 거부한다. 임포트 종료 코드가 0이어도 오류 로그가 있으면 실패하며, 제품 assert·오류·90초 타임아웃과 자식 검사 실패 역시 최초 실행에 0이 아닌 코드로 반환한다.
 
 자동 규칙 검사와 렌더러 캡처는 OS 실제 터치·음향 청취·사람 재미·실기기 검사와 구분한다. 해당 검증은 수행 전 **NOT_MEASURED**다. Android/iOS/Windows/웹 내보내기와 실제 설치·실행도 미검증이다. 독립 최종 리뷰·커밋·통합·push는 Controller의 후속 단계다.
 

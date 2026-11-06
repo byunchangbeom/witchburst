@@ -13,10 +13,11 @@ import tempfile
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--engine", type=Path, help="직접 검사를 시작한 Godot 실행 파일 (기본: PATH의 godot)")
     parser.add_argument("--capture", action="store_true", help="실제 렌더러 캡처 추가 (OS 입력 검증 아님)")
     parser.add_argument("--artifacts", type=Path, help="로그·캡처 보관 경로 (기본: 새 임시 폴더)")
     args = parser.parse_args()
-    engine = shutil.which("godot")
+    engine = str(args.engine.resolve()) if args.engine else shutil.which("godot")
     if not engine:
         raise SystemExit("Godot 4.7.2 실행 파일이 필요합니다. 설치는 수행하지 않습니다.")
     version = subprocess.check_output([engine, "--version"], text=True).strip()
