@@ -28,7 +28,8 @@
       "engine": "Godot 4.7.2 GL Compatibility; Tween 호흡·반동·피격·버튼 눌림, 시뮬레이션 위치 기반 이동",
       "gpu_compile_verification": "NOT_MEASURED",
       "visual_acceptance": "NOT_MEASURED - 기존 사용자 반려를 자동 해소하지 않음",
-      "muzzle_alignment": "마녀 Sprite2D 자식 Marker2D의 반동·호흡 적용 후 실제 포구를 표시 탄·발사 입자가 공유. 표시 보정은 64단위 안에 규칙 궤도로 합류하며 전투·저장 자료는 변경하지 않음"
+      "muzzle_alignment": "마녀 Sprite2D 자식 Marker2D의 반동·호흡 적용 후 실제 포구를 표시 탄·발사 입자가 공유. 표시 보정은 64단위 안에 규칙 궤도로 합류하며 전투·저장 자료는 변경하지 않음",
+      "projectile_tail": "실제 그리기에 쓰는 꼬리 끝은 보존한 발사 포구와 탄 머리 사이로 제한. 비행거리 0에서 시작해 성장별 최대 길이까지 증가. 정령탄도 자체 출발점 보존; 시뮬레이션·저장은 변경하지 않음"
     },
     {
       "id": "procedural-magic-sound",
@@ -149,7 +150,7 @@
     }
   ],
   "verification": {
-    "headless_product": "미완료 - 포구 수정 전 /tmp/witchburst-muzzle-before에서 sandbox 사용자·에디터 저장 경로 및 인증서 접근 오류로 임포트 실패. 수정 후 3비율×4성장×3호흡 포구 회귀를 포함한 호스트 재검증 대기",
+    "headless_product": "미완료 - 꼬리 수정 후 /tmp/witchburst-tail-current에서 sandbox 사용자·에디터 저장 경로 및 인증서 접근 오류로 임포트 실패. smoke·캡처 미실행, 호스트 재검증 대기",
     "actual_renderer_png": "NOT_MEASURED",
     "shader_gpu_compile": "NOT_MEASURED",
     "independent_visual_review": "NOT_MEASURED",
@@ -158,7 +159,8 @@
     "mobile_device": "NOT_MEASURED",
     "human_fun": "NOT_MEASURED",
     "user_design_acceptance": "NOT_MEASURED - 반려 후 재수용 대기",
-    "python_capture_contract": "PASS - unittest test_host_gui.py 5개; 추가 발사 직후 6장 누락·포구 불일치 거부. 합성 헤더 fixture이며 렌더링·시각 품질 증거 아님",
-    "muzzle_render_alignment": "NOT_MEASURED - 10-first-shot·11-grown-shot 각 3비율, 총33 PNG 생성 후 실제 그림·탄·입자 및 독립 판독 필요"
+    "python_capture_contract": "PASS - 이번 unittest test_host_gui.py 6개. 발사 직후 6장 누락·포구 불일치와 머리/입자는 맞아도 꼬리만 48px 뒤로 늘어난 기록 거부. 합성 PNG 헤더 fixture이며 렌더링·시각 품질 증거 아님",
+    "muzzle_render_alignment": "NOT_MEASURED - 10-first-shot·11-grown-shot 각 3비율, 총33 PNG 생성 후 실제 그림·탄·입자 및 독립 판독 필요",
+    "projectile_tail_render": "NOT_MEASURED - 비행거리 0·1/8/24/48/80단위 및 정령탄 smoke 회귀 추가. 호스트 제품검사 및 11-grown-shot 세 비율 실제 PNG 독립 판독 대기"
   }
 }

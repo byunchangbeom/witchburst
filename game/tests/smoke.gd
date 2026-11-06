@@ -214,6 +214,7 @@ func _muzzle_checks() -> void:
 				require(visual.kick == 1.0 and absf(sprite.rotation + 0.035 * tier) < 0.0001, "최대 반동의 회전까지 적용한 재현")
 				require(actual_tip.distance_to(battle._world(battle.muzzle_position())) > 1.0, "변환 전 포구와 다른 비자명 재현")
 				require(visual.projectile_position(bullet).distance_to(actual_tip) < 0.01, "세 비율·네 성장·호흡별 실제 그림 포구에서 탄 표시")
+				require(visual.projectile_tail(bullet).distance_to(actual_tip) < 0.01, "비행거리 0의 꼬리는 포구에서 길이 0")
 				require(visual.emitters[0].position.distance_to(actual_tip) < 0.01, "실제 그림 포구에서 발사 입자 생성")
 				require(bullet.pos == battle.muzzle_position(), "표현 반동이 규칙상 발사 좌표를 바꾸지 않음")
 				require(visual.shot_origins.size() == 1, "이전 사격 표현 자료 회수")
@@ -222,12 +223,39 @@ func _muzzle_checks() -> void:
 				visual.kick = 0.0
 				visual.sync(0.0)
 				require(visual.projectile_position(bullet).distance_to(actual_tip) < 0.01 and visual.emitters[0].position.distance_to(actual_tip) < 0.01, "발사 후 포구가 움직여도 탄·입자 출발점 유지")
+				var unit: float = battle.content_width / 540.0
+				var previous_length := 0.0
+				for travel in [1.0, 8.0, 24.0, 48.0, 80.0]:
+					bullet.pos = launch + Vector2(0, -travel)
+					var head: Vector2 = visual.projectile_position(bullet)
+					var tail: Vector2 = visual.projectile_tail(bullet)
+					var flight := head - actual_tip
+					var along: float = (tail - actual_tip).dot(flight) / flight.length_squared()
+					var length := head.distance_to(tail)
+					require(along >= -0.0001 and along <= 1.0001 and absf((tail - actual_tip).cross(flight)) < 0.01, "꼬리 끝은 발사 포구와 탄 머리 사이에 제한")
+					require(length <= travel * unit + 0.01 and length <= (12 + tier * 12) * unit + 0.01, "꼬리가 실제 비행거리·성장별 길이 상한 준수")
+					require(length + 0.01 >= previous_length, "짧은 비행에서 꼬리가 점진적으로 성장")
+					previous_length = length
+					var target: Dictionary = battle._enemy_by_id(bullet.target)
+					var target_pos: Vector2 = target.pos
+					target.pos = bullet.pos + Vector2(100, 80)
+					require(visual.projectile_tail(bullet).distance_to(tail) < 0.01, "표적 방향 전환으로 꼬리가 비행 경로 밖에 생기지 않음")
+					target.pos = target_pos
+				require(is_equal_approx(previous_length, (12 + tier * 12) * unit), "충분히 비행하면 성장별 최대 꼬리 유지")
 				bullet.pos = launch + Vector2(0, -80)
 				require(visual.projectile_position(bullet).distance_to(battle._world(bullet.pos)) < 0.01, "비행 중 규칙 궤도로 합류")
 				battle.witch.x -= 12.0
 	battle.bullets.clear()
 	visual.sync(0.0)
 	require(visual.shot_origins.is_empty(), "남은 탄이 없으면 표현 자료 전체 회수")
+	battle.spirit = true
+	battle.total_shots = 2
+	battle._fire()
+	var linked: Dictionary = battle.bullets[-1]
+	var linked_start: Vector2 = linked.pos
+	require(linked.get("spirit", false) and visual.projectile_tail(linked) == battle._world(linked_start), "정령 연계탄도 출발점에서 꼬리 길이 0")
+	linked.pos += Vector2(0, -8)
+	require(visual.projectile_position(linked).distance_to(visual.projectile_tail(linked)) <= 8.0 * battle.content_width / 540.0 + 0.01, "정령 연계탄도 비행거리만큼 꼬리 성장")
 	# 표현 Tween과 sync 호출 횟수가 달라도 실제 전투 궤도·피해는 같아야 한다.
 	var reference := fresh()
 	var animated := fresh()

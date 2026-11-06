@@ -71,7 +71,7 @@ def verify_captures(directory):
             raise ValueError("캡처 상태·치수 행렬 불일치")
         if item["stage"] in ("10-first-shot", "11-grown-shot"):
             shot = item.get("shot_alignment", {})
-            points = [shot.get(name, []) for name in ("sprite_muzzle", "projectile", "emitter")]
+            points = [shot.get(name, []) for name in ("sprite_muzzle", "projectile", "emitter", "tail")]
             if (shot.get("kick") != 1.0 or shot.get("breath") != 1.0
                     or any(len(point) != 2 or not all(math.isfinite(n) for n in point) for point in points)
                     or any(math.dist(points[0], point) >= 0.01 for point in points[1:])):

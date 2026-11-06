@@ -120,6 +120,9 @@ func play_shot(bullet: Dictionary) -> void:
 	var muzzle: Vector2 = battle._from_screen(to_local(witch_muzzle.global_position))
 	_prune_shots()
 	shot_origins.append({"bullet": bullet, "start": bullet.pos, "muzzle": muzzle})
+	for linked in battle.bullets:
+		if linked.get("spirit", false) and not shot_origins.any(func(shot: Dictionary) -> bool: return is_same(shot.bullet, linked)):
+			shot_origins.append({"bullet": linked, "start": linked.pos, "muzzle": linked.pos})
 	emit_burst(muzzle, battle.MINT, 3 + battle.power_tier() * 2)
 	shot_tween = create_tween()
 	shot_tween.tween_property(self, "kick", 0.0, 0.16 + battle.power_tier() * 0.025).set_trans(Tween.TRANS_QUAD)
@@ -136,6 +139,19 @@ func projectile_position(bullet: Dictionary) -> Vector2:
 		if is_same(shot.bullet, bullet):
 			var remaining := maxf(0.0, 1.0 - bullet.pos.distance_to(shot.start) / 64.0)
 			return point + (battle._world(shot.muzzle) - battle._world(shot.start)) * remaining
+	return point
+
+func projectile_tail(bullet: Dictionary) -> Vector2:
+	var point := projectile_position(bullet)
+	for shot in shot_origins:
+		if is_same(shot.bullet, bullet):
+			# 첫 프레임은 길이 0. 실제 비행 거리만큼 늘리되 출발 포구를
+			# 넘어가지 않는다. 현재 표적 방향으로 뒤로 빼면 포구를 침범한다.
+			var unit: float = battle.content_width / 540.0
+			var traveled: float = bullet.pos.distance_to(shot.start) * unit
+			var length := minf(traveled, (12.0 + bullet.tier * 12.0) * unit)
+			return point.move_toward(battle._world(shot.muzzle), length)
+	# 출발점이 없는 탄은 머리만 표시하여 임의의 뒤쪽 궤적을 만들지 않는다.
 	return point
 
 func _particle_texture(leaf: bool) -> ImageTexture:
@@ -257,15 +273,12 @@ func _draw() -> void:
 		draw_rect(Rect2(p - Vector2(width / 2 - 2, y - 2), Vector2((width - 4) * enemy.hp / enemy.max_hp, 5)), Color("b0ed75"))
 	for bullet in battle.bullets:
 		var p := projectile_position(bullet)
-		var target: Dictionary = battle._enemy_by_id(bullet.target)
-		var direction := Vector2(0.5, -1).normalized()
-		if not target.is_empty():
-			direction = (battle._world(target.pos) - p).normalized()
 		var r: float = battle.projectile_radius(bullet.tier) * unit
-		var tail: Vector2 = p - direction * (12 + bullet.tier * 12) * unit
-		draw_line(tail, p, BROWN, r * 1.8 + 3, true)
-		draw_line(tail, p, Color("6fddac"), r * 1.8, true)
-		draw_line(tail, p, Color("fffacb"), r * 0.65, true)
+		var tail := projectile_tail(bullet)
+		if tail.distance_squared_to(p) > 0.0001:
+			draw_line(tail, p, BROWN, r * 1.8 + 3, true)
+			draw_line(tail, p, Color("6fddac"), r * 1.8, true)
+			draw_line(tail, p, Color("fffacb"), r * 0.65, true)
 		draw_circle(p, r * 0.6, Color.WHITE)
 	for floating in battle.floats:
 		var p: Vector2 = battle._world(floating.pos)

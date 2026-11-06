@@ -21,7 +21,7 @@ class HostGui(unittest.TestCase):
                 item = {"path": path, "stage": stage, "size": [width, height]}
                 if stage in ("10-first-shot", "11-grown-shot"):
                     item["shot_alignment"] = {"sprite_muzzle": [301, 600], "projectile": [301, 600],
-                                              "emitter": [301, 600], "kick": 1.0, "breath": 1.0}
+                                              "emitter": [301, 600], "tail": [301, 600], "kick": 1.0, "breath": 1.0}
                 items.append(item)
         return {"display_server": "macOS", "captures": items}
 
@@ -49,6 +49,25 @@ class HostGui(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "포구 정렬"):
                         host_gui.verify_captures(directory)
                     shot[field] = original
+
+    def test_launch_tail_cannot_extend_behind_muzzle(self):
+        with tempfile.TemporaryDirectory(prefix="witchburst-gui-tail-") as temporary:
+            directory = Path(temporary)
+            fixture = self.capture_fixture(directory)
+            for item in fixture["captures"]:
+                if item["stage"] not in ("10-first-shot", "11-grown-shot"):
+                    continue
+                shot = item["shot_alignment"]
+                with self.subTest(stage=item["stage"], size=item["size"]):
+                    # 기존 성장탄처럼 머리/입자는 맞아도 꼬리가 48px 뒤면 거부한다.
+                    for tail in ([301, 648], [], [float("nan"), 600]):
+                        shot["tail"] = tail
+                        (directory / "capture-manifest.json").write_text(json.dumps(fixture), encoding="utf-8")
+                        with self.assertRaisesRegex(ValueError, "포구 정렬"):
+                            host_gui.verify_captures(directory)
+                    shot["tail"] = shot["sprite_muzzle"]
+            (directory / "capture-manifest.json").write_text(json.dumps(fixture), encoding="utf-8")
+            self.assertEqual(len(host_gui.verify_captures(directory)), 33)
 
     def test_no_display_receipt_does_not_start_godot(self):
         with tempfile.TemporaryDirectory(prefix="witchburst-gui-contract-") as temporary:

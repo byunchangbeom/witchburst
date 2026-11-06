@@ -164,11 +164,13 @@ func capture_matrix(stage: String, phase: int, launch: bool = false) -> void:
 			var pixel := Vector2(1061, 504.5) if battle.power_tier() == 0 else Vector2(1250, 504.5)
 			var muzzle: Vector2 = battle.visuals.to_local(sprite.to_global(pixel - sprite.texture.get_size() * 0.5))
 			var projectile: Vector2 = battle.visuals.projectile_position(battle.bullets[0])
+			var tail: Vector2 = battle.visuals.projectile_tail(battle.bullets[0])
 			var emitter: Vector2 = battle.visuals.emitters[0].position
 			require(muzzle.distance_to(projectile) < 0.01 and muzzle.distance_to(emitter) < 0.01, "발사 직후 실제 그림·탄·입자 포구 일치")
+			require(muzzle.distance_to(tail) < 0.01, "발사 직후 꼬리가 포구 뒤로 늘어나지 않음")
 			require(battle.visuals.kick == 1.0, "최대 반동 프레임 고정")
 			item["shot_alignment"] = {"sprite_muzzle": [muzzle.x, muzzle.y],
-				"projectile": [projectile.x, projectile.y], "emitter": [emitter.x, emitter.y],
+				"projectile": [projectile.x, projectile.y], "tail": [tail.x, tail.y], "emitter": [emitter.x, emitter.y],
 				"kick": battle.visuals.kick, "breath": battle.visuals.breath_amount}
 		if not verify_only:
 			battle.queue_redraw()
