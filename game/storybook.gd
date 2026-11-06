@@ -259,7 +259,7 @@ func _sync_witch() -> void:
 	spirit_sprite.scale = Vector2.ONE * 48.0 * unit / spirit_texture.get_height()
 	spirit_sprite.material.set_shader_parameter("pulse", 0.45 + sin(battle.elapsed * 3.0) * 0.35)
 	# 발 하단의 불투명 범위와 그림자 전체를 실제 Sprite 변환으로 투영한다.
-	# 배경 원본 판독 경계 650 < y + 0.5x < 1480 안의 최소 끝점 이동이다.
+	# 배경 원본 판독 경계 650 < y + 0.5x < 1260 (아래 절벽에서 보수적으로 안쪽) 안의 최소 끝점 이동이다.
 	var feet := Rect2(119, 950, 1131, 233) if tier == 0 else Rect2(223, 950, 1021, 238)
 	var points := _sprite_corners(witch_sprite, feet)
 	points.append_array(_sprite_corners(witch_shadow, Rect2(Vector2.ZERO, Vector2(64, 24))))
@@ -271,12 +271,12 @@ func _sync_witch() -> void:
 	for point in points:
 		var raw: Vector2 = background.to_local(to_global(point)) + MEADOW.get_size() * 0.5
 		lower = maxf(lower, base.y + (652.0 - raw.y - raw.x * 0.5) * background.scale.y)
-		upper = minf(upper, base.y + (1478.0 - raw.y - raw.x * 0.5) * background.scale.y)
+		upper = minf(upper, base.y + (1258.0 - raw.y - raw.x * 0.5) * background.scale.y)
 	var top: float = battle._world(Vector2(battle.witch.x, 490)).y
 	var bottom: float = battle._world(Vector2(battle.witch.x, 660)).y
 	# clamp로 y들이 뭉치지 않도록 전체 세로 구간을 양의 기울기로 대응한다.
-	var safe_top := maxf(top, lower)
 	var safe_bottom := minf(bottom, upper)
+	var safe_top := maxf(lower, minf(top, safe_bottom - (bottom - top) * 0.35))
 	var mapped := lerpf(safe_top, safe_bottom, (base.y - top) / (bottom - top))
 	party_shift = Vector2(0, mapped - base.y)
 	witch_sprite.position += party_shift

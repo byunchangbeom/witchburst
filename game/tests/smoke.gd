@@ -747,6 +747,7 @@ func _party_checks() -> void:
 							var state: Dictionary = battle.progress_data()
 							visual.sync(0.0)
 							var measured: Dictionary = probe.measure(battle)
+							require(measured.rock_fraction < 0.10 and measured.shadow_rock_fraction < 0.40, "원본 배경 픽셀에서 발·그림자의 갈색 절벽 영역 침범 없음")
 							require(measured.samples > 100 and measured.min_diagonal > 650.0 and measured.max_diagonal < 1480.0, "실제 불투명 발·그림자·정령이 두 절벽 사이 풀밭 안")
 							require(measured.display[1] > previous_y, "고정 x의 세로 입력은 멈춤·도약·역행 없이 증가")
 							if is_finite(previous_y):

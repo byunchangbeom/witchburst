@@ -1,6 +1,11 @@
 extends RefCounted
 ## 제품의 지형 헬퍼를 쓰지 않고, 불투명 발 픽셀과 실제 Sprite 변환을 읽는다.
 var contours: Dictionary = {}
+var terrain_image: Image
+
+func _rock(color: Color) -> bool:
+	return color.r > color.g + 0.12 and color.g < 0.70 and color.r > 0.28
+
 
 func _feet(sprite: Sprite2D, first_row: int) -> Array[Vector2]:
 	var key := sprite.texture.resource_path + str(sprite.texture.get_size()) + str(first_row)
@@ -29,6 +34,10 @@ func measure(battle: Control) -> Dictionary:
 	var minimum := INF
 	var maximum := -INF
 	var count := 0
+	var rock_samples := 0
+	var shadow_rock_fraction := 0.0
+	if terrain_image == null:
+		terrain_image = visual.MEADOW.get_image()
 	for sprite: Sprite2D in sprites:
 		var pixels: Array[Vector2]
 		if sprite == visual.witch_shadow:
@@ -42,7 +51,18 @@ func measure(battle: Control) -> Dictionary:
 			minimum = minf(minimum, diagonal)
 			maximum = maxf(maximum, diagonal)
 			count += 1
-	return {"min_diagonal": minimum, "max_diagonal": maximum, "samples": count,
+			var tx := clampi(int(raw.x), 0, terrain_image.get_width() - 1)
+			var ty := clampi(int(raw.y), 0, terrain_image.get_height() - 1)
+			if _rock(terrain_image.get_pixel(tx, ty)):
+				rock_samples += 1
+			if sprite == visual.witch_shadow:
+				var brown := 0
+				for dy in range(-2, 3):
+					for dx in range(-2, 3):
+						if _rock(terrain_image.get_pixel(clampi(tx + dx, 0, terrain_image.get_width()-1), clampi(ty + dy, 0, terrain_image.get_height()-1))):
+							brown += 1
+				shadow_rock_fraction = maxf(shadow_rock_fraction, float(brown)/25.0)
+	return {"min_diagonal": minimum, "max_diagonal": maximum, "samples": count, "rock_fraction": float(rock_samples)/count, "shadow_rock_fraction": shadow_rock_fraction,
 		"shift": [visual.party_shift.x, visual.party_shift.y],
 		"rule": [battle.witch.x, battle.witch.y],
 		"display": [battle._world(battle.witch).x + visual.party_shift.x, battle._world(battle.witch).y + visual.party_shift.y]}
