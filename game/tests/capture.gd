@@ -257,7 +257,7 @@ func capture_party() -> void:
 				var sprite: Sprite2D = battle.visuals.witch_sprite
 				var tip := Vector2(1061, 504.5) if equipped == -1 else Vector2(1250, 504.5)
 				var muzzle: Vector2 = battle.visuals.to_local(sprite.to_global(tip - sprite.texture.get_size() * 0.5))
-				var spirit_pixel := Vector2(420, 340) - battle.visuals.spirit_sprite.texture.get_size() * 0.5
+				var spirit_pixel: Vector2 = Vector2(420, 340) - battle.visuals.spirit_sprite.texture.get_size() * 0.5
 				var spirit_tip: Vector2 = battle.visuals.to_local(battle.visuals.spirit_sprite.to_global(spirit_pixel))
 				var main: Dictionary = battle.bullets[0]
 				var linked: Dictionary = battle.bullets[1]

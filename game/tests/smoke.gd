@@ -772,7 +772,7 @@ func _party_checks() -> void:
 			var sprite: Sprite2D = visual.witch_sprite
 			var tip := Vector2(1061, 504.5) if equipped == -1 else Vector2(1250, 504.5)
 			var actual: Vector2 = visual.to_local(sprite.to_global(tip - sprite.texture.get_size() * 0.5))
-			var spirit_pixel := Vector2(420, 340) - visual.spirit_sprite.texture.get_size() * 0.5
+			var spirit_pixel: Vector2 = Vector2(420, 340) - visual.spirit_sprite.texture.get_size() * 0.5
 			var linked: Vector2 = visual.to_local(visual.spirit_sprite.to_global(spirit_pixel))
 			var frozen: Vector2 = visual.projectile_position(battle.bullets[0])
 			require(frozen.distance_to(actual) < 0.01 and visual.projectile_position(battle.bullets[1]).distance_to(linked) < 0.01, "드래그·최대 반동·정령 진동의 실제 그림 발사점")
