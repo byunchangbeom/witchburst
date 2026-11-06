@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "project": "마녀포격단 · Witchburst",
+  "scope": "first-battle",
+  "assets": [
+    {
+      "id": "procedural-battle-art",
+      "files": ["game/battle.gd"],
+      "creator": "본 작업의 engineer 제작 세션",
+      "source": "신규 작성한 Godot draw 원·다각형·선·호·별 도형 조합",
+      "contents": ["꼬마 마녀", "별 지팡이와 2단계 마도구", "동행 정령", "저주 정령", "가시왕", "저주숲과 이끼길", "마법탄", "정화 파편", "별비", "전투 UI"],
+      "external_asset_copied": false,
+      "reference_policy": "GAME-BRIEF.md의 성장 대비와 전투 구조만 참고. 레퍼런스 이미지·캐릭터·게임 화면 파일은 사용하지 않음"
+    },
+    {
+      "id": "procedural-magic-sound",
+      "files": ["game/sound.gd"],
+      "creator": "본 작업의 engineer 제작 세션",
+      "source": "신규 사인파 합성과 감쇠 envelope로 생성한 22050Hz 16bit PCM",
+      "contents": ["발사", "명중", "보상", "강화", "별비", "승리", "시간초과"],
+      "external_asset_copied": false,
+      "listening_verification": "NOT_MEASURED"
+    },
+    {
+      "id": "system-korean-font",
+      "files": ["game/battle.gd"],
+      "source": "실행 OS에 이미 설치된 SystemFont를 이름으로 조회",
+      "candidates": ["Apple SD Gothic Neo", "Noto Sans CJK KR", "Malgun Gothic", "NanumGothic", "sans-serif"],
+      "system_fallback": true,
+      "font_file_bundled": false,
+      "note": "폰트 파일을 복사·다운로드·재배포하지 않음. 대상 기기 폰트 가용성은 후속 실기기 검증 필요"
+    }
+  ]
+}
