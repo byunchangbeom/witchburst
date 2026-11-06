@@ -1,0 +1,19 @@
+{
+  "adapter": "command",
+  "argv": ["python3", "@WORKTREE@/tests/host_gui.py", "@PROMPT@", "@ANSWER@", "@ARTIFACTS@"],
+  "result_contract": "gui-v1",
+  "inputs": [
+    "tests/host-gui-check.json",
+    "tests/host_gui.py",
+    "tests/run.py",
+    "game/tests/capture.gd",
+    "game/tests/smoke.gd",
+    "game/battle.gd",
+    "game/sound.gd",
+    "game/main.tscn",
+    "game/project.godot"
+  ],
+  "observations": ["rendered_states", "capture_matrix"],
+  "max_env_checks": 3,
+  "retry_delay": 1
+}

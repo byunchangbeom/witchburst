@@ -73,6 +73,16 @@ class Entrypoints(unittest.TestCase):
         self.assertIn("FAIL smoke", result.stdout)
         self.assertNotIn("PASS smoke", result.stdout)
 
+    def test_capture_stage_failure_reaches_direct_exit_code(self):
+        capture = self.project / "tests/capture.gd"
+        capture.write_text(capture.read_text(encoding="utf-8").replace(
+            'capture_matrix("05-won", battle.Phase.WON)',
+            'capture_matrix("05-won", battle.Phase.LOST)', 1), encoding="utf-8")
+        result = self.direct()
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("PASS smoke", result.stdout)
+        self.assertIn("FAIL capture-stages", result.stdout)
+
     def test_import_log_error_reaches_direct_exit_code(self):
         (self.project / "broken.gd").write_text("extends Node\nfunc broken(\n", encoding="utf-8")
         # 사용하지 않는 스크립트는 임포트에서 파싱되지 않을 수 있으므로 실제 오토로드로 연결한다.

@@ -20,6 +20,11 @@ def main():
     engine = str(args.engine.resolve()) if args.engine else shutil.which("godot")
     if not engine:
         raise SystemExit("Godot 4.7.2 실행 파일이 필요합니다. 설치는 수행하지 않습니다.")
+    if args.capture:
+        from host_gui import display_unavailable
+        reason, diagnostics = display_unavailable()
+        if reason:
+            raise SystemExit(f"ENV_UNAVAILABLE {reason}: {diagnostics}. Controller 호스트 GUI 검사를 사용하세요.")
     version = subprocess.check_output([engine, "--version"], text=True).strip()
     if not version.startswith("4.7.2."):
         raise SystemExit(f"요구 엔진: 4.7.2, 현재: {version}")
@@ -61,7 +66,8 @@ def main():
         env["WITCHBURST_TEST_ROOT"] = str(work)
         env["WITCHBURST_ARTIFACTS"] = str(artifacts)
         checks = [("import", ["--headless", "--import", "--quit"]),
-                  ("smoke", ["--headless", "--script", "res://tests/smoke.gd"])]
+                  ("smoke", ["--headless", "--script", "res://tests/smoke.gd"]),
+                  ("capture-stages", ["--headless", "--script", "res://tests/capture.gd", "--", "--verify-stages"])]
         if args.capture:
             checks.append(("capture", ["--audio-driver", "Dummy", "--script", "res://tests/capture.gd"]))
         failed = []
