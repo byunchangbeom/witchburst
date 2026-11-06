@@ -101,7 +101,13 @@ func _run() -> void:
 	await capture_matrix("06-lost", battle.Phase.LOST)
 	battle.result_button.pressed.emit()
 	require(battle.phase == battle.Phase.FOREST and battle.round_number == 2, "패배 후 재도전")
-	require(records.size() == 45, "15상태 × 3비율 캡처 행렬 완성")
+	require(records.size() == 45, "기존 15상태 × 3비율 캡처 행렬 보존")
+	await capture_party()
+	require(records.size() == 129, "기존45 + 두 무기 × 드래그14상태 × 3비율 완성")
+	var unique := {}
+	for item in records:
+		require(not unique.has(item.path), "드래그 행렬 중복·누락 거부")
+		unique[item.path] = true
 	var manifest := {"display_server": DisplayServer.get_name(), "captures": records,
 		"visual_review": "NOT_MEASURED", "human_play": "NOT_MEASURED",
 		"fixture": "성장 비교는 별빛1000·잎16 주입 후 실제 제작·합성·정령 해금. 발사·비행 비교는 _fire 직접 호출 후 반동·호흡1 고정, 비행은 규칙 탄을 표적 쪽으로80단위 이동한 표현 fixture; 나머지는 전투 시뮬레이션"}
@@ -110,7 +116,7 @@ func _run() -> void:
 	require(file != null, "상태 기록 저장")
 	file.store_string(JSON.stringify(manifest, "\t"))
 	file.close()
-	print("캡처 상태 준비 검사 완료 (PNG 없음)." if verify_only else "실제 렌더러 PNG 45개 저장. 독립 시각 판독은 별도 필요.")
+	print("캡처 상태 준비 검사 완료 (PNG 없음)." if verify_only else "실제 렌더러 PNG 129개 저장. 독립 시각 판독은 별도 필요.")
 	battle.free()
 	quit(0)
 
@@ -211,3 +217,85 @@ func capture_matrix(stage: String, phase: int, launch: bool = false, flight: flo
 	if launch or flight > 0.0:
 		battle.visuals.breath.play()
 		battle.visuals.shot_tween.play()
+
+func capture_party() -> void:
+	# 기존 45장을 보존한다. 제품 드래그·이동으로 준비한 별도 지형 행렬이다.
+	var probe := preload("res://tests/party_probe.gd").new()
+	var cases := ["default", "top-left", "top-right", "bottom-left", "bottom-right",
+		"edge-top", "edge-right", "edge-bottom", "edge-left", "counterexample", "enter", "exit", "moving", "return"]
+	var targets := [Vector2(270, 625), Vector2(65, 490), Vector2(475, 490), Vector2(65, 660), Vector2(475, 660),
+		Vector2(270, 490), Vector2(475, 575), Vector2(270, 660), Vector2(65, 575), Vector2(440, 660),
+		Vector2(270, 490.1), Vector2(270, 489.9), Vector2(475, 660), Vector2(440, 660)]
+	for dimensions in SIZES:
+		root.size = dimensions
+		await process_frame
+		await process_frame
+		for equipped in [-1, 2]:
+			for index in range(cases.size()):
+				fresh()
+				battle._layout_ui()
+				battle.equipped = equipped
+				battle.spirit = true
+				battle.shot_clock = 1000.0
+				battle.visuals.breath.pause()
+				battle.visuals.breath_amount = 1.0 if index % 2 == 0 else -1.0
+				battle.elapsed = PI / 6 if index % 2 == 0 else PI / 2
+				if cases[index] != "default":
+					battle.dragging = true
+					battle._drag_position(battle._world(targets[index]))
+					battle.advance(0.8)
+				if cases[index] == "return":
+					battle.dragging = false
+					battle.advance(4.0)
+					require(battle.manual_grace == 0.0 and battle.witch.distance_to(targets[index]) > 20, "해제 후 실제 자동 이동")
+				battle.total_shots = 2
+				battle.bullets.clear()
+				battle.visuals.emitter_life.fill(0.0)
+				battle._fire()
+				battle.visuals.shot_tween.pause()
+				battle.visuals.sync(0.0)
+				var sprite: Sprite2D = battle.visuals.witch_sprite
+				var tip := Vector2(1061, 504.5) if equipped == -1 else Vector2(1250, 504.5)
+				var muzzle: Vector2 = battle.visuals.to_local(sprite.to_global(tip - sprite.texture.get_size() * 0.5))
+				var spirit_pixel := Vector2(420, 340) - battle.visuals.spirit_sprite.texture.get_size() * 0.5
+				var spirit_tip: Vector2 = battle.visuals.to_local(battle.visuals.spirit_sprite.to_global(spirit_pixel))
+				var main: Dictionary = battle.bullets[0]
+				var linked: Dictionary = battle.bullets[1]
+				var launch: Vector2 = battle.visuals.projectile_position(main)
+				var linked_launch: Vector2 = battle.visuals.projectile_position(linked)
+				var emitter: Vector2 = battle.visuals.emitters[0].position
+				require(launch.distance_to(muzzle) < 0.01 and emitter.distance_to(muzzle) < 0.01, "드래그 행렬의 실제 그림·발사 입자·주탄 포구")
+				require(linked_launch.distance_to(spirit_tip) < 0.01, "진동 중 정령 실제 그림·연계탄 출발점")
+				var back_pixel := Vector2(920, 664.5) if equipped == -1 else Vector2(800, 699.5)
+				var breech: Vector2 = battle.visuals.to_local(sprite.to_global(back_pixel - sprite.texture.get_size() * 0.5))
+				var rule_start: Vector2 = main.pos
+				main.pos += Vector2(0, -8)
+				var initial: Vector2 = battle.visuals.projectile_position(main)
+				main.pos = rule_start
+				require((initial - muzzle).normalized().dot((muzzle - breech).normalized()) > 0.9999, "드래그 위치에서도 실제 포신 축으로 초기 비행")
+				if cases[index] == "moving":
+					battle._drag_position(battle._world(Vector2(65, 490)))
+					# 발사 뒤 실제 본체만 이동한 순간. 충돌 이전의 8단위 비행을 판독한다.
+					battle.advance(1.0 / 120.0)
+					battle.visuals.sync(0.0)
+					main.pos = rule_start
+					require(battle.visuals.projectile_position(main).distance_to(muzzle) < 0.01, "본체 이동 후 발사 기준 고정")
+					main.pos = rule_start + Vector2(0, -8)
+				var measured: Dictionary = probe.measure(battle)
+				require(measured.samples > 100 and measured.min_diagonal > 650 and measured.max_diagonal < 1480, "드래그 실제 발·그림자·정령 범위가 풀밭 내부")
+				var filename := "party-%s-%s-%dx%d.png" % ["starter" if equipped == -1 else "cannon", cases[index], dimensions.x, dimensions.y]
+				var item := {"path": filename, "stage": "party-%s-%s" % ["starter" if equipped == -1 else "cannon", cases[index]],
+					"size": [dimensions.x, dimensions.y], "party": measured, "terrain": [],
+					"party_shot": {"muzzle": [muzzle.x, muzzle.y], "launch": [launch.x, launch.y],
+						"emitter": [emitter.x, emitter.y], "spirit_tip": [spirit_tip.x, spirit_tip.y],
+						"spirit_launch": [linked_launch.x, linked_launch.y], "initial": [initial.x, initial.y],
+						"breech": [breech.x, breech.y], "kick": battle.visuals.kick}}
+				if not verify_only:
+					battle._refresh_ui()
+					battle.queue_redraw()
+					await process_frame
+					await RenderingServer.frame_post_draw
+					var rendered := root.get_texture().get_image()
+					require(rendered != null and rendered.get_size() == dimensions, "드래그 PNG 실제 치수")
+					require(rendered.save_png(directory.path_join(filename)) == OK, "드래그 PNG 저장")
+				records.append(item)

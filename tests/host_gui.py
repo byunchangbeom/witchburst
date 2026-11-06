@@ -14,6 +14,9 @@ import sys
 
 STATES = ("01-first", "02-grown", "03-boss", "04-skill", "05-won", "06-lost", "07-workshop", "08-rebirth", "09-merge",
           "10-first-shot", "11-grown-shot", "12-first-flight", "13-grown-flight", "14-boss-shot", "15-boss-flight")
+PARTY_CASES = ("default", "top-left", "top-right", "bottom-left", "bottom-right", "edge-top", "edge-right",
+               "edge-bottom", "edge-left", "counterexample", "enter", "exit", "moving", "return")
+STATES += tuple(f"party-{weapon}-{case}" for weapon in ("starter", "cannon") for case in PARTY_CASES)
 SIZES = ((540, 960), (540, 1200), (720, 960))
 
 
@@ -91,6 +94,25 @@ def verify_captures(directory):
                     or (flight and (math.dist(points[0], points[1]) < 1
                                     or math.dist(points[1], points[3]) > 48 * unit + 0.01))):
                 raise ValueError("비행 프레임·꼬리 불일치")
+        if item["stage"].startswith("party-"):
+            party = item.get("party", {})
+            low, high = party.get("min_diagonal", 0), party.get("max_diagonal", 1500)
+            if (not all(math.isfinite(n) for n in (low, high))
+                    or not 650 < low <= high < 1480 or party.get("samples", 0) <= 100):
+                raise ValueError("드래그 발·그림자 풀밭 기록 불일치")
+            shot = item.get("party_shot", {})
+            points = [shot.get(name, []) for name in
+                      ("muzzle", "launch", "emitter", "spirit_tip", "spirit_launch", "initial", "breech")]
+            if (shot.get("kick") != 1.0
+                    or any(len(point) != 2 or not all(math.isfinite(n) for n in point) for point in points)
+                    or any(math.dist(points[0], points[i]) >= 0.01 for i in (1, 2))
+                    or math.dist(points[3], points[4]) >= 0.01):
+                raise ValueError("드래그 주탄·정령탄 포구 불일치")
+            axis = [points[0][i] - points[6][i] for i in (0, 1)]
+            initial = [points[5][i] - points[0][i] for i in (0, 1)]
+            lengths = math.hypot(*axis) * math.hypot(*initial)
+            if lengths <= 0 or sum(a * b for a, b in zip(axis, initial)) / lengths < 0.9999:
+                raise ValueError("드래그 포신 초기 탄도 불일치")
         terrain = item.get("terrain")
         if not isinstance(terrain, list) or (item["stage"] in ("01-first", "08-rebirth") and not terrain):
             raise ValueError("풀밭 배치 기록 누락")

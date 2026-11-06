@@ -20,6 +20,11 @@ class HostGui(unittest.TestCase):
                 (directory / path).write_bytes(b"\x89PNG\r\n\x1a\n" + struct.pack(">I", 13) + b"IHDR" + struct.pack(">II", width, height))
                 item = {"path": path, "stage": stage, "size": [width, height],
                         "terrain": [{"foot": [500, 700], "shadow_half_width": 32}]}
+                if stage.startswith("party-"):
+                    item["party"] = {"min_diagonal": 700, "max_diagonal": 1400, "samples": 200}
+                    item["party_shot"] = {"muzzle": [300, 500], "launch": [300, 500], "emitter": [300, 500],
+                                          "spirit_tip": [250, 490], "spirit_launch": [250, 490],
+                                          "initial": [308, 492], "breech": [290, 510], "kick": 1.0}
                 if stage in ("10-first-shot", "11-grown-shot", "14-boss-shot", "12-first-flight", "13-grown-flight", "15-boss-flight"):
                     item["shot_alignment"] = {"sprite_muzzle": [301, 600], "projectile": [301, 600],
                                               "emitter": [301, 600], "tail": [301, 600], "kick": 1.0, "breath": 1.0,
@@ -37,7 +42,7 @@ class HostGui(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "누락"):
                 host_gui.verify_captures(directory)
             manifest.write_text(json.dumps(self.capture_fixture(directory)), encoding="utf-8")
-            self.assertEqual(len(host_gui.verify_captures(directory)), 45)
+            self.assertEqual(len(host_gui.verify_captures(directory)), 129)
 
     def test_shot_origin_must_match_sprite_after_recoil(self):
         with tempfile.TemporaryDirectory(prefix="witchburst-gui-muzzle-") as temporary:
@@ -71,7 +76,7 @@ class HostGui(unittest.TestCase):
                             host_gui.verify_captures(directory)
                     shot["tail"] = shot["sprite_muzzle"]
             (directory / "capture-manifest.json").write_text(json.dumps(fixture), encoding="utf-8")
-            self.assertEqual(len(host_gui.verify_captures(directory)), 45)
+            self.assertEqual(len(host_gui.verify_captures(directory)), 129)
 
     def test_muzzle_match_does_not_hide_wrong_initial_direction(self):
         with tempfile.TemporaryDirectory(prefix="witchburst-gui-axis-") as temporary:
@@ -108,6 +113,29 @@ class HostGui(unittest.TestCase):
             (directory / "capture-manifest.json").write_text(json.dumps(fixture), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "누락"):
                 host_gui.verify_captures(directory)
+
+    def test_party_matrix_and_real_transform_receipts_are_required(self):
+        with tempfile.TemporaryDirectory(prefix="witchburst-gui-party-") as temporary:
+            directory = Path(temporary)
+            fixture = self.capture_fixture(directory)
+            manifest = directory / "capture-manifest.json"
+            removed = fixture["captures"].pop()
+            manifest.write_text(json.dumps(fixture), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "누락"):
+                host_gui.verify_captures(directory)
+            fixture["captures"].append(removed)
+            for section, key, value in (("party", "max_diagonal", 1480),
+                                        ("party", "min_diagonal", float("nan")),
+                                        ("party", "samples", 0),
+                                        ("party_shot", "spirit_launch", [250, 500]),
+                                        ("party_shot", "initial", [300, 492])):
+                with self.subTest(section=section, key=key):
+                    original = removed[section][key]
+                    removed[section][key] = value
+                    manifest.write_text(json.dumps(fixture), encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "드래그"):
+                        host_gui.verify_captures(directory)
+                    removed[section][key] = original
 
     def test_no_display_receipt_does_not_start_godot(self):
         with tempfile.TemporaryDirectory(prefix="witchburst-gui-contract-") as temporary:

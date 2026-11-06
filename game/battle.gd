@@ -31,6 +31,13 @@ var save_path := "user://progress.json"
 var store = Store.new()
 var save_status := "기기 내 자동 저장"
 var save_clock := 0.0
+# 정지 사유는 알림 종류별로만 해제한다. 실패 후보는 메모리에 반영하지 않는다.
+var pause_reason := false
+var focus_reason := false
+var suspend_snapshot: Dictionary = {}
+var suspended_at := 0
+var resume_retry_clock := 0.0
+var skip_resume_delta := false
 var growth_random := RandomNumberGenerator.new()
 var workshop: Panel
 var workshop_button: Button
@@ -147,6 +154,8 @@ func power_tier() -> int:
 	return maxi(2 if levels.attack >= 4 else (1 if levels.attack >= 2 else 0), equipped + 1)
 
 func buy_upgrade(kind: String) -> bool:
+	if is_suspended():
+		return false
 	if not levels.has(kind) or levels[kind] >= 20:
 		return false
 	var cost := upgrade_cost(kind)
@@ -166,6 +175,16 @@ func buy_upgrade(kind: String) -> bool:
 	return true
 
 func _process(delta: float) -> void:
+	if is_suspended():
+		if not pause_reason and not focus_reason:
+			resume_retry_clock += minf(delta, 1.0)
+			if resume_retry_clock >= 1.0:
+				resume_retry_clock = 0.0
+				_resume_progress()
+		return
+	if skip_resume_delta:
+		skip_resume_delta = false
+		return
 	advance(delta)
 	save_clock += delta
 	if save_clock >= 5.0:
@@ -176,6 +195,8 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func advance(delta: float) -> void:
+	if is_suspended():
+		return
 	# 프레임 수가 아닌 경과 초를 누적한다. 검사는 같은 함수를 사용한다.
 	accumulator += delta
 	while accumulator + 0.0000001 >= STEP:
@@ -183,6 +204,8 @@ func advance(delta: float) -> void:
 		_tick(STEP)
 
 func _tick(dt: float) -> void:
+	if is_suspended():
+		return
 	elapsed += dt
 	recoil = maxf(0.0, recoil - dt * 5.0)
 	skill_flash = maxf(0.0, skill_flash - dt * 2.0)
@@ -252,6 +275,8 @@ func _enemy_by_id(id: int) -> Dictionary:
 	return {}
 
 func _fire() -> void:
+	if is_suspended():
+		return
 	var target: Dictionary = enemies[0]
 	for enemy in enemies:
 		if enemy.pos.distance_squared_to(witch) < target.pos.distance_squared_to(witch):
@@ -308,6 +333,8 @@ func _start_boss() -> void:
 	_refresh_ui()
 
 func cast_skill() -> bool:
+	if is_suspended():
+		return false
 	if phase != Phase.BOSS or cooldown > 0.0:
 		return false
 	cooldown = SKILL_COOLDOWN
@@ -333,6 +360,8 @@ func _finish(won: bool) -> void:
 	_refresh_ui()
 
 func restart_battle() -> void:
+	if is_suspended():
+		return
 	if phase != Phase.LOST and phase != Phase.WON:
 		return
 	round_number += 1
@@ -380,6 +409,8 @@ func _drag_position(pos: Vector2) -> void:
 	manual_grace = 2.0
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_suspended():
+		return
 	if workshop.visible or phase == Phase.LOST or phase == Phase.WON:
 		return
 	if event is InputEventScreenTouch:
@@ -409,16 +440,81 @@ func _input(event: InputEvent) -> void:
 		dragging = false
 		active_touch = -1
 
+func is_suspended() -> bool:
+	return not suspend_snapshot.is_empty()
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		if save_progress():
+		# 정지 중 종료도 보상 커서를 일반 저장으로 앞지르지 않는다.
+		if is_suspended():
+			var stored := _save_suspend_entry() if pause_reason or focus_reason else _resume_progress()
+			if stored:
+				get_tree().quit()
+		elif save_progress():
 			get_tree().quit()
-	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
-		if not local_owner_id.is_empty():
-			save_progress()
-	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
-		dragging = false
-		active_touch = -1
+	else:
+		_handle_lifecycle(what)
+
+func _handle_lifecycle(what: int, now: int = -1) -> void:
+	if local_owner_id.is_empty():
+		return
+	match what:
+		NOTIFICATION_APPLICATION_PAUSED:
+			pause_reason = true
+		NOTIFICATION_APPLICATION_FOCUS_OUT:
+			focus_reason = true
+		NOTIFICATION_APPLICATION_RESUMED:
+			pause_reason = false
+		NOTIFICATION_APPLICATION_FOCUS_IN:
+			focus_reason = false
+		_:
+			return
+	var timestamp := clampi(_now() if now == -1 else now, 0, 4102444800)
+	if pause_reason or focus_reason:
+		if not is_suspended():
+			suspended_at = timestamp
+			suspend_snapshot = progress_data().duplicate(true)
+			dragging = false
+			active_touch = -1
+			accumulator = 0.0
+			# 진입 저장 실패에도 현재 메모리와 최초 정산 기준을 보존한다.
+			_save_suspend_entry()
+	elif is_suspended():
+		_resume_progress(timestamp)
+
+func _save_suspend_entry() -> bool:
+	var entry := suspend_snapshot.duplicate(true)
+	entry.reward_cursor = maxi(int(entry.reward_cursor), suspended_at)
+	entry.saved_at = maxi(int(entry.saved_at), suspended_at)
+	if not store.write(entry):
+		save_status = "저장 실패 · 복귀 때 재시도"
+		return false
+	return true
+
+func _resume_progress(now: int = -1) -> bool:
+	if not is_suspended() or pause_reason or focus_reason:
+		return false
+	var timestamp := clampi(_now() if now == -1 else now, 0, 4102444800)
+	# 실패할 때마다 최초 스냅샷에서 성공 시각까지 재계산한다.
+	var candidate := suspend_snapshot.duplicate(true)
+	var start := maxi(suspended_at, int(candidate.reward_cursor))
+	var gap := mini(Store.MAX_OFFLINE, maxi(0, timestamp - start))
+	var rate := 2 + int(candidate.rebirths)
+	candidate.pending_coins = mini(1440 * rate, int(candidate.pending_coins) + int(gap / 60) * rate)
+	candidate.reward_cursor = maxi(start, timestamp)
+	candidate.saved_at = maxi(maxi(int(candidate.saved_at), suspended_at), timestamp)
+	if not store.write(candidate):
+		save_status = "저장 실패 · 복귀 정산 재시도"
+		return false
+	_apply_progress(candidate)
+	suspend_snapshot.clear()
+	save_clock = 0.0
+	accumulator = 0.0
+	resume_retry_clock = 0.0
+	skip_resume_delta = true
+	save_status = "기기 내 자동 저장"
+	_refresh_ui()
+	return true
 
 func _in_field(pos: Vector2) -> bool:
 	return Rect2(content_left, 88, content_width, field_bottom - 88).has_point(pos)
@@ -666,6 +762,8 @@ func _load_progress(now: int = -1) -> void:
 		save_status = "저장 실패 · 경로 확인"
 
 func save_progress(now: int = -1) -> bool:
+	if is_suspended():
+		return false
 	if local_owner_id.is_empty():
 		return false
 	var data := progress_data()
@@ -693,6 +791,8 @@ func _acquire(tier: int) -> void:
 		equipped = tier
 
 func draw_tool() -> int:
+	if is_suspended():
+		return -1
 	if coins < DRAW_COST or inventory.any(func(count: Variant) -> bool: return count >= 9998):
 		return -1
 	var before := progress_data()
@@ -708,6 +808,8 @@ func draw_tool() -> int:
 	return tier
 
 func craft_tool() -> bool:
+	if is_suspended():
+		return false
 	if materials < CRAFT_COST or inventory[0] >= 9998:
 		return false
 	var before := progress_data()
@@ -721,6 +823,8 @@ func craft_tool() -> bool:
 	return true
 
 func merge_tool(tier: int) -> bool:
+	if is_suspended():
+		return false
 	if tier < 0 or tier >= 2 or inventory[tier] < 2 or inventory[tier + 1] >= 9998:
 		return false
 	var before := progress_data()
@@ -735,6 +839,8 @@ func merge_tool(tier: int) -> bool:
 	return true
 
 func equip_tool(tier: int) -> bool:
+	if is_suspended():
+		return false
 	if tier < -1 or tier > 2 or (tier >= 0 and inventory[tier] < 1):
 		return false
 	var before := progress_data()
@@ -745,6 +851,8 @@ func equip_tool(tier: int) -> bool:
 	return true
 
 func unlock_spirit() -> bool:
+	if is_suspended():
+		return false
 	if spirit or materials < SPIRIT_COST:
 		return false
 	var before := progress_data()
@@ -758,6 +866,8 @@ func unlock_spirit() -> bool:
 	return true
 
 func claim_offline() -> bool:
+	if is_suspended():
+		return false
 	if pending_coins <= 0 or coins + pending_coins > 1000000000:
 		return false
 	var before := progress_data()
@@ -771,6 +881,8 @@ func claim_offline() -> bool:
 	return true
 
 func rebirth() -> bool:
+	if is_suspended():
+		return false
 	if not boss_cleared or rebirths >= 1000:
 		return false
 	var before := progress_data()
@@ -794,6 +906,8 @@ func tool_name(tier: int) -> String:
 	return ["새싹", "달빛포", "거대 성운포"][tier] if tier >= 0 else "별 지팡이"
 
 func toggle_workshop() -> void:
+	if is_suspended():
+		return
 	workshop.visible = not workshop.visible
 	dragging = false
 	active_touch = -1

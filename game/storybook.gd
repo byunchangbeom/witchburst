@@ -35,6 +35,7 @@ var emitter_positions: Array[Vector2] = []
 var shadow_texture: ImageTexture
 var witch_shadow: Sprite2D
 var enemy_shadows: Dictionary = {}
+var party_shift := Vector2.ZERO
 
 func _atlas(region: Rect2) -> AtlasTexture:
 	var texture := AtlasTexture.new()
@@ -125,7 +126,8 @@ func play_shot(bullet: Dictionary) -> void:
 	shot_origins.append({"bullet": bullet, "start": bullet.pos, "muzzle": muzzle, "axis": axis})
 	for linked in battle.bullets:
 		if linked.get("spirit", false) and not shot_origins.any(func(shot: Dictionary) -> bool: return is_same(shot.bullet, linked)):
-			var start: Vector2 = _point(linked.pos)
+			# 원본 아틀라스의 입 앞쪽을 현재 진동·공통 변위가 적용된 그림에서 읽는다.
+			var start: Vector2 = to_local(spirit_sprite.to_global(Vector2(420, 340) - spirit_texture.get_size() * 0.5))
 			var target: Dictionary = battle._enemy_by_id(linked.target)
 			shot_origins.append({"bullet": linked, "start": linked.pos, "muzzle": battle._from_screen(start),
 				"axis": (_point(target.pos) - start).normalized()})
@@ -219,10 +221,6 @@ func sync(_delta: float) -> void:
 	_prune_shots()
 	_sync_witch()
 	var unit: float = battle.content_width / 540.0
-	spirit_sprite.visible = battle.spirit
-	spirit_sprite.position = _point(battle.witch + Vector2(-58, -18)) + Vector2(0, sin(battle.elapsed * 3.0) * 6.0)
-	spirit_sprite.scale = Vector2.ONE * 48.0 * unit / spirit_texture.get_height()
-	spirit_sprite.material.set_shader_parameter("pulse", 0.45 + sin(battle.elapsed * 3.0) * 0.35)
 	_sync_enemies(unit)
 	queue_redraw()
 
@@ -256,6 +254,41 @@ func _sync_witch() -> void:
 	witch_shadow.position = witch_sprite.position + Vector2(0, 1199 * sprite_scale * 0.47)
 	witch_shadow.scale = Vector2.ONE * unit
 	witch_sprite.material.set_shader_parameter("pulse", battle.recoil * 0.6)
+	spirit_sprite.visible = battle.spirit
+	spirit_sprite.position = battle._world(battle.witch + Vector2(-58, -18)) + Vector2(0, sin(battle.elapsed * 3.0) * 6.0)
+	spirit_sprite.scale = Vector2.ONE * 48.0 * unit / spirit_texture.get_height()
+	spirit_sprite.material.set_shader_parameter("pulse", 0.45 + sin(battle.elapsed * 3.0) * 0.35)
+	# 발 하단의 불투명 범위와 그림자 전체를 실제 Sprite 변환으로 투영한다.
+	# 배경 원본 판독 경계 650 < y + 0.5x < 1480 안의 최소 끝점 이동이다.
+	var feet := Rect2(119, 950, 1131, 233) if tier == 0 else Rect2(223, 950, 1021, 238)
+	var points := _sprite_corners(witch_sprite, feet)
+	points.append_array(_sprite_corners(witch_shadow, Rect2(Vector2.ZERO, Vector2(64, 24))))
+	if battle.spirit:
+		points.append_array(_sprite_corners(spirit_sprite, Rect2(2, 500, 469, 196)))
+	var base: Vector2 = battle._world(battle.witch)
+	var lower := -INF
+	var upper := INF
+	for point in points:
+		var raw: Vector2 = background.to_local(to_global(point)) + MEADOW.get_size() * 0.5
+		lower = maxf(lower, base.y + (652.0 - raw.y - raw.x * 0.5) * background.scale.y)
+		upper = minf(upper, base.y + (1478.0 - raw.y - raw.x * 0.5) * background.scale.y)
+	var top: float = battle._world(Vector2(battle.witch.x, 490)).y
+	var bottom: float = battle._world(Vector2(battle.witch.x, 660)).y
+	# clamp로 y들이 뭉치지 않도록 전체 세로 구간을 양의 기울기로 대응한다.
+	var safe_top := maxf(top, lower)
+	var safe_bottom := minf(bottom, upper)
+	var mapped := lerpf(safe_top, safe_bottom, (base.y - top) / (bottom - top))
+	party_shift = Vector2(0, mapped - base.y)
+	witch_sprite.position += party_shift
+	witch_shadow.position += party_shift
+	spirit_sprite.position += party_shift
+
+func _sprite_corners(sprite: Sprite2D, pixels: Rect2) -> Array[Vector2]:
+	var points: Array[Vector2] = []
+	for pixel in [pixels.position, Vector2(pixels.end.x, pixels.position.y), pixels.end, Vector2(pixels.position.x, pixels.end.y)]:
+		points.append(to_local(sprite.to_global(pixel - sprite.texture.get_size() * 0.5)))
+	return points
+
 
 func _sync_enemies(unit: float) -> void:
 	var active: Array[int] = []
@@ -326,7 +359,7 @@ func _draw() -> void:
 		draw_string_outline(battle.font, p - offset, floating.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 6, Color(BROWN, color.a))
 		draw_string(battle.font, p - offset, floating.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
 	if battle.dragging:
-		draw_arc(battle._world(battle.witch), 44 * unit, 0, TAU, 32, Color("fff4be"), 3, true)
+		draw_arc(battle._world(battle.witch) + party_shift, 44 * unit, 0, TAU, 32, Color("fff4be"), 3, true)
 	if battle.skill_flash > 0:
 		for i in range(7):
 			var start: Vector2 = battle._world(Vector2(75 + i * 62, 205))

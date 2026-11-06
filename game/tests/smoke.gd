@@ -17,8 +17,11 @@ func require(condition: bool, message: String) -> void:
 		quit(1)
 	assert(condition, message)
 
-func fresh(existing_path: String = "") -> Control:
+func fresh(existing_path: String = "", test_time: int = -1) -> Control:
 	var battle := scene.instantiate() as Control
+	if test_time >= 0:
+		battle.set_script(preload("res://tests/clock_battle.gd"))
+		battle.test_time = test_time
 	fixture_id += 1
 	battle.save_path = existing_path if not existing_path.is_empty() else OS.get_environment("WITCHBURST_TEST_ROOT").path_join("smoke-%d.json" % fixture_id)
 	root.add_child(battle)
@@ -183,6 +186,8 @@ func _run() -> void:
 	b.free()
 	_growth_checks()
 	_save_checks()
+	_lifecycle_checks()
+	_party_checks()
 	_muzzle_checks()
 	_terrain_checks()
 	_visual_checks()
@@ -249,8 +254,7 @@ func _muzzle_checks() -> void:
 	battle.total_shots = 2
 	battle._fire()
 	var linked: Dictionary = battle.bullets[-1]
-	var linked_start: Vector2 = linked.pos
-	require(linked.get("spirit", false) and visual.projectile_tail(linked).distance_to(visual._point(linked_start)) < 0.01, "정령 연계탄도 출발점에서 꼬리 길이 0")
+	require(linked.get("spirit", false) and visual.projectile_tail(linked).distance_to(visual.to_local(visual.spirit_sprite.to_global(Vector2(420, 340) - visual.spirit_sprite.texture.get_size() * 0.5))) < 0.01, "정령 연계탄도 출발점에서 꼬리 길이 0")
 	linked.pos += Vector2(0, -8)
 	require(visual.projectile_position(linked).distance_to(visual.projectile_tail(linked)) <= 8.0 * battle.content_width / 540.0 + 0.01, "정령 연계탄도 비행거리만큼 꼬리 성장")
 	# 표현 Tween과 sync 호출 횟수가 달라도 실제 전투 궤도·피해는 같아야 한다.
@@ -579,4 +583,207 @@ func _save_checks() -> void:
 	battle = fresh(filename)
 	require(battle.coins == 0 and battle.rebirths == 0 and battle.store.valid(battle.progress_data()), "주·백업 모두 불량이어도 새 진행 복구")
 	require(Array(DirAccess.get_files_at(filename.get_base_dir())).any(func(entry: String) -> bool: return entry.begins_with(filename.get_file() + ".invalid-")), "불량 저장 원문 별도 보존")
+	battle.free()
+
+func _lifecycle_checks() -> void:
+	var pause := MainLoop.NOTIFICATION_APPLICATION_PAUSED
+	var resume := MainLoop.NOTIFICATION_APPLICATION_RESUMED
+	var out := MainLoop.NOTIFICATION_APPLICATION_FOCUS_OUT
+	var inside := MainLoop.NOTIFICATION_APPLICATION_FOCUS_IN
+	# 단일 종류·중복·교차·무관한 양의 알림. 먼저 해제된 사유만으로 풀리지 않는다.
+	for order in [[out, inside], [pause, resume], [out, pause, inside, resume],
+		[pause, out, resume, inside], [out, out, resume, inside], [pause, pause, inside, resume],
+		[inside, resume, out, pause, pause, resume, inside, inside, resume]]:
+		var battle := fresh("", 1000000)
+		battle.coins = 137
+		battle.materials = 11
+		battle.pending_coins = 7
+		battle.rebirths = 2
+		battle.boss_cleared = true
+		battle._start_boss()
+		var entered := false
+		var paused := false
+		var focused_out := false
+		for event in order:
+			if event == out:
+				focused_out = true
+			elif event == inside:
+				focused_out = false
+			elif event == pause:
+				paused = true
+			elif event == resume:
+				paused = false
+			if not entered and (paused or focused_out):
+				entered = true
+			battle.test_time = 1000600 if event in [inside, resume] else 1000000
+			battle.notification(event)
+			require(battle.is_suspended() == (paused or focused_out), "종류별 정지 사유·교차/중복 알림 해제")
+			if battle.is_suspended():
+				var snapshot: Dictionary = battle.progress_data()
+				var elapsed: float = battle.elapsed
+				var boss_time: float = battle.boss_time
+				var shots: int = battle.total_shots
+				var disk: String = FileAccess.get_file_as_string(battle.save_path)
+				battle.advance(600)
+				battle._process(600)
+				require(not battle.buy_upgrade("attack") and battle.draw_tool() == -1 and not battle.craft_tool() and not battle.merge_tool(0) and not battle.equip_tool(-1) and not battle.unlock_spirit() and not battle.rebirth() and not battle.cast_skill() and not battle.claim_offline() and not battle.save_progress(), "정지 중 성장·수령·스킬·일반 저장 차단")
+				battle._fire()
+				battle.restart_battle()
+				require(battle.progress_data() == snapshot and battle.elapsed == elapsed and battle.boss_time == boss_time and battle.total_shots == shots, "정지 중 메모리·전투·보스 시간 보존")
+				require(FileAccess.get_file_as_string(battle.save_path) == disk and battle.suspended_at == 1000000, "중복 진입·자동저장이 최초 기준과 디스크를 덮지 않음")
+			require(not entered or battle.coins == 137, "진입/복귀에 오래된 파일을 재로드하지 않음")
+		require(entered and not battle.is_suspended() and battle.pending_coins == 47 and battle.reward_cursor == 1000600, "10분 복귀·기존 pending·환생별 비율 한 번 정산")
+		var elapsed: float = battle.elapsed
+		battle._process(600)
+		require(battle.elapsed == elapsed and battle.boss_time == battle.BOSS_LIMIT, "복귀 첫 큰 delta와 누적 시뮬레이션 따라잡기 폐기")
+		battle.test_time = 1000605
+		battle._process(5.0)
+		require(battle.pending_coins == 47 and battle.reward_cursor == 1000605, "복귀 다음 자동저장이 정산 보상을 보존")
+		require(battle.claim_offline() and battle.coins == 184 and not battle.claim_offline(), "복귀 보상 한 번 수령")
+		var filename: String = battle.save_path
+		battle.free()
+		battle = fresh(filename, 1000605)
+		require(battle.pending_coins == 0 and battle.coins == 184, "자동저장·수령·새 씬 재로드 손실/중복 없음")
+		battle.free()
+	# 경계 시간·미래 커서·시계 역행. saved_at도 후퇴하지 않는다.
+	for fixture in [[59, 0, 0, 0], [60, 0, 0, 2], [600, 7, 0, 27],
+		[86400 * 3, 12, 0, 2880], [600, 2875, 0, 2880],
+		[600, 7, 3600, 7], [-600, 7, 0, 7], [3660, 7, 3600, 9]]:
+		var battle := fresh("", 1000000)
+		battle.pending_coins = fixture[1]
+		battle.reward_cursor = 1000000 + fixture[2]
+		battle.saved_at = battle.reward_cursor
+		battle.notification(out)
+		battle.test_time += fixture[0]
+		battle.notification(inside)
+		require(not battle.is_suspended() and battle.pending_coins == fixture[3], "분 버림·24h·총 pending 상한·미래 커서·역행: " + str(fixture))
+		require(battle.reward_cursor == maxi(1000000 + fixture[2], battle.test_time) and battle.saved_at == maxi(1000000 + fixture[2], battle.test_time), "복귀 커서·저장시각 단조 증가")
+		battle.free()
+	# 진입 및 복귀 원자저장 실패: 미저장 메모리 진행·최초 기준을 성공까지 고정한다.
+	for entry_fails in [false, true]:
+		var battle := fresh("", 1000000)
+		var filename: String = battle.save_path
+		var old_disk: String = FileAccess.get_file_as_string(filename)
+		battle.coins = 333
+		battle.materials = 17
+		battle.inventory = [2, 1, 0]
+		battle.equipped = 1
+		battle.pending_coins = 11
+		battle.levels.attack = 3
+		battle.shot_clock = 1000.0
+		var memory: Dictionary = battle.progress_data()
+		var invalid_path := OS.get_environment("WITCHBURST_TEST_ROOT").path_join("missing-resume/progress.json")
+		if entry_fails:
+			battle.store.path = invalid_path
+		battle.notification(out)
+		require(battle.is_suspended() and battle.progress_data() == memory, "진입 저장 성공/실패 모두 메모리 스냅샷 보존")
+		if entry_fails:
+			require(FileAccess.get_file_as_string(filename) == old_disk, "진입 실패 시 원본 파일 보존")
+		battle.store.path = invalid_path
+		battle.test_time = 1000600
+		battle.notification(inside)
+		require(battle.is_suspended() and battle.progress_data() == memory, "복귀 저장 실패 후보를 메모리에 노출하지 않음")
+		var disk: String = FileAccess.get_file_as_string(filename)
+		battle.test_time = 1000900
+		battle._process(600)
+		battle.notification(inside)
+		require(battle.is_suspended() and battle.progress_data() == memory and not battle.save_progress(), "실패 중 지연 재시도·중복 복귀·일반저장에도 메모리 불변")
+		require(FileAccess.get_file_as_string(filename) == disk, "실패 후보가 기존 디스크 커서를 덮지 않음")
+		# 재실제 진입이 오면 최초 기준은 유지하면서 두 번째 사유를 기다린다.
+		battle.notification(pause)
+		require(not battle._save_suspend_entry(), "정지 중 종료용 스냅샷 저장 실패도 계속 정지")
+		battle.store.path = filename
+		require(battle._save_suspend_entry(), "종료용 저장은 최초 정지 시각만 확정")
+		var frozen_disk: Dictionary = battle.store._read(filename)
+		require(frozen_disk.reward_cursor == 1000000 and frozen_disk.pending_coins == 11 and battle.progress_data() == memory, "종료용 저장이 복귀 실패 중 커서를 앞지르지 않음")
+		battle.test_time = 1001200
+		battle._process(1)
+		require(battle.is_suspended() and battle.suspended_at == 1000000, "재진입 사유가 남으면 성공 경로에서도 재개 금지")
+		battle.notification(resume)
+		require(not battle.is_suspended() and battle.pending_coins == 51 and battle.reward_cursor == 1001200, "지연 성공 시 최초 pending에서 20분 재계산·한 번 반영")
+		require(battle.coins == 333 and battle.materials == 17 and battle.inventory == [2, 1, 0] and battle.levels.attack == 3, "진입 실패 뒤 현재 진행 보존")
+		battle._process(600)
+		battle.test_time += 5
+		battle._process(5)
+		require(battle.claim_offline() and battle.coins == 384, "실패 회복 후 자동저장·수령")
+		battle.free()
+		battle = fresh(filename, 1001205)
+		require(battle.pending_coins == 0 and battle.coins == 384 and battle.levels.attack == 3, "실패 회복 뒤 새 씬 디스크 재로드")
+		battle.free()
+	# 추가 알림 없이도 _process의 제한된 재시도로 성공할 수 있다.
+	var battle := fresh("", 1000000)
+	var filename: String = battle.save_path
+	battle.notification(pause)
+	battle.store.path = OS.get_environment("WITCHBURST_TEST_ROOT").path_join("missing-auto/progress.json")
+	battle.test_time = 1000600
+	battle.notification(resume)
+	battle.store.path = filename
+	battle.test_time = 1000900
+	battle._process(1.0)
+	require(not battle.is_suspended() and battle.pending_coins == 30, "추가 OS 알림 없는 지연 재시도도 성공 시각까지 정산")
+	battle.free()
+
+func _party_checks() -> void:
+	var probe := preload("res://tests/party_probe.gd").new()
+	var battle := fresh()
+	var visual: Node2D = battle.visuals
+	visual.breath.pause()
+	battle.spirit = true
+	for dimensions in [Vector2(540, 960), Vector2(540, 1200), Vector2(720, 960)]:
+		battle.size = dimensions
+		battle._layout_ui()
+		for equipped in [-1, 2]:
+			battle.equipped = equipped
+			for breath_value in [-1.0, 0.0, 1.0]:
+				visual.breath_amount = breath_value
+				for kick_value in [0.0, 1.0]:
+					visual.kick = kick_value
+					for x in [65.0, 270.0, 440.0, 475.0]:
+						var previous_y := -INF
+						var previous_rule_y := 0.0
+						for y in [490.0, 490.1, 510.0, 575.0, 625.0, 659.9, 660.0]:
+							battle.witch = Vector2(x, y)
+							battle.elapsed = PI / 6 if breath_value > 0 else -PI / 6
+							var state: Dictionary = battle.progress_data()
+							visual.sync(0.0)
+							var measured: Dictionary = probe.measure(battle)
+							require(measured.samples > 100 and measured.min_diagonal > 650.0 and measured.max_diagonal < 1480.0, "실제 불투명 발·그림자·정령이 두 절벽 사이 풀밭 안")
+							require(measured.display[1] > previous_y, "고정 x의 세로 입력은 멈춤·도약·역행 없이 증가")
+							if is_finite(previous_y):
+								var original_step: float = battle._world(Vector2(x, y)).y - battle._world(Vector2(x, previous_rule_y)).y
+								require(measured.display[1] - previous_y <= original_step + 0.01, "경계 미소 입력의 도약·비연속 없음")
+							previous_y = measured.display[1]
+							previous_rule_y = y
+							require(battle.witch == Vector2(x, y) and battle.progress_data() == state, "표현 변위를 규칙/저장에 되먹이지 않음")
+			# 실제 드래그 이동·해제·자동복귀와 발사 후 이동을 검사한다.
+			battle.witch = Vector2(270, 625)
+			battle.dragging = true
+			battle._drag_position(battle._world(Vector2(440, 660)))
+			battle.shot_clock = 1000
+			for frame in range(50):
+				battle.advance(1.0 / 60.0)
+				visual.sync(0.0)
+				var measured: Dictionary = probe.measure(battle)
+				require(measured.min_diagonal > 650 and measured.max_diagonal < 1480, "드래그 경계로 이동 중에도 실제 발·그림자 풀밭 유지")
+			battle.total_shots = 2
+			battle.bullets.clear()
+			battle._fire()
+			visual.shot_tween.pause()
+			var sprite: Sprite2D = visual.witch_sprite
+			var tip := Vector2(1061, 504.5) if equipped == -1 else Vector2(1250, 504.5)
+			var actual: Vector2 = visual.to_local(sprite.to_global(tip - sprite.texture.get_size() * 0.5))
+			var spirit_pixel := Vector2(420, 340) - visual.spirit_sprite.texture.get_size() * 0.5
+			var linked: Vector2 = visual.to_local(visual.spirit_sprite.to_global(spirit_pixel))
+			var frozen: Vector2 = visual.projectile_position(battle.bullets[0])
+			require(frozen.distance_to(actual) < 0.01 and visual.projectile_position(battle.bullets[1]).distance_to(linked) < 0.01, "드래그·최대 반동·정령 진동의 실제 그림 발사점")
+			battle.witch += Vector2(-25, -25)
+			visual.sync(0.0)
+			require(visual.projectile_position(battle.bullets[0]).distance_to(frozen) < 0.01, "발사 뒤 본체 이동에도 출발점 유지")
+			battle.dragging = false
+			battle.manual_grace = 0.0
+			for frame in range(180):
+				battle.advance(1.0 / 60.0)
+				visual.sync(0.0)
+				var measured: Dictionary = probe.measure(battle)
+				require(measured.min_diagonal > 650 and measured.max_diagonal < 1480, "해제 후 자동 이동 중 풀밭 유지")
 	battle.free()

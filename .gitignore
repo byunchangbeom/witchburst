@@ -2,3 +2,7 @@
 .godot/
 exports/
 *.tmp
+
+# Python 재생성 캐시
+__pycache__/
+*.py[cod]
