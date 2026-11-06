@@ -18,10 +18,14 @@ class HostGui(unittest.TestCase):
             for width, height in host_gui.SIZES:
                 path = f"{stage}-{width}x{height}.png"
                 (directory / path).write_bytes(b"\x89PNG\r\n\x1a\n" + struct.pack(">I", 13) + b"IHDR" + struct.pack(">II", width, height))
-                item = {"path": path, "stage": stage, "size": [width, height]}
-                if stage in ("10-first-shot", "11-grown-shot"):
+                item = {"path": path, "stage": stage, "size": [width, height],
+                        "terrain": [{"foot": [500, 700], "shadow_half_width": 32}]}
+                if stage in ("10-first-shot", "11-grown-shot", "14-boss-shot", "12-first-flight", "13-grown-flight", "15-boss-flight"):
                     item["shot_alignment"] = {"sprite_muzzle": [301, 600], "projectile": [301, 600],
-                                              "emitter": [301, 600], "tail": [301, 600], "kick": 1.0, "breath": 1.0}
+                                              "emitter": [301, 600], "tail": [301, 600], "kick": 1.0, "breath": 1.0,
+                                              "sprite_breech": [291, 610], "initial_projectile": [301 + 8 * min(width, 600) / 540 / 2**0.5, 600 - 8 * min(width, 600) / 540 / 2**0.5], "travel": 0.0}
+                    if stage.endswith("flight"):
+                        item["shot_alignment"].update(projectile=[340, 560], tail=[320, 580], travel=80.0)
                 items.append(item)
         return {"display_server": "macOS", "captures": items}
 
@@ -33,13 +37,13 @@ class HostGui(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "누락"):
                 host_gui.verify_captures(directory)
             manifest.write_text(json.dumps(self.capture_fixture(directory)), encoding="utf-8")
-            self.assertEqual(len(host_gui.verify_captures(directory)), 33)
+            self.assertEqual(len(host_gui.verify_captures(directory)), 45)
 
     def test_shot_origin_must_match_sprite_after_recoil(self):
         with tempfile.TemporaryDirectory(prefix="witchburst-gui-muzzle-") as temporary:
             directory = Path(temporary)
             fixture = self.capture_fixture(directory)
-            shot = fixture["captures"][-1]["shot_alignment"]
+            shot = next(item["shot_alignment"] for item in fixture["captures"] if item["stage"] == "11-grown-shot")
             for field, value in (("projectile", [310, 605]), ("emitter", [310, 605]),
                                  ("kick", 0.0), ("sprite_muzzle", [float("nan"), 600])):
                 with self.subTest(field=field):
@@ -55,7 +59,7 @@ class HostGui(unittest.TestCase):
             directory = Path(temporary)
             fixture = self.capture_fixture(directory)
             for item in fixture["captures"]:
-                if item["stage"] not in ("10-first-shot", "11-grown-shot"):
+                if item["stage"] not in ("10-first-shot", "11-grown-shot", "14-boss-shot"):
                     continue
                 shot = item["shot_alignment"]
                 with self.subTest(stage=item["stage"], size=item["size"]):
@@ -67,7 +71,43 @@ class HostGui(unittest.TestCase):
                             host_gui.verify_captures(directory)
                     shot["tail"] = shot["sprite_muzzle"]
             (directory / "capture-manifest.json").write_text(json.dumps(fixture), encoding="utf-8")
-            self.assertEqual(len(host_gui.verify_captures(directory)), 33)
+            self.assertEqual(len(host_gui.verify_captures(directory)), 45)
+
+    def test_muzzle_match_does_not_hide_wrong_initial_direction(self):
+        with tempfile.TemporaryDirectory(prefix="witchburst-gui-axis-") as temporary:
+            directory = Path(temporary)
+            fixture = self.capture_fixture(directory)
+            for item in fixture["captures"]:
+                if "shot_alignment" not in item:
+                    continue
+                shot = item["shot_alignment"]
+                with self.subTest(stage=item["stage"], size=item["size"]):
+                    original = shot["initial_projectile"]
+                    shot["initial_projectile"] = [301, 592]  # 기존 수직 탄도 재현
+                    (directory / "capture-manifest.json").write_text(json.dumps(fixture), encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "초기 탄도"):
+                        host_gui.verify_captures(directory)
+                    shot["initial_projectile"] = original
+
+    def test_cliff_placement_and_missing_flight_are_rejected(self):
+        with tempfile.TemporaryDirectory(prefix="witchburst-gui-grass-") as temporary:
+            directory = Path(temporary)
+            fixture = self.capture_fixture(directory)
+            for item in fixture["captures"]:
+                if item["stage"] not in ("01-first", "08-rebirth"):
+                    continue
+                original = item["terrain"]
+                for value in ([], [{"foot": [200, 300], "shadow_half_width": 32}],
+                              [{"foot": [500, 1400], "shadow_half_width": 32}]):
+                    item["terrain"] = value
+                    (directory / "capture-manifest.json").write_text(json.dumps(fixture), encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "풀밭"):
+                        host_gui.verify_captures(directory)
+                item["terrain"] = original
+            fixture["captures"] = [item for item in fixture["captures"] if not item["stage"].endswith("flight")]
+            (directory / "capture-manifest.json").write_text(json.dumps(fixture), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "누락"):
+                host_gui.verify_captures(directory)
 
     def test_no_display_receipt_does_not_start_godot(self):
         with tempfile.TemporaryDirectory(prefix="witchburst-gui-contract-") as temporary:

@@ -118,12 +118,18 @@ func play_shot(bullet: Dictionary) -> void:
 	# 반동·호흡을 먼저 적용한 그림의 실제 포구를 탄과 입자가 공유한다.
 	_sync_witch()
 	var muzzle: Vector2 = battle._from_screen(to_local(witch_muzzle.global_position))
+	# 원본 그림에서 판독한 지팡이/포신 축을 실제 Sprite 변환으로 읽는다.
+	var breech := Vector2(264, 65) if battle.power_tier() == 0 else Vector2(144, 100)
+	var axis: Vector2 = (witch_muzzle.global_position - witch_sprite.to_global(breech)).normalized()
 	_prune_shots()
-	shot_origins.append({"bullet": bullet, "start": bullet.pos, "muzzle": muzzle})
+	shot_origins.append({"bullet": bullet, "start": bullet.pos, "muzzle": muzzle, "axis": axis})
 	for linked in battle.bullets:
 		if linked.get("spirit", false) and not shot_origins.any(func(shot: Dictionary) -> bool: return is_same(shot.bullet, linked)):
-			shot_origins.append({"bullet": linked, "start": linked.pos, "muzzle": linked.pos})
-	emit_burst(muzzle, battle.MINT, 3 + battle.power_tier() * 2)
+			var start: Vector2 = _point(linked.pos)
+			var target: Dictionary = battle._enemy_by_id(linked.target)
+			shot_origins.append({"bullet": linked, "start": linked.pos, "muzzle": battle._from_screen(start),
+				"axis": (_point(target.pos) - start).normalized()})
+	_emit_at(battle._world(muzzle), battle.MINT, 3 + battle.power_tier() * 2)
 	shot_tween = create_tween()
 	shot_tween.tween_property(self, "kick", 0.0, 0.16 + battle.power_tier() * 0.025).set_trans(Tween.TRANS_QUAD)
 
@@ -132,25 +138,39 @@ func _prune_shots() -> void:
 		return battle.bullets.any(func(bullet: Dictionary) -> bool: return is_same(bullet, shot.bullet)))
 
 func projectile_position(bullet: Dictionary) -> Vector2:
-	# 표시는 실제 그림의 포구에서 시작해 64단위 안에 규칙 궤도로 합류한다.
-	# 충돌·피해·비행시간은 기존 bullet.pos만 사용하며 Tween을 읽지 않는다.
-	var point: Vector2 = battle._world(bullet.pos)
 	for shot in shot_origins:
 		if is_same(shot.bullet, bullet):
-			var remaining := maxf(0.0, 1.0 - bullet.pos.distance_to(shot.start) / 64.0)
-			return point + (battle._world(shot.muzzle) - battle._world(shot.start)) * remaining
-	return point
+			return _flight_point(shot, bullet.pos.distance_to(shot.start))
+	return _point(bullet.pos)
+
+func _flight_point(shot: Dictionary, traveled: float) -> Vector2:
+	# 처음 28단위는 포신 축으로 전진하고 이후 표적으로 부드럽게 휘어진다.
+	# 피해·충돌·수명은 기존 규칙 좌표만 사용한다. 표현을 규칙에 되먹이지 않는다.
+	var unit: float = battle.content_width / 540.0
+	var muzzle: Vector2 = battle._world(shot.muzzle)
+	var lead: Vector2 = muzzle + shot.axis * minf(traveled, 28.0) * unit
+	if traveled <= 28.0:
+		return lead
+	var target: Dictionary = battle._enemy_by_id(shot.bullet.target)
+	if target.is_empty():
+		return _point(shot.bullet.pos)
+	var end := _point(target.pos)
+	var start: Vector2 = muzzle + shot.axis * 28.0 * unit
+	var distance: float = shot.bullet.pos.distance_to(shot.start)
+	var remaining: float = shot.bullet.pos.distance_to(target.pos) + distance - traveled
+	var t := clampf((traveled - 28.0) / maxf(traveled - 28.0 + remaining, 0.001), 0.0, 1.0)
+	var handle := minf(90.0 * unit, start.distance_to(end) * 0.4)
+	return start.bezier_interpolate(start + shot.axis * handle, end - (end - start).normalized() * handle, end, t)
 
 func projectile_tail(bullet: Dictionary) -> Vector2:
 	var point := projectile_position(bullet)
 	for shot in shot_origins:
 		if is_same(shot.bullet, bullet):
-			# 첫 프레임은 길이 0. 실제 비행 거리만큼 늘리되 출발 포구를
-			# 넘어가지 않는다. 현재 표적 방향으로 뒤로 빼면 포구를 침범한다.
 			var unit: float = battle.content_width / 540.0
-			var traveled: float = bullet.pos.distance_to(shot.start) * unit
-			var length := minf(traveled, (12.0 + bullet.tier * 12.0) * unit)
-			return point.move_toward(battle._world(shot.muzzle), length)
+			var traveled: float = bullet.pos.distance_to(shot.start)
+			var length := minf(traveled, 12.0 + bullet.tier * 12.0)
+			var previous := _flight_point(shot, traveled - length)
+			return point.move_toward(previous, length * unit)
 	# 출발점이 없는 탄은 머리만 표시하여 임의의 뒤쪽 궤적을 만들지 않는다.
 	return point
 
@@ -171,12 +191,15 @@ func _particle_texture(leaf: bool) -> ImageTexture:
 	return ImageTexture.create_from_image(picture)
 
 func emit_burst(pos: Vector2, color: Color, count: int) -> void:
+	_emit_at(_point(pos), color, count)
+
+func _emit_at(point: Vector2, color: Color, count: int) -> void:
 	for i in range(MAX_EMITTERS):
 		if emitter_life[i] > battle.elapsed:
 			continue
 		var emitter := emitters[i]
-		emitter_positions[i] = pos
-		emitter.position = battle._world(pos)
+		emitter_positions[i] = battle._from_screen(point)
+		emitter.position = point
 		emitter.texture = leaf_texture if color == battle.MINT and count >= 20 else star_texture
 		emitter.amount = mini(count, PARTICLES_PER_EMITTER)
 		emitter.color = color
@@ -197,11 +220,25 @@ func sync(_delta: float) -> void:
 	_sync_witch()
 	var unit: float = battle.content_width / 540.0
 	spirit_sprite.visible = battle.spirit
-	spirit_sprite.position = battle._world(battle.witch + Vector2(-58, -18)) + Vector2(0, sin(battle.elapsed * 3.0) * 6.0)
+	spirit_sprite.position = _point(battle.witch + Vector2(-58, -18)) + Vector2(0, sin(battle.elapsed * 3.0) * 6.0)
 	spirit_sprite.scale = Vector2.ONE * 48.0 * unit / spirit_texture.get_height()
 	spirit_sprite.material.set_shader_parameter("pulse", 0.45 + sin(battle.elapsed * 3.0) * 0.35)
 	_sync_enemies(unit)
 	queue_redraw()
+
+func _point(pos: Vector2) -> Vector2:
+	# 배경 원본의 안전한 풀밭 경계 y=650-0.5x를 화면으로 투영한다.
+	# 적 생성 높이에서 가장 많이 보정하고 드래그 영역(490) 전에 0으로
+	# 이어 준다. 배경의 cover/crop과 같은 변환을 써서 세 비율을 함께 다룬다.
+	var point: Vector2 = battle._world(pos)
+	var meadow_scale := maxf(battle.size.x / MEADOW.get_width(), battle.size.y / MEADOW.get_height())
+	var origin: Vector2 = (battle.size - MEADOW.get_size() * meadow_scale) * 0.5
+	var texture_x := (point.x - origin.x) / meadow_scale
+	var grass_y := origin.y + (650.0 - texture_x * 0.5) * meadow_scale
+	var spawn_y: float = battle._world(Vector2(pos.x, 245)).y
+	var correction := maxf(0.0, grass_y + 16.0 * battle.content_width / 540.0 - spawn_y)
+	point.y += correction * clampf((490.0 - pos.y) / 245.0, 0.0, 1.0)
+	return point
 
 func _sync_witch() -> void:
 	var unit: float = battle.content_width / 540.0
@@ -243,11 +280,11 @@ func _sync_enemies(unit: float) -> void:
 		var height: float = (152.0 if enemy.boss else 62.0) * unit
 		sprite.scale = Vector2.ONE * height / sprite.texture.get_height()
 		sprite.scale.y *= 1.0 + sin(battle.elapsed * 3.5 + enemy.id) * 0.025
-		sprite.position = battle._world(enemy.pos) + Vector2(enemy.flash * 5.0, -enemy.flash * 4.0)
+		sprite.position = _point(enemy.pos) + Vector2(enemy.flash * 5.0, -enemy.flash * 4.0)
 		sprite.rotation = sin(battle.elapsed * 2.0 + enemy.id) * 0.035 + enemy.flash * 0.08
 		sprite.material.set_shader_parameter("flash", enemy.flash)
 		var ground: Sprite2D = enemy_shadows[enemy.id]
-		ground.position = battle._world(enemy.pos) + Vector2(0, height * 0.44)
+		ground.position = _point(enemy.pos) + Vector2(0, height * 0.44)
 		ground.scale = Vector2.ONE * (1.8 if enemy.boss else 0.65) * unit
 	for id in enemy_sprites.keys():
 		if id not in active:
@@ -266,7 +303,7 @@ func _draw() -> void:
 		return
 	var unit: float = battle.content_width / 540.0
 	for enemy in battle.enemies:
-		var p: Vector2 = battle._world(enemy.pos)
+		var p := _point(enemy.pos)
 		var width: float = (104.0 if enemy.boss else 42.0) * unit
 		var y: float = (88.0 if enemy.boss else 40.0) * unit
 		draw_style_box(battle._panel_style(BROWN, BROWN, 4), Rect2(p - Vector2(width / 2, y), Vector2(width, 9)))
@@ -281,7 +318,7 @@ func _draw() -> void:
 			draw_line(tail, p, Color("fffacb"), r * 0.65, true)
 		draw_circle(p, r * 0.6, Color.WHITE)
 	for floating in battle.floats:
-		var p: Vector2 = battle._world(floating.pos)
+		var p := _point(floating.pos)
 		var color: Color = floating.color
 		color.a = minf(floating.life * 3.0, 1.0)
 		var font_size := 22 if not floating.text.begins_with("+") else 18

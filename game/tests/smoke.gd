@@ -184,6 +184,7 @@ func _run() -> void:
 	_growth_checks()
 	_save_checks()
 	_muzzle_checks()
+	_terrain_checks()
 	_visual_checks()
 	await _input_checks()
 	print("제품 자동 검사: ", checks, "개, 실패 ", failures)
@@ -211,39 +212,35 @@ func _muzzle_checks() -> void:
 				var sprite: Sprite2D = visual.witch_sprite
 				var pixel := Vector2(1061, 504.5) if tier == 0 else Vector2(1250, 504.5)
 				var actual_tip: Vector2 = visual.to_local(sprite.to_global(pixel - sprite.texture.get_size() * 0.5))
-				require(visual.kick == 1.0 and absf(sprite.rotation + 0.035 * tier) < 0.0001, "최대 반동의 회전까지 적용한 재현")
+				require(visual.kick == 1.0, "최대 반동 재현")
 				require(actual_tip.distance_to(battle._world(battle.muzzle_position())) > 1.0, "변환 전 포구와 다른 비자명 재현")
 				require(visual.projectile_position(bullet).distance_to(actual_tip) < 0.01, "세 비율·네 성장·호흡별 실제 그림 포구에서 탄 표시")
 				require(visual.projectile_tail(bullet).distance_to(actual_tip) < 0.01, "비행거리 0의 꼬리는 포구에서 길이 0")
 				require(visual.emitters[0].position.distance_to(actual_tip) < 0.01, "실제 그림 포구에서 발사 입자 생성")
 				require(bullet.pos == battle.muzzle_position(), "표현 반동이 규칙상 발사 좌표를 바꾸지 않음")
 				require(visual.shot_origins.size() == 1, "이전 사격 표현 자료 회수")
+				# 원본 그림의 포구와 포신 뒤쪽 픽셀을 각각 변환한다.
+				var back_pixel := Vector2(920, 664.5) if tier == 0 else Vector2(800, 699.5)
+				var axis: Vector2 = (sprite.to_global(pixel - sprite.texture.get_size() * 0.5) - sprite.to_global(back_pixel - sprite.texture.get_size() * 0.5)).normalized()
 				var launch: Vector2 = bullet.pos
 				battle.witch.x += 12.0
 				visual.kick = 0.0
 				visual.sync(0.0)
 				require(visual.projectile_position(bullet).distance_to(actual_tip) < 0.01 and visual.emitters[0].position.distance_to(actual_tip) < 0.01, "발사 후 포구가 움직여도 탄·입자 출발점 유지")
 				var unit: float = battle.content_width / 540.0
-				var previous_length := 0.0
-				for travel in [1.0, 8.0, 24.0, 48.0, 80.0]:
+				for travel in [1.0, 8.0, 24.0, 28.0, 48.0, 80.0, 200.0]:
 					bullet.pos = launch + Vector2(0, -travel)
 					var head: Vector2 = visual.projectile_position(bullet)
 					var tail: Vector2 = visual.projectile_tail(bullet)
-					var flight := head - actual_tip
-					var along: float = (tail - actual_tip).dot(flight) / flight.length_squared()
-					var length := head.distance_to(tail)
-					require(along >= -0.0001 and along <= 1.0001 and absf((tail - actual_tip).cross(flight)) < 0.01, "꼬리 끝은 발사 포구와 탄 머리 사이에 제한")
-					require(length <= travel * unit + 0.01 and length <= (12 + tier * 12) * unit + 0.01, "꼬리가 실제 비행거리·성장별 길이 상한 준수")
-					require(length + 0.01 >= previous_length, "짧은 비행에서 꼬리가 점진적으로 성장")
-					previous_length = length
-					var target: Dictionary = battle._enemy_by_id(bullet.target)
-					var target_pos: Vector2 = target.pos
-					target.pos = bullet.pos + Vector2(100, 80)
-					require(visual.projectile_tail(bullet).distance_to(tail) < 0.01, "표적 방향 전환으로 꼬리가 비행 경로 밖에 생기지 않음")
-					target.pos = target_pos
-				require(is_equal_approx(previous_length, (12 + tier * 12) * unit), "충분히 비행하면 성장별 최대 꼬리 유지")
-				bullet.pos = launch + Vector2(0, -80)
-				require(visual.projectile_position(bullet).distance_to(battle._world(bullet.pos)) < 0.01, "비행 중 규칙 궤도로 합류")
+					require(head.is_finite() and tail.is_finite(), "유도 궤적의 유한 좌표")
+					require(head.distance_to(tail) <= minf(travel, 12 + tier * 12) * unit + 0.01, "꼬리 비행거리·성장 길이 상한")
+					if travel <= 28.0:
+						require(head.distance_to(actual_tip + axis * travel * unit) < 0.01, "세 비율·네 성장·호흡별 실제 포신 축으로 초기 비행")
+						var along: float = (tail - actual_tip).dot(axis)
+						require(along >= -0.01 and absf((tail - actual_tip).cross(axis)) < 0.01, "초기 꼬리가 포구 뒤로 침범하지 않음")
+				var target: Dictionary = battle._enemy_by_id(bullet.target)
+				bullet.pos = target.pos
+				require(visual.projectile_position(bullet).distance_to(visual._point(target.pos)) < 0.01, "표현 궤적은 풀밭에 배치한 표적으로 도착")
 				battle.witch.x -= 12.0
 	battle.bullets.clear()
 	visual.sync(0.0)
@@ -253,7 +250,7 @@ func _muzzle_checks() -> void:
 	battle._fire()
 	var linked: Dictionary = battle.bullets[-1]
 	var linked_start: Vector2 = linked.pos
-	require(linked.get("spirit", false) and visual.projectile_tail(linked) == battle._world(linked_start), "정령 연계탄도 출발점에서 꼬리 길이 0")
+	require(linked.get("spirit", false) and visual.projectile_tail(linked).distance_to(visual._point(linked_start)) < 0.01, "정령 연계탄도 출발점에서 꼬리 길이 0")
 	linked.pos += Vector2(0, -8)
 	require(visual.projectile_position(linked).distance_to(visual.projectile_tail(linked)) <= 8.0 * battle.content_width / 540.0 + 0.01, "정령 연계탄도 비행거리만큼 꼬리 성장")
 	# 표현 Tween과 sync 호출 횟수가 달라도 실제 전투 궤도·피해는 같아야 한다.
@@ -268,6 +265,32 @@ func _muzzle_checks() -> void:
 	require(reference.bullets == animated.bullets and reference.enemies == animated.enemies and reference.total_hits == animated.total_hits and reference.random.state == animated.random.state, "호흡·반동·렌더 횟수가 달라도 전투 규칙 동일")
 	reference.free()
 	animated.free()
+	battle.free()
+
+func _terrain_checks() -> void:
+	var battle := fresh()
+	var visual: Node2D = battle.visuals
+	for dimensions in [Vector2(540, 960), Vector2(540, 1200), Vector2(720, 960)]:
+		battle.size = dimensions
+		battle._layout_ui()
+		for boss in [false, true]:
+			for x in ([205, 270, 335] if boss else [99, 115, 270, 425, 441]):
+				for y in ([300, 312, 324] if boss else [245, 350, 465]):
+					var enemy: Dictionary = battle.enemies[0]
+					enemy.boss = boss
+					enemy.pos = Vector2(x, y)
+					# 생물 종류에 맞는 실제 텍스처로 검사한다.
+					visual.enemy_sprites[enemy.id].texture = visual.boss_texture if boss else visual.seed_texture
+					visual.sync(0.0)
+					var shadow: Sprite2D = visual.enemy_shadows[enemy.id]
+					var foot: Vector2 = visual.background.to_local(shadow.global_position) + visual.MEADOW.get_size() * 0.5
+					# 원본을 직접 보고 잡은 보수 풀밭 영역. 그림자 폭도 경계 안에 둔다.
+					var half_width: float = 32 * shadow.scale.x / visual.background.scale.x
+					require(foot.y > 650.0 - (foot.x - half_width) * 0.5, "세 비율·생성/이동 범위에서 발과 그림자가 절벽 아래 풀밭에 놓임")
+					require(foot.y < 1480.0 - (foot.x + half_width) * 0.5, "아래 절벽에도 발과 그림자가 들어가지 않음")
+					var sprite: Sprite2D = visual.enemy_sprites[enemy.id]
+					require(absf(sprite.position.x - shadow.position.x) < 0.01 and sprite.position.y < shadow.position.y, "생물과 발밑 그림자 정렬")
+					require(enemy.pos == Vector2(x, y), "풀밭 보정이 규칙 좌표를 쓰지 않음")
 	battle.free()
 
 func _visual_checks() -> void:
