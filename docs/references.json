@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "observed_date": "2026-11-06",
+  "reference_game": "총잡이 고양이 : 방치형 키우기 RPG / Cat Gunner",
+  "evidence_kind": "PUBLIC_REFERENCE_ONLY",
+  "pages": [
+    {
+      "url": "https://play.google.com/store/apps/details?id=com.Chodun.CatGunner&hl=ko",
+      "inspection": "공식 소개·공개 스크린샷 확인. 자동 전투·총기 합성·수집·환생·오프라인 보상의 설명을 참고."
+    },
+    {
+      "url": "https://uibowl.io/game/%EC%B4%9D%EC%9E%A1%EC%9D%B4%20%EA%B3%A0%EC%96%91%EC%9D%B4",
+      "inspection": "공개 제목 확인 후 로그인 화면으로 이동. 회원용 세부 UI 목록은 미확인. 사용자가 별도 제공한 공개 이미지 URL 13개는 직접 확인."
+    },
+    {
+      "url": "https://m.blog.naver.com/csyqweiop/224410633288",
+      "inspection": "브라우저에서 본문 확인. 2026-09-14 작성자의 관찰로서 스탯·드래그 조작·도전/광산·합성·스킨을 참고. 그 작성자는 생선/펫을 미해금이라고 명시. 현 버전의 규칙 확정 자료로 취급하지 않음."
+    }
+  ],
+  "images": [
+    {
+      "id": 90,
+      "url": "https://d31var7gpnk8lm.cloudfront.net/favicon/32773fb9-500f-40bf-8d84-44de9f561e89/game_catgunner_202608_90.png",
+      "inspection": "직접 시각 판독",
+      "observation": "앱 아이콘: 작은 고양이와 큰 총기"
+    },
+    {
+      "id": 82,
+      "url": "https://d31var7gpnk8lm.cloudfront.net/new-52597066-b97c-4aa9-8c7c-127d8f186cc6/new-9f104d6f-2e41-47e7-b003-f279a623d4f4/6e88ec71-788a-494b-b84d-b0084095ab21/game_catgunner_202608_82.png",
+      "inspection": "직접 시각 판독",
+      "observation": "초기 성장 홍보 이미지; 전투와 재화 표시"
+    },
+    {
+      "id": 83,
+      "url": "https://d31var7gpnk8lm.cloudfront.net/new-52597066-b97c-4aa9-8c7c-127d8f186cc6/new-7ca1bc1d-b7b4-482c-8234-0a9830fe281c/35a7d517-2d48-402e-baf4-d14ed1557e5f/game_catgunner_202608_83.png",
+      "inspection": "직접 시각 판독",
+      "observation": "고화력 성장 홍보 이미지"
+    },
+    {
+      "id": 84,
+      "url": "https://d31var7gpnk8lm.cloudfront.net/new-52597066-b97c-4aa9-8c7c-127d8f186cc6/new-4f11af48-02b0-42bd-ae24-619ed67eeb4d/c2332db9-0442-40f2-bc42-1f7c8196227e/game_catgunner_202608_84.png",
+      "inspection": "직접 시각 판독",
+      "observation": "성장 전후 대비 홍보 이미지"
+    },
+    {
+      "id": 85,
+      "url": "https://d31var7gpnk8lm.cloudfront.net/new-52597066-b97c-4aa9-8c7c-127d8f186cc6/new-4bd32303-2388-4166-bdbb-bc6456fc9968/21017164-9496-482d-bc0c-27bd5f201f54/game_catgunner_202608_85.png",
+      "inspection": "직접 시각 판독",
+      "observation": "세로 전투·좌우 메뉴·공격력/속도/획득량 하단 강화"
+    },
+    {
+      "id": 86,
+      "url": "https://d31var7gpnk8lm.cloudfront.net/new-52597066-b97c-4aa9-8c7c-127d8f186cc6/new-bb9ac226-5732-426d-98ed-1417b5282e4a/c34122f0-f885-4069-931b-2e0e7ef2bd78/game_catgunner_202608_86.png",
+      "inspection": "직접 시각 판독",
+      "observation": "무기 발사 표현·동료·지역 변화"
+    },
+    {
+      "id": 87,
+      "url": "https://d31var7gpnk8lm.cloudfront.net/new-52597066-b97c-4aa9-8c7c-127d8f186cc6/new-01016d43-82bb-4746-841b-8522d44c6f18/5f81c001-ec2f-4bc5-8eaa-b919e5873d01/game_catgunner_202608_87.png",
+      "inspection": "직접 시각 판독",
+      "observation": "동료 사격·다수 장애물과 체력 표시"
+    },
+    {
+      "id": 88,
+      "url": "https://d31var7gpnk8lm.cloudfront.net/new-52597066-b97c-4aa9-8c7c-127d8f186cc6/new-f65c2e2f-d8f2-4146-b80f-5eb0c970f83f/ee0020c3-106f-4b09-8f3f-77a91c0e035e/game_catgunner_202608_88.png",
+      "inspection": "직접 시각 판독",
+      "observation": "강화 수치·피해와 보상 표시가 늘어난 전투"
+    },
+    {
+      "id": 89,
+      "url": "https://d31var7gpnk8lm.cloudfront.net/new-52597066-b97c-4aa9-8c7c-127d8f186cc6/new-cdcb8a1c-38b3-45f6-a3be-bf7c2cce1830/7f72873e-613f-4ba5-a984-24262548b3e5/game_catgunner_202608_89.png",
+      "inspection": "직접 시각 판독",
+      "observation": "후반 고화력·파괴·보상 밀도"
+    },
+    {
+      "id": 2,
+      "url": "https://d31var7gpnk8lm.cloudfront.net/new-379cfb2a-1f6e-4947-891a-6719191ec412/new-2c0be027-e8f3-4535-8252-b84b8c73b629/ca98cba5-9f5a-4aaa-9e2d-ad9337995c1d/game_catgunner_202608_2.png",
+      "inspection": "직접 시각 판독",
+      "observation": "생선 수집·같은 등급 합성 안내·능력 보너스·뽑기 UI"
+    },
+    {
+      "id": 4,
+      "url": "https://d31var7gpnk8lm.cloudfront.net/new-362f660d-ad73-472d-951c-ac0b4ef7eef3/new-e5f7774e-60cc-4185-8417-ede8b734cff0/a0f33080-ab8a-49be-8c27-6990f16e8f7e/game_catgunner_202608_4.png",
+      "inspection": "직접 시각 판독",
+      "observation": "보조 모드 종료·보상 증폭·광고 제거 상품의 당시 화면"
+    },
+    {
+      "id": 6,
+      "url": "https://d31var7gpnk8lm.cloudfront.net/cmsph1nbk000el704l1z9emsa/new-6c3d6a0c-14fc-4870-9c2f-416d90d8832d/20268a14-fd72-4d40-acaa-a9aa9d1fd12f/game_catgunner_202608_6.png",
+      "inspection": "직접 시각 판독",
+      "observation": "스테이지 클리어·모드/강화 메뉴"
+    },
+    {
+      "id": 8,
+      "url": "https://d31var7gpnk8lm.cloudfront.net/new-52c5a403-9c18-4419-9e75-9bd6b8559498/new-8c473a42-761d-4dc6-ac92-a522b4aca6ca/e2cf7a70-aa97-4efb-9ad3-b8145740eb9e/game_catgunner_202608_8.png",
+      "inspection": "직접 시각 판독",
+      "observation": "진행 중 시간 초과·재시도 맥락의 화면"
+    }
+  ],
+  "video": {
+    "url": "https://www.youtube.com/shorts/om7pvunb_1I",
+    "title_observed": "Cat Gunner",
+    "channel_observed": "@chodun1554",
+    "duration_seconds_observed": 30.021,
+    "sampled_seconds": [
+      1,
+      6,
+      12,
+      15,
+      22,
+      28
+    ],
+    "inspection": "공개 플레이어의 구간별 실제 프레임을 시각 판독. 12초는 전환 중 프레임. 연속 영상 전체·음향을 감상했다고 주장하지 않음.",
+    "visual_observation": "초반 단독 소형 사격에서 동료·대형 무기·관통/폭발·다수 피해와 보상 표시로 성장 대비를 강조한다.",
+    "audio": "NOT_HEARD"
+  },
+  "limits": {
+    "direct_app_play": "NOT_RUN",
+    "live_game_balance": "NOT_MEASURED",
+    "exact_growth_formula": "UNKNOWN",
+    "draw_or_merge_probabilities": "UNKNOWN",
+    "reference_offline_cap": "UNKNOWN",
+    "reusable_production_assets": "NONE_CONFIRMED",
+    "commercial_name_clearance": "NOT_CHECKED"
+  },
+  "production_boundary": "링크와 관찰만 보존한다. 원본 이미지·영상·음원·캐릭터·상표를 새 게임의 배포 자산으로 채택하지 않는다. 새 아트·음악·이름을 사용한다.",
+  "temporary_downloads": "13개 공개 이미지와 브라우저 샘플의 임시 파일은 확인 후 회수했다.",
+  "game_bootstrap_observation": {
+    "directory": "/Users/nhn/brainspace/workspace/games/witchburst",
+    "directory_created_by": "user",
+    "confirmation": "내가 만듬",
+    "directory_at_check": "EMPTY_NON_SYMLINK_DIRECTORY",
+    "git_at_check": "NOT_A_REPOSITORY",
+    "runtime_at_check": "ABSENT",
+    "harness_session_created_or_modified_game_directory": false,
+    "next_session": "현재 파일과 Git을 다시 확인하고 사용자가 준비한 폴더에서 시작한다."
+  }
+}
