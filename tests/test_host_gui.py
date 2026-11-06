@@ -1,6 +1,7 @@
 """GUI가 없을 때의 빠른 환경 판정과 캡처 누락·위조된 headless 수용을 방지한다."""
 
 import json
+import struct
 from pathlib import Path
 import tempfile
 import unittest
@@ -10,6 +11,45 @@ import host_gui
 
 
 class HostGui(unittest.TestCase):
+    def capture_fixture(self, directory, states=None):
+        # PNG 헤더만 사용하는 호스트 행렬 계약 fixture다. 렌더링 증거가 아니다.
+        items = []
+        for stage in host_gui.STATES if states is None else states:
+            for width, height in host_gui.SIZES:
+                path = f"{stage}-{width}x{height}.png"
+                (directory / path).write_bytes(b"\x89PNG\r\n\x1a\n" + struct.pack(">I", 13) + b"IHDR" + struct.pack(">II", width, height))
+                item = {"path": path, "stage": stage, "size": [width, height]}
+                if stage in ("10-first-shot", "11-grown-shot"):
+                    item["shot_alignment"] = {"sprite_muzzle": [301, 600], "projectile": [301, 600],
+                                              "emitter": [301, 600], "kick": 1.0, "breath": 1.0}
+                items.append(item)
+        return {"display_server": "macOS", "captures": items}
+
+    def test_shot_frames_are_required_in_matrix(self):
+        with tempfile.TemporaryDirectory(prefix="witchburst-gui-shots-") as temporary:
+            directory = Path(temporary)
+            manifest = directory / "capture-manifest.json"
+            manifest.write_text(json.dumps(self.capture_fixture(directory, host_gui.STATES[:9])), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "누락"):
+                host_gui.verify_captures(directory)
+            manifest.write_text(json.dumps(self.capture_fixture(directory)), encoding="utf-8")
+            self.assertEqual(len(host_gui.verify_captures(directory)), 33)
+
+    def test_shot_origin_must_match_sprite_after_recoil(self):
+        with tempfile.TemporaryDirectory(prefix="witchburst-gui-muzzle-") as temporary:
+            directory = Path(temporary)
+            fixture = self.capture_fixture(directory)
+            shot = fixture["captures"][-1]["shot_alignment"]
+            for field, value in (("projectile", [310, 605]), ("emitter", [310, 605]),
+                                 ("kick", 0.0), ("sprite_muzzle", [float("nan"), 600])):
+                with self.subTest(field=field):
+                    original = shot[field]
+                    shot[field] = value
+                    (directory / "capture-manifest.json").write_text(json.dumps(fixture), encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "포구 정렬"):
+                        host_gui.verify_captures(directory)
+                    shot[field] = original
+
     def test_no_display_receipt_does_not_start_godot(self):
         with tempfile.TemporaryDirectory(prefix="witchburst-gui-contract-") as temporary:
             directory = Path(temporary)

@@ -3,6 +3,7 @@
 import ctypes
 import hashlib
 import json
+import math
 from pathlib import Path
 import platform
 import shutil
@@ -11,7 +12,8 @@ import subprocess
 import sys
 
 
-STATES = ("01-first", "02-grown", "03-boss", "04-skill", "05-won", "06-lost", "07-workshop", "08-rebirth", "09-merge")
+STATES = ("01-first", "02-grown", "03-boss", "04-skill", "05-won", "06-lost", "07-workshop", "08-rebirth", "09-merge",
+          "10-first-shot", "11-grown-shot")
 SIZES = ((540, 960), (540, 1200), (720, 960))
 
 
@@ -67,6 +69,13 @@ def verify_captures(directory):
         key = (item["stage"], *size)
         if key not in expected or key in found or list(size) != item["size"]:
             raise ValueError("캡처 상태·치수 행렬 불일치")
+        if item["stage"] in ("10-first-shot", "11-grown-shot"):
+            shot = item.get("shot_alignment", {})
+            points = [shot.get(name, []) for name in ("sprite_muzzle", "projectile", "emitter")]
+            if (shot.get("kick") != 1.0 or shot.get("breath") != 1.0
+                    or any(len(point) != 2 or not all(math.isfinite(n) for n in point) for point in points)
+                    or any(math.dist(points[0], point) >= 0.01 for point in points[1:])):
+                raise ValueError("발사 직후 최대 반동·호흡 포구 정렬 불일치")
         found.add(key)
         captures.append({"path": path.name, "sha256": hashlib.sha256(data).hexdigest()})
     if found != expected:

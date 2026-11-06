@@ -256,7 +256,8 @@ func _fire() -> void:
 	for enemy in enemies:
 		if enemy.pos.distance_squared_to(witch) < target.pos.distance_squared_to(witch):
 			target = enemy
-	bullets.append({"pos": muzzle_position(), "target": target.id, "damage": attack_damage(), "life": 2.0, "tier": power_tier()})
+	var bullet := {"pos": muzzle_position(), "target": target.id, "damage": attack_damage(), "life": 2.0, "tier": power_tier()}
+	bullets.append(bullet)
 	total_shots += 1
 	# 해금한 정령은 매 세 번째 사격에 연계탄을 보탠다.
 	if spirit and total_shots % 3 == 0:
@@ -264,8 +265,7 @@ func _fire() -> void:
 		spirit_shots += 1
 	recoil = 1.0
 	if is_instance_valid(visuals):
-		visuals.play_shot()
-	_burst(muzzle_position(), MINT, 3 + power_tier() * 2)
+		visuals.play_shot(bullet)
 	sound.play("shot" if power_tier() == 0 else "cannon")
 
 func _hit(enemy: Dictionary, damage: float) -> void:

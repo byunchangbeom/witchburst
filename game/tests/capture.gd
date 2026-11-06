@@ -55,6 +55,7 @@ func _run() -> void:
 	battle.advance(0.1)
 	require(battle.total_shots > 0 and not battle.bullets.is_empty(), "첫 사격 표시 준비")
 	await capture_matrix("01-first", battle.Phase.FOREST)
+	await capture_matrix("10-first-shot", battle.Phase.FOREST, true)
 	# 외형 비교 fixture다. 자연 보상만의 승리는 smoke.gd에서 별도로 확인한다.
 	battle.coins = 1000
 	battle.materials = 16
@@ -74,6 +75,7 @@ func _run() -> void:
 	battle.advance(0.2)
 	require(battle.power_tier() == 3 and battle.bullets.any(func(b: Dictionary) -> bool: return b.tier == 3), "성장한 마도구와 큰 탄 표시 준비")
 	await capture_matrix("02-grown", battle.Phase.FOREST)
+	await capture_matrix("11-grown-shot", battle.Phase.FOREST, true)
 	battle.toggle_workshop()
 	await capture_matrix("07-workshop", battle.Phase.FOREST)
 	battle.toggle_workshop()
@@ -95,26 +97,36 @@ func _run() -> void:
 	await capture_matrix("06-lost", battle.Phase.LOST)
 	battle.result_button.pressed.emit()
 	require(battle.phase == battle.Phase.FOREST and battle.round_number == 2, "패배 후 재도전")
-	require(records.size() == 27, "9상태 × 3비율 캡처 행렬 완성")
+	require(records.size() == 33, "11상태 × 3비율 캡처 행렬 완성")
 	var manifest := {"display_server": DisplayServer.get_name(), "captures": records,
 		"visual_review": "NOT_MEASURED", "human_play": "NOT_MEASURED",
-		"fixture": "성장 비교는 별빛1000·잎16 주입 후 실제 제작·합성·정령 해금, 나머지 전투 시뮬레이션"}
+		"fixture": "성장 비교는 별빛1000·잎16 주입 후 실제 제작·합성·정령 해금. 발사 직후는 _fire 직접 호출 후 반동·호흡1 고정, 나머지 전투 시뮬레이션"}
 	var filename := "capture-stages.json" if verify_only else "capture-manifest.json"
 	var file := FileAccess.open(directory.path_join(filename), FileAccess.WRITE)
 	require(file != null, "상태 기록 저장")
 	file.store_string(JSON.stringify(manifest, "\t"))
 	file.close()
-	print("캡처 상태 준비 검사 완료 (PNG 없음)." if verify_only else "실제 렌더러 PNG 27개 저장. 독립 시각 판독은 별도 필요.")
+	print("캡처 상태 준비 검사 완료 (PNG 없음)." if verify_only else "실제 렌더러 PNG 33개 저장. 독립 시각 판독은 별도 필요.")
 	battle.free()
 	quit(0)
 
-func capture_matrix(stage: String, phase: int) -> void:
+func capture_matrix(stage: String, phase: int, launch: bool = false) -> void:
 	for dimensions in SIZES:
 		root.size = dimensions
 		# 창 크기와 stretch가 적용된 뒤 레이아웃을 읽는다.
 		await process_frame
 		await process_frame
 		battle._layout_ui()
+		if launch:
+			# 이동 전, 최대 반동·호흡 직후의 한 프레임을 세 비율에서 고정한다.
+			battle.visuals.breath.pause()
+			battle.visuals.breath_amount = 1.0
+			battle.bullets.clear()
+			battle.visuals.emitter_life.fill(0.0)
+			for emitter in battle.visuals.emitters:
+				emitter.emitting = false
+			battle._fire()
+			battle.visuals.shot_tween.pause()
 		battle._refresh_ui()
 		battle.visuals.sync(0.0)
 		require(battle.phase == phase, "캡처 상태 일치: " + stage)
@@ -147,6 +159,17 @@ func capture_matrix(stage: String, phase: int) -> void:
 			"enemy_sprites": battle.visuals.enemy_sprites.size(),
 			"emitters": battle.visuals.emitters.size(), "shaders": ["hit_flash", "magic_pulse"],
 			"font": battle.font.get_font_name(), "logical_size": [battle.size.x, battle.size.y]}
+		if launch:
+			var sprite: Sprite2D = battle.visuals.witch_sprite
+			var pixel := Vector2(1061, 504.5) if battle.power_tier() == 0 else Vector2(1250, 504.5)
+			var muzzle: Vector2 = battle.visuals.to_local(sprite.to_global(pixel - sprite.texture.get_size() * 0.5))
+			var projectile: Vector2 = battle.visuals.projectile_position(battle.bullets[0])
+			var emitter: Vector2 = battle.visuals.emitters[0].position
+			require(muzzle.distance_to(projectile) < 0.01 and muzzle.distance_to(emitter) < 0.01, "발사 직후 실제 그림·탄·입자 포구 일치")
+			require(battle.visuals.kick == 1.0, "최대 반동 프레임 고정")
+			item["shot_alignment"] = {"sprite_muzzle": [muzzle.x, muzzle.y],
+				"projectile": [projectile.x, projectile.y], "emitter": [emitter.x, emitter.y],
+				"kick": battle.visuals.kick, "breath": battle.visuals.breath_amount}
 		if not verify_only:
 			battle.queue_redraw()
 			await process_frame
@@ -157,3 +180,6 @@ func capture_matrix(stage: String, phase: int) -> void:
 			require(rendered.save_png(directory.path_join(filename)) == OK, "PNG 저장: " + filename)
 			print("캡처: ", filename)
 		records.append(item)
+	if launch:
+		battle.visuals.breath.play()
+		battle.visuals.shot_tween.play()

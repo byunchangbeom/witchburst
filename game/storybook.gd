@@ -14,6 +14,8 @@ const PARTICLES_PER_EMITTER := 18
 var battle: Control
 var background: Sprite2D
 var witch_sprite: Sprite2D
+var witch_muzzle: Marker2D
+var shot_origins: Array[Dictionary] = []
 var spirit_sprite: Sprite2D
 var enemy_sprites: Dictionary = {}
 var emitters: Array[CPUParticles2D] = []
@@ -74,6 +76,8 @@ func setup(owner_battle: Control) -> void:
 	witch_shadow.z_index = -2
 	witch_sprite = _sprite(STARTER)
 	witch_sprite.material = _material(PULSE)
+	witch_muzzle = Marker2D.new()
+	witch_sprite.add_child(witch_muzzle)
 	spirit_sprite = _sprite(spirit_texture)
 	spirit_sprite.material = _material(PULSE)
 	# 표현 전용 호흡 Tween. 시뮬레이션 시각과 난수는 변경하지 않는다.
@@ -107,12 +111,32 @@ func setup(owner_battle: Control) -> void:
 		emitter_positions.append(Vector2.ZERO)
 	sync(0.0)
 
-func play_shot() -> void:
+func play_shot(bullet: Dictionary) -> void:
 	if is_instance_valid(shot_tween):
 		shot_tween.kill()
 	kick = 1.0
+	# 반동·호흡을 먼저 적용한 그림의 실제 포구를 탄과 입자가 공유한다.
+	_sync_witch()
+	var muzzle: Vector2 = battle._from_screen(to_local(witch_muzzle.global_position))
+	_prune_shots()
+	shot_origins.append({"bullet": bullet, "start": bullet.pos, "muzzle": muzzle})
+	emit_burst(muzzle, battle.MINT, 3 + battle.power_tier() * 2)
 	shot_tween = create_tween()
 	shot_tween.tween_property(self, "kick", 0.0, 0.16 + battle.power_tier() * 0.025).set_trans(Tween.TRANS_QUAD)
+
+func _prune_shots() -> void:
+	shot_origins = shot_origins.filter(func(shot: Dictionary) -> bool:
+		return battle.bullets.any(func(bullet: Dictionary) -> bool: return is_same(bullet, shot.bullet)))
+
+func projectile_position(bullet: Dictionary) -> Vector2:
+	# 표시는 실제 그림의 포구에서 시작해 64단위 안에 규칙 궤도로 합류한다.
+	# 충돌·피해·비행시간은 기존 bullet.pos만 사용하며 Tween을 읽지 않는다.
+	var point: Vector2 = battle._world(bullet.pos)
+	for shot in shot_origins:
+		if is_same(shot.bullet, bullet):
+			var remaining := maxf(0.0, 1.0 - bullet.pos.distance_to(shot.start) / 64.0)
+			return point + (battle._world(shot.muzzle) - battle._world(shot.start)) * remaining
+	return point
 
 func _particle_texture(leaf: bool) -> ImageTexture:
 	# 신규 별·잎 입자 모양을 엔진에서 생성한다.
@@ -153,24 +177,34 @@ func sync(_delta: float) -> void:
 	background.position = battle.size * 0.5
 	# 세로 비율이 달라도 나무와 절벽을 찌그러뜨리지 않고 화면을 채운다.
 	background.scale = Vector2.ONE * maxf(battle.size.x / MEADOW.get_width(), battle.size.y / MEADOW.get_height())
+	_prune_shots()
+	_sync_witch()
+	var unit: float = battle.content_width / 540.0
+	spirit_sprite.visible = battle.spirit
+	spirit_sprite.position = battle._world(battle.witch + Vector2(-58, -18)) + Vector2(0, sin(battle.elapsed * 3.0) * 6.0)
+	spirit_sprite.scale = Vector2.ONE * 48.0 * unit / spirit_texture.get_height()
+	spirit_sprite.material.set_shader_parameter("pulse", 0.45 + sin(battle.elapsed * 3.0) * 0.35)
+	_sync_enemies(unit)
+	queue_redraw()
+
+func _sync_witch() -> void:
 	var unit: float = battle.content_width / 540.0
 	var tier: int = battle.power_tier()
 	witch_sprite.texture = STARTER if tier == 0 else CANNON
 	var width := (82.0 if tier == 0 else 96.0 + tier * 6.0) * unit
 	var sprite_scale := width / witch_sprite.texture.get_width()
 	witch_sprite.scale = Vector2(sprite_scale, sprite_scale * (1.0 + breath_amount * 0.018))
-	# 그림의 지팡이 끝·포구를 탄 발생점에 맞춘다.
+	# 규칙상 포구를 기준으로 그림을 배치하고 표현용 반동·호흡을 더한다.
 	var tip := Vector2(405, -95) if tier == 0 else Vector2(594, -95)
+	witch_muzzle.position = tip
 	witch_sprite.position = battle._world(battle.muzzle_position()) - tip * witch_sprite.scale
 	witch_sprite.position += Vector2(-kick * (2.0 + tier * 2.0), breath_amount * 1.5) * unit
 	witch_sprite.rotation = -kick * 0.035 * tier
 	witch_shadow.position = witch_sprite.position + Vector2(0, 1199 * sprite_scale * 0.47)
 	witch_shadow.scale = Vector2.ONE * unit
 	witch_sprite.material.set_shader_parameter("pulse", battle.recoil * 0.6)
-	spirit_sprite.visible = battle.spirit
-	spirit_sprite.position = battle._world(battle.witch + Vector2(-58, -18)) + Vector2(0, sin(battle.elapsed * 3.0) * 6.0)
-	spirit_sprite.scale = Vector2.ONE * 48.0 * unit / spirit_texture.get_height()
-	spirit_sprite.material.set_shader_parameter("pulse", 0.45 + sin(battle.elapsed * 3.0) * 0.35)
+
+func _sync_enemies(unit: float) -> void:
 	var active: Array[int] = []
 	for enemy in battle.enemies:
 		active.append(enemy.id)
@@ -210,7 +244,6 @@ func sync(_delta: float) -> void:
 			enemy_shadows.erase(id)
 			enemy_sprites[id].free()
 			enemy_sprites.erase(id)
-	queue_redraw()
 
 func _draw() -> void:
 	if not is_instance_valid(battle):
@@ -223,7 +256,7 @@ func _draw() -> void:
 		draw_style_box(battle._panel_style(BROWN, BROWN, 4), Rect2(p - Vector2(width / 2, y), Vector2(width, 9)))
 		draw_rect(Rect2(p - Vector2(width / 2 - 2, y - 2), Vector2((width - 4) * enemy.hp / enemy.max_hp, 5)), Color("b0ed75"))
 	for bullet in battle.bullets:
-		var p: Vector2 = battle._world(bullet.pos)
+		var p := projectile_position(bullet)
 		var target: Dictionary = battle._enemy_by_id(bullet.target)
 		var direction := Vector2(0.5, -1).normalized()
 		if not target.is_empty():

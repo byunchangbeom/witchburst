@@ -183,10 +183,64 @@ func _run() -> void:
 	b.free()
 	_growth_checks()
 	_save_checks()
+	_muzzle_checks()
 	_visual_checks()
 	await _input_checks()
 	print("제품 자동 검사: ", checks, "개, 실패 ", failures)
 	quit(1 if failures else 0)
+
+func _muzzle_checks() -> void:
+	var battle := fresh()
+	var visual: Node2D = battle.visuals
+	visual.breath.pause()
+	# 같은 좌표 헬퍼끼리 비교하지 않고, 원본 그림에서 판독한 포구 픽셀을
+	# 실제 Sprite2D 변환으로 옮겨 그리기에 쓰는 탄·입자 좌표와 대조한다.
+	for dimensions in [Vector2(540, 960), Vector2(540, 1200), Vector2(720, 960)]:
+		battle.size = dimensions
+		battle._layout_ui()
+		for tier in range(4):
+			battle.equipped = tier - 1
+			for breathing in [-1.0, 0.0, 1.0]:
+				visual.breath_amount = breathing
+				battle.bullets.clear()
+				visual.emitter_life.fill(0.0)
+				battle._fire()
+				visual.shot_tween.pause()
+				visual.sync(0.0)
+				var bullet: Dictionary = battle.bullets[0]
+				var sprite: Sprite2D = visual.witch_sprite
+				var pixel := Vector2(1061, 504.5) if tier == 0 else Vector2(1250, 504.5)
+				var actual_tip: Vector2 = visual.to_local(sprite.to_global(pixel - sprite.texture.get_size() * 0.5))
+				require(visual.kick == 1.0 and absf(sprite.rotation + 0.035 * tier) < 0.0001, "최대 반동의 회전까지 적용한 재현")
+				require(actual_tip.distance_to(battle._world(battle.muzzle_position())) > 1.0, "변환 전 포구와 다른 비자명 재현")
+				require(visual.projectile_position(bullet).distance_to(actual_tip) < 0.01, "세 비율·네 성장·호흡별 실제 그림 포구에서 탄 표시")
+				require(visual.emitters[0].position.distance_to(actual_tip) < 0.01, "실제 그림 포구에서 발사 입자 생성")
+				require(bullet.pos == battle.muzzle_position(), "표현 반동이 규칙상 발사 좌표를 바꾸지 않음")
+				require(visual.shot_origins.size() == 1, "이전 사격 표현 자료 회수")
+				var launch: Vector2 = bullet.pos
+				battle.witch.x += 12.0
+				visual.kick = 0.0
+				visual.sync(0.0)
+				require(visual.projectile_position(bullet).distance_to(actual_tip) < 0.01 and visual.emitters[0].position.distance_to(actual_tip) < 0.01, "발사 후 포구가 움직여도 탄·입자 출발점 유지")
+				bullet.pos = launch + Vector2(0, -80)
+				require(visual.projectile_position(bullet).distance_to(battle._world(bullet.pos)) < 0.01, "비행 중 규칙 궤도로 합류")
+				battle.witch.x -= 12.0
+	battle.bullets.clear()
+	visual.sync(0.0)
+	require(visual.shot_origins.is_empty(), "남은 탄이 없으면 표현 자료 전체 회수")
+	# 표현 Tween과 sync 호출 횟수가 달라도 실제 전투 궤도·피해는 같아야 한다.
+	var reference := fresh()
+	var animated := fresh()
+	for i in range(120):
+		animated.visuals.breath_amount = sin(i)
+		animated.visuals.kick = float(i % 2)
+		animated.visuals.sync(0.0)
+		reference.advance(1.0 / 60.0)
+		animated.advance(1.0 / 60.0)
+	require(reference.bullets == animated.bullets and reference.enemies == animated.enemies and reference.total_hits == animated.total_hits and reference.random.state == animated.random.state, "호흡·반동·렌더 횟수가 달라도 전투 규칙 동일")
+	reference.free()
+	animated.free()
+	battle.free()
 
 func _visual_checks() -> void:
 	# 텍스처·재질의 실제 연결과 표현 계층의 상한을 검사한다. GPU 판정은 아니다.
@@ -210,14 +264,14 @@ func _visual_checks() -> void:
 		visual.sync(1.0 / 60.0)
 	require(battle.progress_data() == snapshot and battle.total_shots == shots and battle.random.state == random_state, "렌더링이 성장·저장·전투 난수에 영향 없음")
 	battle._fire()
-	require(battle.bullets[-1].pos == battle.muzzle_position(), "지팡이 끝에서 발사체 생성")
+	require(battle.bullets[-1].pos == battle.muzzle_position(), "초기 규칙 발사 좌표 보존")
 	battle.equipped = 2
 	battle.spirit = true
 	visual.sync(0.0)
 	require(visual.witch_sprite.texture.resource_path.ends_with("witch-cannon.png") and visual.spirit_sprite.visible, "성장 마법포·여우정령 실제 적용")
 	require(visual.spirit_sprite.material.shader == visual.PULSE and visual.spirit_sprite.material.get_shader_parameter("pulse") > 0.0, "정령 맥동 셰이더 실제 적용")
 	battle._fire()
-	require(battle.bullets[-1].pos == battle.muzzle_position() and battle.bullets[-1].tier == 3, "큰포 포구에서 성장탄 생성")
+	require(battle.bullets[-1].pos == battle.muzzle_position() and battle.bullets[-1].tier == 3, "성장 규칙 발사 좌표·단계 보존")
 	var baseline: int = visual.get_child_count()
 	for i in range(100):
 		battle._burst(battle.witch, battle.MINT, 40)
