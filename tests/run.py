@@ -57,7 +57,7 @@ def main():
             checks.append(("capture", ["--audio-driver", "Dummy", "--script", "res://tests/capture.gd"]))
         try:
             for name, options in checks:
-                if name == "capture" and failed:
+                if failed:
                     break
                 command = [engine, "--path", str(project), "--log-file", str(artifacts / f"{name}-engine.log"), *options]
                 try:

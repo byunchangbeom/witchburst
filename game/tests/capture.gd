@@ -60,6 +60,10 @@ func _run() -> void:
 	battle.materials = 16
 	for i in range(4):
 		require(battle.craft_tool(), "실제 코드 재료 제작")
+	battle.toggle_workshop()
+	require(not battle.merge_button.disabled, "동급 장비 합성 버튼 사용 가능")
+	await capture_matrix("09-merge", battle.Phase.FOREST)
+	battle.toggle_workshop()
 	require(battle.merge_tool(0) and battle.merge_tool(0) and battle.merge_tool(1), "성운포까지 동급 합성")
 	require(battle.unlock_spirit(), "실제 정령 해금")
 	for i in range(2):
@@ -91,6 +95,7 @@ func _run() -> void:
 	await capture_matrix("06-lost", battle.Phase.LOST)
 	battle.result_button.pressed.emit()
 	require(battle.phase == battle.Phase.FOREST and battle.round_number == 2, "패배 후 재도전")
+	require(records.size() == 27, "9상태 × 3비율 캡처 행렬 완성")
 	var manifest := {"display_server": DisplayServer.get_name(), "captures": records,
 		"visual_review": "NOT_MEASURED", "human_play": "NOT_MEASURED",
 		"fixture": "성장 비교는 별빛1000·잎16 주입 후 실제 제작·합성·정령 해금, 나머지 전투 시뮬레이션"}
@@ -99,7 +104,7 @@ func _run() -> void:
 	require(file != null, "상태 기록 저장")
 	file.store_string(JSON.stringify(manifest, "\t"))
 	file.close()
-	print("캡처 상태 준비 검사 완료 (PNG 없음)." if verify_only else "실제 렌더러 PNG 24개 저장. 독립 시각 판독은 별도 필요.")
+	print("캡처 상태 준비 검사 완료 (PNG 없음)." if verify_only else "실제 렌더러 PNG 27개 저장. 독립 시각 판독은 별도 필요.")
 	battle.free()
 	quit(0)
 
@@ -111,6 +116,7 @@ func capture_matrix(stage: String, phase: int) -> void:
 		await process_frame
 		battle._layout_ui()
 		battle._refresh_ui()
+		battle.visuals.sync(0.0)
 		require(battle.phase == phase, "캡처 상태 일치: " + stage)
 		require(battle.result_panel.visible == (phase == battle.Phase.WON or phase == battle.Phase.LOST), "결과 창 표시 일치")
 		var viewport := Rect2(Vector2.ZERO, battle.size)
@@ -118,6 +124,8 @@ func capture_matrix(stage: String, phase: int) -> void:
 			battle.skill_button, battle.stats_label, battle.footer_label,
 			battle.workshop_button, battle.upgrades.attack, battle.upgrades.speed, battle.upgrades.yield]:
 			require(viewport.encloses(control.get_rect()), "화면 내 UI 배치: " + stage)
+		require(battle.visuals.witch_sprite.texture != null and battle.visuals.background.texture != null, "실제 그림 연결")
+		require(battle.visuals.witch_sprite.material is ShaderMaterial and battle.visuals.spirit_sprite.material is ShaderMaterial, "실제 마법 재질 연결")
 		if battle.workshop.visible:
 			require(viewport.encloses(battle.workshop.get_rect()), "장비 메뉴 화면 내 배치")
 			var menu_rect := Rect2(Vector2.ZERO, battle.workshop.size)
@@ -126,7 +134,7 @@ func capture_matrix(stage: String, phase: int) -> void:
 		if battle.result_panel.visible:
 			require(viewport.encloses(battle.result_panel.get_rect()), "화면 내 결과 창 배치")
 			var panel_rect := Rect2(Vector2.ZERO, battle.result_panel.size)
-			for control in [battle.result_title, battle.result_text, battle.result_button]:
+			for control in [battle.result_title, battle.result_text, battle.result_button, battle.rebirth_button]:
 				require(panel_rect.encloses(control.get_rect()), "결과 창 내부 텍스트·버튼 배치")
 		var filename := "%s-%dx%d.png" % [stage, dimensions.x, dimensions.y]
 		var item := {"path": filename, "stage": stage, "size": [dimensions.x, dimensions.y],
@@ -135,6 +143,9 @@ func capture_matrix(stage: String, phase: int) -> void:
 			"shots": battle.total_shots, "hits": battle.total_hits, "rewards": battle.total_rewards,
 			"boss_hp": battle.boss_hp, "boss_time": battle.boss_time,
 			"status": battle.status_label.text, "skill": battle.skill_button.text,
+			"witch_texture": battle.visuals.witch_sprite.texture.resource_path,
+			"enemy_sprites": battle.visuals.enemy_sprites.size(),
+			"emitters": battle.visuals.emitters.size(), "shaders": ["hit_flash", "magic_pulse"],
 			"font": battle.font.get_font_name(), "logical_size": [battle.size.x, battle.size.y]}
 		if not verify_only:
 			battle.queue_redraw()

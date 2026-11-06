@@ -1,0 +1,252 @@
+extends Node2D
+## 전투 자료를 읽는 표현 계층. 규칙·저장·전투 난수에는 쓰지 않는다.
+
+const STARTER = preload("res://assets/art/witch-starter.png")
+const CANNON = preload("res://assets/art/witch-cannon.png")
+const MEADOW = preload("res://assets/art/sunlit-meadow.png")
+const CREATURES = preload("res://assets/art/forest-creatures.png")
+const FLASH = preload("res://shaders/hit_flash.gdshader")
+const PULSE = preload("res://shaders/magic_pulse.gdshader")
+const BROWN := Color("543725")
+const MAX_EMITTERS := 12
+const PARTICLES_PER_EMITTER := 18
+
+var battle: Control
+var background: Sprite2D
+var witch_sprite: Sprite2D
+var spirit_sprite: Sprite2D
+var enemy_sprites: Dictionary = {}
+var emitters: Array[CPUParticles2D] = []
+var emitter_life: Array[float] = []
+var seed_texture: AtlasTexture
+var boss_texture: AtlasTexture
+var spirit_texture: AtlasTexture
+var star_texture: ImageTexture
+var leaf_texture: ImageTexture
+var breath: Tween
+var breath_amount := 0.0
+var kick := 0.0
+var shot_tween: Tween
+var hit_tweens: Dictionary = {}
+var last_flashes: Dictionary = {}
+var emitter_positions: Array[Vector2] = []
+var shadow_texture: ImageTexture
+var witch_shadow: Sprite2D
+var enemy_shadows: Dictionary = {}
+
+func _atlas(region: Rect2) -> AtlasTexture:
+	var texture := AtlasTexture.new()
+	texture.atlas = CREATURES
+	texture.region = region
+	texture.filter_clip = true
+	return texture
+
+func _material(shader: Shader) -> ShaderMaterial:
+	var result := ShaderMaterial.new()
+	result.shader = shader
+	return result
+
+func _sprite(texture: Texture2D) -> Sprite2D:
+	var sprite := Sprite2D.new()
+	sprite.texture = texture
+	sprite.z_index = -1
+	add_child(sprite)
+	return sprite
+
+func setup(owner_battle: Control) -> void:
+	battle = owner_battle
+	# 전투 그림·숫자·입자는 HUD와 공방/결과 창보다 뒤에서 그린다.
+	z_index = -1
+	seed_texture = _atlas(Rect2(140, 144, 415, 530))
+	boss_texture = _atlas(Rect2(724, 0, 724, 710))
+	spirit_texture = _atlas(Rect2(1558, 10, 500, 700))
+	background = _sprite(MEADOW)
+	background.z_index = -10
+	var shadow := Image.create(64, 24, false, Image.FORMAT_RGBA8)
+	shadow.fill(Color.TRANSPARENT)
+	for y in range(24):
+		for x in range(64):
+			var distance := Vector2((x - 31.5) / 32.0, (y - 11.5) / 12.0).length()
+			if distance < 1.0:
+				shadow.set_pixel(x, y, Color(BROWN, (1.0 - distance) * 0.28))
+	shadow_texture = ImageTexture.create_from_image(shadow)
+	witch_shadow = _sprite(shadow_texture)
+	witch_shadow.z_index = -2
+	witch_sprite = _sprite(STARTER)
+	witch_sprite.material = _material(PULSE)
+	spirit_sprite = _sprite(spirit_texture)
+	spirit_sprite.material = _material(PULSE)
+	# 표현 전용 호흡 Tween. 시뮬레이션 시각과 난수는 변경하지 않는다.
+	breath = create_tween().set_loops()
+	breath.tween_property(self, "breath_amount", 1.0, 0.8).set_trans(Tween.TRANS_SINE)
+	breath.tween_property(self, "breath_amount", -1.0, 0.8).set_trans(Tween.TRANS_SINE)
+	star_texture = _particle_texture(false)
+	leaf_texture = _particle_texture(true)
+	for i in range(MAX_EMITTERS):
+		var emitter := CPUParticles2D.new()
+		emitter.emitting = false
+		emitter.one_shot = true
+		emitter.amount = PARTICLES_PER_EMITTER
+		emitter.lifetime = 0.65
+		emitter.explosiveness = 1.0
+		emitter.spread = 180.0
+		emitter.direction = Vector2.UP
+		emitter.initial_velocity_min = 35.0
+		emitter.initial_velocity_max = 100.0
+		emitter.gravity = Vector2(0, 65)
+		emitter.scale_amount_min = 0.5
+		emitter.scale_amount_max = 1.0
+		emitter.z_index = 0
+		var gradient := Gradient.new()
+		gradient.set_color(0, Color.WHITE)
+		gradient.set_color(1, Color(1, 1, 1, 0))
+		emitter.color_ramp = gradient
+		add_child(emitter)
+		emitters.append(emitter)
+		emitter_life.append(0.0)
+		emitter_positions.append(Vector2.ZERO)
+	sync(0.0)
+
+func play_shot() -> void:
+	if is_instance_valid(shot_tween):
+		shot_tween.kill()
+	kick = 1.0
+	shot_tween = create_tween()
+	shot_tween.tween_property(self, "kick", 0.0, 0.16 + battle.power_tier() * 0.025).set_trans(Tween.TRANS_QUAD)
+
+func _particle_texture(leaf: bool) -> ImageTexture:
+	# 신규 별·잎 입자 모양을 엔진에서 생성한다.
+	var picture := Image.create(16, 16, false, Image.FORMAT_RGBA8)
+	picture.fill(Color.TRANSPARENT)
+	for y in range(16):
+		for x in range(16):
+			var p := Vector2(x - 7.5, y - 7.5)
+			var inside := absf(p.x) + absf(p.y) < 7.0
+			if leaf:
+				inside = pow((p.x + p.y * 0.4) / 5.0, 2) + pow(p.y / 7.0, 2) < 1.0
+			else:
+				inside = absf(p.x) * absf(p.y) < 6.0 and p.length() < 7.5
+			if inside:
+				picture.set_pixel(x, y, Color("a1df77") if leaf else Color("fff3a3"))
+	return ImageTexture.create_from_image(picture)
+
+func emit_burst(pos: Vector2, color: Color, count: int) -> void:
+	for i in range(MAX_EMITTERS):
+		if emitter_life[i] > battle.elapsed:
+			continue
+		var emitter := emitters[i]
+		emitter_positions[i] = pos
+		emitter.position = battle._world(pos)
+		emitter.texture = leaf_texture if color == battle.MINT and count >= 20 else star_texture
+		emitter.amount = mini(count, PARTICLES_PER_EMITTER)
+		emitter.color = color
+		emitter.initial_velocity_max = 65.0 + battle.power_tier() * 25.0
+		emitter.restart()
+		emitter.emitting = true
+		emitter_life[i] = battle.elapsed + emitter.lifetime + 0.1
+		return
+	# 모든 슬롯이 사용 중이면 생략하여 노드와 입자 수를 제한한다.
+
+func sync(_delta: float) -> void:
+	for i in range(MAX_EMITTERS):
+		emitters[i].position = battle._world(emitter_positions[i])
+	background.position = battle.size * 0.5
+	# 세로 비율이 달라도 나무와 절벽을 찌그러뜨리지 않고 화면을 채운다.
+	background.scale = Vector2.ONE * maxf(battle.size.x / MEADOW.get_width(), battle.size.y / MEADOW.get_height())
+	var unit: float = battle.content_width / 540.0
+	var tier: int = battle.power_tier()
+	witch_sprite.texture = STARTER if tier == 0 else CANNON
+	var width := (82.0 if tier == 0 else 96.0 + tier * 6.0) * unit
+	var sprite_scale := width / witch_sprite.texture.get_width()
+	witch_sprite.scale = Vector2(sprite_scale, sprite_scale * (1.0 + breath_amount * 0.018))
+	# 그림의 지팡이 끝·포구를 탄 발생점에 맞춘다.
+	var tip := Vector2(405, -95) if tier == 0 else Vector2(594, -95)
+	witch_sprite.position = battle._world(battle.muzzle_position()) - tip * witch_sprite.scale
+	witch_sprite.position += Vector2(-kick * (2.0 + tier * 2.0), breath_amount * 1.5) * unit
+	witch_sprite.rotation = -kick * 0.035 * tier
+	witch_shadow.position = witch_sprite.position + Vector2(0, 1199 * sprite_scale * 0.47)
+	witch_shadow.scale = Vector2.ONE * unit
+	witch_sprite.material.set_shader_parameter("pulse", battle.recoil * 0.6)
+	spirit_sprite.visible = battle.spirit
+	spirit_sprite.position = battle._world(battle.witch + Vector2(-58, -18)) + Vector2(0, sin(battle.elapsed * 3.0) * 6.0)
+	spirit_sprite.scale = Vector2.ONE * 48.0 * unit / spirit_texture.get_height()
+	spirit_sprite.material.set_shader_parameter("pulse", 0.45 + sin(battle.elapsed * 3.0) * 0.35)
+	var active: Array[int] = []
+	for enemy in battle.enemies:
+		active.append(enemy.id)
+		if not enemy_sprites.has(enemy.id):
+			var created := _sprite(boss_texture if enemy.boss else seed_texture)
+			created.material = _material(FLASH)
+			enemy_sprites[enemy.id] = created
+			var enemy_shadow := _sprite(shadow_texture)
+			enemy_shadow.z_index = -2
+			enemy_shadows[enemy.id] = enemy_shadow
+		var sprite: Sprite2D = enemy_sprites[enemy.id]
+		if enemy.flash > float(last_flashes.get(enemy.id, 0.0)):
+			if hit_tweens.has(enemy.id) and is_instance_valid(hit_tweens[enemy.id]):
+				hit_tweens[enemy.id].kill()
+			sprite.skew = 0.12
+			var tween := create_tween()
+			tween.tween_property(sprite, "skew", 0.0, 0.2).set_trans(Tween.TRANS_BACK)
+			hit_tweens[enemy.id] = tween
+		last_flashes[enemy.id] = enemy.flash
+		var height: float = (152.0 if enemy.boss else 62.0) * unit
+		sprite.scale = Vector2.ONE * height / sprite.texture.get_height()
+		sprite.scale.y *= 1.0 + sin(battle.elapsed * 3.5 + enemy.id) * 0.025
+		sprite.position = battle._world(enemy.pos) + Vector2(enemy.flash * 5.0, -enemy.flash * 4.0)
+		sprite.rotation = sin(battle.elapsed * 2.0 + enemy.id) * 0.035 + enemy.flash * 0.08
+		sprite.material.set_shader_parameter("flash", enemy.flash)
+		var ground: Sprite2D = enemy_shadows[enemy.id]
+		ground.position = battle._world(enemy.pos) + Vector2(0, height * 0.44)
+		ground.scale = Vector2.ONE * (1.8 if enemy.boss else 0.65) * unit
+	for id in enemy_sprites.keys():
+		if id not in active:
+			# 즉시 회수하여 headless 고속 진행에도 대기 노드를 쌓지 않는다.
+			if hit_tweens.has(id) and is_instance_valid(hit_tweens[id]):
+				hit_tweens[id].kill()
+			hit_tweens.erase(id)
+			last_flashes.erase(id)
+			enemy_shadows[id].free()
+			enemy_shadows.erase(id)
+			enemy_sprites[id].free()
+			enemy_sprites.erase(id)
+	queue_redraw()
+
+func _draw() -> void:
+	if not is_instance_valid(battle):
+		return
+	var unit: float = battle.content_width / 540.0
+	for enemy in battle.enemies:
+		var p: Vector2 = battle._world(enemy.pos)
+		var width: float = (104.0 if enemy.boss else 42.0) * unit
+		var y: float = (88.0 if enemy.boss else 40.0) * unit
+		draw_style_box(battle._panel_style(BROWN, BROWN, 4), Rect2(p - Vector2(width / 2, y), Vector2(width, 9)))
+		draw_rect(Rect2(p - Vector2(width / 2 - 2, y - 2), Vector2((width - 4) * enemy.hp / enemy.max_hp, 5)), Color("b0ed75"))
+	for bullet in battle.bullets:
+		var p: Vector2 = battle._world(bullet.pos)
+		var target: Dictionary = battle._enemy_by_id(bullet.target)
+		var direction := Vector2(0.5, -1).normalized()
+		if not target.is_empty():
+			direction = (battle._world(target.pos) - p).normalized()
+		var r: float = battle.projectile_radius(bullet.tier) * unit
+		var tail: Vector2 = p - direction * (12 + bullet.tier * 12) * unit
+		draw_line(tail, p, BROWN, r * 1.8 + 3, true)
+		draw_line(tail, p, Color("6fddac"), r * 1.8, true)
+		draw_line(tail, p, Color("fffacb"), r * 0.65, true)
+		draw_circle(p, r * 0.6, Color.WHITE)
+	for floating in battle.floats:
+		var p: Vector2 = battle._world(floating.pos)
+		var color: Color = floating.color
+		color.a = minf(floating.life * 3.0, 1.0)
+		var font_size := 22 if not floating.text.begins_with("+") else 18
+		var offset := Vector2(battle.font.get_string_size(floating.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x * 0.5, 0)
+		draw_string_outline(battle.font, p - offset, floating.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 6, Color(BROWN, color.a))
+		draw_string(battle.font, p - offset, floating.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
+	if battle.dragging:
+		draw_arc(battle._world(battle.witch), 44 * unit, 0, TAU, 32, Color("fff4be"), 3, true)
+	if battle.skill_flash > 0:
+		for i in range(7):
+			var start: Vector2 = battle._world(Vector2(75 + i * 62, 205))
+			var end: Vector2 = battle._world(Vector2(95 + i * 55, 450))
+			draw_line(start, end, Color(0.4, 0.85, 0.72, battle.skill_flash * 0.7), 12, true)
+			draw_line(start, end, Color(1, 1, 0.86, battle.skill_flash), 4, true)

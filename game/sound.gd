@@ -11,7 +11,7 @@ func _ready() -> void:
 		voice.volume_db = -19.0
 		add_child(voice)
 		voices.append(voice)
-	for kind in ["shot", "hit", "reward", "upgrade", "skill", "win", "lose"]:
+	for kind in ["shot", "cannon", "hit", "reward", "upgrade", "skill", "win", "lose"]:
 		sounds[kind] = _make_sound(kind)
 
 func play(kind: String) -> void:
@@ -27,6 +27,7 @@ func _make_sound(kind: String) -> AudioStreamWAV:
 	var duration := 0.09
 	var frequency := 620.0
 	match kind:
+		"cannon": frequency = 185.0; duration = 0.18
 		"hit": frequency = 240.0
 		"reward": frequency = 1046.5; duration = 0.16
 		"upgrade": frequency = 523.25; duration = 0.32

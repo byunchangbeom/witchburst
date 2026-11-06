@@ -1,42 +1,44 @@
 {
   "schema_version": 1,
   "project": "마녀포격단 · Witchburst",
-  "scope": "first-battle-growth-save",
+  "scope": "first-battle-storybook-growth-save",
   "assets": [
     {
-      "id": "procedural-battle-art",
+      "id": "storybook-engine-art",
       "files": [
-        "game/battle.gd"
+        "game/battle.gd",
+        "game/storybook.gd",
+        "game/story_button.gd",
+        "game/shaders/hit_flash.gdshader",
+        "game/shaders/magic_pulse.gdshader"
       ],
-      "creator": "본 작업의 engineer 제작 세션",
-      "source": "신규 작성한 Godot draw 원·다각형·선·호·별 도형 조합",
+      "creator": "storybook-visuals experience 제작 세션",
+      "source": "신규 Godot UI·CanvasItem 셰이더·별/잎 입자 모양·탄도·외곽선 숫자",
       "contents": [
-        "꼬마 마녀",
-        "별 지팡이와 2단계 마도구",
-        "동행 정령",
-        "저주 정령",
-        "가시왕",
-        "저주숲과 이끼길",
-        "마법탄",
-        "정화 파편",
-        "별비",
-        "전투 UI",
-        "3등급 마도구·장착·합성 메뉴",
-        "정령 연계탄",
-        "환생·오프라인 보상 안내"
+        "민트/크림 강화 카드와 종이/나무/금빛 버튼",
+        "피격 흰색 flash ShaderMaterial",
+        "마법포 발광·정령 맥동 ShaderMaterial",
+        "CPUParticles2D 별·잎 12슬롯×최대18입자",
+        "외곽선 마법탄·피해 수치·별비",
+        "환생·합성·오프라인 보상 안내"
       ],
       "external_asset_copied": false,
-      "reference_policy": "GAME-BRIEF.md의 성장 대비와 전투 구조만 참고. 레퍼런스 이미지·캐릭터·게임 화면 파일은 사용하지 않음"
+      "reference_policy": "GAME-BRIEF.md의 성장 대비와 전투 구조만 참고. 레퍼런스 이미지·캐릭터·게임 화면 파일은 사용하지 않음",
+      "retired": "기존 도형 마녀·적·정령·어두운 통로는 렌더링 코드에서 제거",
+      "engine": "Godot 4.7.2 GL Compatibility; Tween 호흡·반동·피격·버튼 눌림, 시뮬레이션 위치 기반 이동",
+      "gpu_compile_verification": "NOT_MEASURED",
+      "visual_acceptance": "NOT_MEASURED - 기존 사용자 반려를 자동 해소하지 않음"
     },
     {
       "id": "procedural-magic-sound",
       "files": [
         "game/sound.gd"
       ],
-      "creator": "본 작업의 engineer 제작 세션",
-      "source": "신규 사인파 합성과 감쇠 envelope로 생성한 22050Hz 16bit PCM",
+      "creator": "engineer 원본, storybook-visuals experience에서 성장 발사음 추가",
+      "source": "신규 사인파 합성과 감쇠 envelope로 생성한 22050Hz 16bit PCM, 최대6음성",
       "contents": [
         "발사",
+        "성장 마법포의 낮고 긴 발사음",
         "명중",
         "보상",
         "강화",
@@ -63,6 +65,98 @@
       "system_fallback": true,
       "font_file_bundled": false,
       "note": "폰트 파일을 복사·다운로드·재배포하지 않음. 대상 기기 폰트 가용성은 후속 실기기 검증 필요"
+    },
+    {
+      "id": "imagegen-witch-starter",
+      "files": [
+        "game/assets/art/witch-starter.png"
+      ],
+      "creator": "사용자가 제공한 신규 imagegen 제작 자산",
+      "source": "imagegen 생성 결과 01a1afba-1f82-7af2-b09b-615779173642/exec-d729f860-f2d5-4655-987b-50358953ac03.png",
+      "contents": [
+        "작은 지팡이를 든 시작 마녀"
+      ],
+      "size": [
+        1312,
+        1199
+      ],
+      "mode": "RGBA",
+      "sha256": "5fc43bf672134561dacee261af31cfaebe0d10a0bc7bd2f9d8cce3214665fb8d",
+      "copy_policy": "원본을 보존하고 바이트 그대로 복사; 이미지 편집 없음",
+      "reference_game_asset_copied": false,
+      "inspection": "view_image 직접 확인 및 알파/치수 확인; 실제 엔진 PNG는 호스트 검증 대기"
+    },
+    {
+      "id": "imagegen-witch-cannon",
+      "files": [
+        "game/assets/art/witch-cannon.png"
+      ],
+      "creator": "사용자가 제공한 신규 imagegen 제작 자산",
+      "source": "imagegen 생성 결과 01a1afba-1f82-7af2-b09b-615779173642/exec-327f0cb7-076d-46c0-9e00-594dac426c2d.png",
+      "contents": [
+        "민트황동 대형 마법포 성장 마녀"
+      ],
+      "size": [
+        1312,
+        1199
+      ],
+      "mode": "RGBA",
+      "sha256": "4b10c4bdf861ca4e09091c357b6b49cf5df66afde520fde4b840e7e90d4766d6",
+      "copy_policy": "원본을 보존하고 바이트 그대로 복사; 이미지 편집 없음",
+      "reference_game_asset_copied": false,
+      "inspection": "view_image 직접 확인 및 알파/치수 확인; 실제 엔진 PNG는 호스트 검증 대기"
+    },
+    {
+      "id": "imagegen-sunlit-meadow",
+      "files": [
+        "game/assets/art/sunlit-meadow.png"
+      ],
+      "creator": "사용자가 제공한 신규 imagegen 제작 자산",
+      "source": "imagegen 생성 결과 01a1afba-1f82-7af2-b09b-615779173642/exec-510474b7-3dca-49c9-8fea-931026b9c525.png",
+      "contents": [
+        "밝은 사선 풀밭·절벽·수목"
+      ],
+      "size": [
+        1052,
+        1495
+      ],
+      "mode": "RGB",
+      "sha256": "a9646f0e698aeeb1c300ae939f43959fe37f0f15057f54a91394ead0ae9fb551",
+      "copy_policy": "원본을 보존하고 바이트 그대로 복사; 이미지 편집 없음",
+      "reference_game_asset_copied": false,
+      "inspection": "view_image 직접 확인 및 알파/치수 확인; 실제 엔진 PNG는 호스트 검증 대기"
+    },
+    {
+      "id": "imagegen-forest-creatures",
+      "files": [
+        "game/assets/art/forest-creatures.png"
+      ],
+      "creator": "사용자가 제공한 신규 imagegen 제작 자산",
+      "source": "imagegen 생성 결과 01a1afba-1f82-7af2-b09b-615779173642/exec-be3e9560-40b2-4787-ade8-7afa3c1b21ec.png",
+      "contents": [
+        "저주씨앗·가시왕·민트 여우정령 3칸 아틀라스"
+      ],
+      "size": [
+        2172,
+        724
+      ],
+      "mode": "RGBA",
+      "sha256": "28f8888dce563609d5a2311971a661bb5f894e11b7d8f7026d89bb21c7e9c9d6",
+      "copy_policy": "원본을 보존하고 바이트 그대로 복사; 이미지 편집 없음",
+      "reference_game_asset_copied": false,
+      "inspection": "view_image 직접 확인 및 알파/치수 확인; 실제 엔진 PNG는 호스트 검증 대기"
     }
-  ]
+  ],
+  "verification": {
+    "headless_product": "미완료 - 이번 tests/run.py가 sandbox 사용자/에디터 저장 경로·인증서 접근 오류로 임포트 실패; 최종 코드의 호스트 재검증 필요",
+    "actual_renderer_png": "NOT_MEASURED",
+    "shader_gpu_compile": "NOT_MEASURED",
+    "independent_visual_review": "NOT_MEASURED",
+    "os_input": "NOT_MEASURED",
+    "audio_listening": "NOT_MEASURED",
+    "mobile_device": "NOT_MEASURED",
+    "human_fun": "NOT_MEASURED",
+    "user_design_acceptance": "NOT_MEASURED - 반려 후 재수용 대기",
+    "python_capture_contract": "PASS - unittest test_host_gui.py 3개; 렌더링·시각 품질의 증거 아님"
+  }
 }

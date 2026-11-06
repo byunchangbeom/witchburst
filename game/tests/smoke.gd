@@ -183,9 +183,61 @@ func _run() -> void:
 	b.free()
 	_growth_checks()
 	_save_checks()
+	_visual_checks()
 	await _input_checks()
 	print("제품 자동 검사: ", checks, "개, 실패 ", failures)
 	quit(1 if failures else 0)
+
+func _visual_checks() -> void:
+	# 텍스처·재질의 실제 연결과 표현 계층의 상한을 검사한다. GPU 판정은 아니다.
+	var battle := fresh()
+	var visual: Node2D = battle.visuals
+	visual.sync(0.0)
+	require(visual.background.texture.get_size() == Vector2(1052, 1495), "신규 풀밭 배경 실제 로드")
+	require(is_equal_approx(visual.background.scale.x, visual.background.scale.y), "풀밭·수목 원본 종횡비 보존")
+	require(visual.witch_sprite.texture.resource_path.ends_with("witch-starter.png"), "시작 마녀 그림 실제 적용")
+	require(visual.witch_sprite.texture.get_image().get_format() == Image.FORMAT_RGBA8, "마녀 투명 텍스처 로드")
+	require(visual.enemy_sprites.size() == 1 and visual.seed_texture.atlas == visual.CREATURES, "저주씨앗 아틀라스 실제 적용")
+	var enemy: Dictionary = battle.enemies[0]
+	var sprite: Sprite2D = visual.enemy_sprites[enemy.id]
+	battle._hit(enemy, 1.0)
+	visual.sync(0.0)
+	require(sprite.material is ShaderMaterial and sprite.material.shader == visual.FLASH and sprite.material.get_shader_parameter("flash") == 1.0, "피격 흰색 셰이더 실제 연결·값")
+	var snapshot: Dictionary = battle.progress_data()
+	var shots: int = battle.total_shots
+	var random_state: int = battle.random.state
+	for i in range(30):
+		visual.sync(1.0 / 60.0)
+	require(battle.progress_data() == snapshot and battle.total_shots == shots and battle.random.state == random_state, "렌더링이 성장·저장·전투 난수에 영향 없음")
+	battle._fire()
+	require(battle.bullets[-1].pos == battle.muzzle_position(), "지팡이 끝에서 발사체 생성")
+	battle.equipped = 2
+	battle.spirit = true
+	visual.sync(0.0)
+	require(visual.witch_sprite.texture.resource_path.ends_with("witch-cannon.png") and visual.spirit_sprite.visible, "성장 마법포·여우정령 실제 적용")
+	require(visual.spirit_sprite.material.shader == visual.PULSE and visual.spirit_sprite.material.get_shader_parameter("pulse") > 0.0, "정령 맥동 셰이더 실제 적용")
+	battle._fire()
+	require(battle.bullets[-1].pos == battle.muzzle_position() and battle.bullets[-1].tier == 3, "큰포 포구에서 성장탄 생성")
+	var baseline: int = visual.get_child_count()
+	for i in range(100):
+		battle._burst(battle.witch, battle.MINT, 40)
+	require(visual.get_child_count() == baseline and visual.emitters.size() == 12, "입자 100회에도 12슬롯 재사용·노드 증가 없음")
+	require(visual.emitters.all(func(emitter: CPUParticles2D) -> bool: return emitter.amount <= 18 and emitter.one_shot), "동시 입자 상한 216·일회 방출")
+	require(visual.emitters.all(func(emitter: CPUParticles2D) -> bool: return visual.z_index + emitter.z_index < battle.workshop.z_index), "보상 입자가 공방·결과 창과 강화 UI를 덮지 않음")
+	battle.advance(1.0)
+	visual.sync(1.0)
+	battle._burst(battle.witch, battle.MINT, 25)
+	require(visual.emitter_life.any(func(until: float) -> bool: return until > battle.elapsed), "만료 후 입자 슬롯 재사용")
+	battle.enemies.clear()
+	visual.sync(0.0)
+	require(visual.enemy_sprites.is_empty() and visual.get_child_count() < baseline, "정화된 적 스프라이트 회수")
+	battle._start_boss()
+	visual.sync(0.0)
+	sprite = visual.enemy_sprites[battle.enemies[0].id]
+	require(sprite.texture == visual.boss_texture and sprite.material.shader == visual.FLASH, "큰 가시왕 그림·피격 재질 적용")
+	battle._refresh_ui()
+	require(battle.upgrades.attack.get("value") == str(roundi(battle.attack_damage())) and battle.upgrades.speed.get("value").ends_with("/초"), "강화 카드 현재 능력값 표시")
+	battle.free()
 
 func _input_checks() -> void:
 	var battle := fresh()

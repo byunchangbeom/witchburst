@@ -11,7 +11,7 @@ import subprocess
 import sys
 
 
-STATES = ("01-first", "02-grown", "03-boss", "04-skill", "05-won", "06-lost", "07-workshop", "08-rebirth")
+STATES = ("01-first", "02-grown", "03-boss", "04-skill", "05-won", "06-lost", "07-workshop", "08-rebirth", "09-merge")
 SIZES = ((540, 960), (540, 1200), (720, 960))
 
 
