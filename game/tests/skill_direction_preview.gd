@@ -5,6 +5,8 @@ var directory: String
 var observations: Array[Dictionary]=[]
 var max_speed := false
 var actual_speed := 0.0
+var case_direction := "N"
+var case_tier := 0
 func _initialize() -> void:run.call_deferred()
 func capture(label: String) -> void:
 	b._refresh_ui()
@@ -17,7 +19,7 @@ func capture(label: String) -> void:
 	var emitted_axes: Array = []
 	for shot: Dictionary in b.visuals.shot_origins:
 		emitted_axes.append([shot.axis.x, shot.axis.y])
-	observations.append({"index":observations.size(),"label":label,"state":m.state,"facing":m.facing,"move":m.move_direction,"upper_frame":m.witch.frame,"lower_frame":m.legs.frame,"lower_visible":m.legs.visible,"stride":m.stride,"muzzle":[m.muzzle.x,m.muzzle.y],"breech":[m.breech.x,m.breech.y],"emitted_axes":emitted_axes,"skill_uses":b.skill_uses,"max_speed_fixture":max_speed,"actual_rule_speed":actual_speed})
+	observations.append({"index":observations.size(),"label":label,"case_direction":case_direction,"case_tier":case_tier,"state":m.state,"facing":m.facing,"move":m.move_direction,"upper_frame":m.witch.frame,"lower_frame":m.legs.frame,"lower_visible":m.legs.visible,"stride":m.stride,"muzzle":[m.muzzle.x,m.muzzle.y],"breech":[m.breech.x,m.breech.y],"emitted_axes":emitted_axes,"skill_uses":b.skill_uses,"max_speed_fixture":max_speed,"actual_rule_speed":actual_speed})
 func run() -> void:
 	directory=OS.get_environment("WITCHBURST_ARTIFACTS")
 	max_speed = "--max-speed" in OS.get_cmdline_user_args()
@@ -26,6 +28,8 @@ func run() -> void:
 	var names := ["N","NE","E","SE","S","SW","W","NW"]
 	for tier in [0,3]:
 		for sector in range(8):
+			case_direction = names[sector]
+			case_tier = tier
 			b=load("res://main.tscn").instantiate()
 			b.set_script(load("res://tests/capture_battle.gd"))
 			b.save_path=OS.get_environment("WITCHBURST_TEST_ROOT").path_join("skill-dir-%d-%d.json"%[tier,sector])

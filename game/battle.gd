@@ -258,6 +258,8 @@ func _tick(dt: float) -> void:
 		var travel := 620.0 * dt
 		if distance <= travel + target.radius:
 			bullet.life = 0.0
+			if is_instance_valid(visuals):
+				visuals.play_impact(bullet, target.pos)
 			_hit(target, bullet.damage)
 			if phase == Phase.WON:
 				break
@@ -315,6 +317,8 @@ func _hit(enemy: Dictionary, damage: float) -> void:
 		materials += 5 if enemy.boss else 1
 		total_rewards += reward
 		_float_text(enemy.pos + Vector2(0, 10), "+%d 별빛  +%d 잎" % [reward, 5 if enemy.boss else 1], GOLD)
+		if is_instance_valid(visuals):
+			visuals.play_reward(enemy.pos)
 		_burst(enemy.pos, MINT, 25)
 		sound.play("reward")
 		if enemy.boss:

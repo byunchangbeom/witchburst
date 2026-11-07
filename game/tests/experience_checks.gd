@@ -23,6 +23,8 @@ func fresh() -> Control:
 	return b
 
 func run() -> void:
+	salvo_checks()
+	reward_checks()
 	for dimensions in [Vector2(540,960), Vector2(540,1200), Vector2(720,960)]:
 		var b := fresh()
 		b.size = dimensions
@@ -61,6 +63,7 @@ func run() -> void:
 			v.sync(0.0)
 			require(v.shot_origins.is_empty(), "탄 제거 후 리본용 별도 잔류 자료가 없음")
 		b.free()
+
 	for tier in [0,3]:
 		for sector in range(8):
 			var b := fresh()
@@ -95,3 +98,74 @@ func run() -> void:
 			b.free()
 	print("원작 대조 표현·최고속 회귀: ", checks, "개, 실패 ", failures)
 	quit(1 if failures else 0)
+
+func salvo_checks() -> void:
+	for tier in [0,3]:
+		var b := fresh()
+		b.equipped = tier-1
+		b.spirit = true
+		b.total_shots = 2
+		b.shot_clock = 10.0
+		var v: Node2D = b.visuals
+		b._fire()
+		require(v.salvos.size() == (0 if tier==0 else 2), "성장 주탄/실제 정령탄만 발사당 한 광류를 남김")
+		if tier==0:
+			b.free()
+			continue
+		var bullet: Dictionary = b.bullets[0]
+		var target: Dictionary = b._enemy_by_id(bullet.target)
+		var origin: Vector2 = bullet.pos
+		for distance in [8.0,40.0,80.0]:
+			bullet.pos = origin.move_toward(target.pos,distance)
+			v.sync(1.0/60.0)
+		var saved: Dictionary = b.progress_data().duplicate(true)
+		var salvo: Dictionary = v.salvos[0]
+		var observed: Vector2 = v.projectile_position(bullet)
+		for lane in range(-2,3):
+			var strand: PackedVector2Array = v.salvo_strand(salvo,lane)
+			require(strand[0].distance_to(b._world(salvo.points[0])) < .01 and strand[-1].distance_to(observed) < .01, "분지 양끝은 실제 발원점·관측된 머리에 합류; 표적 앞까지 미리 그리지 않음")
+		require(saved == b.progress_data(), "광류 조회가 피해·재화·저장 계약을 변경하지 않음")
+		# 실제 제품 _tick의 적중 통지를 통과시키고 정확히 한 피해만 확인한다.
+		b.bullets.resize(1)
+		target.hp = 1000000.0
+		var hp: float = target.hp
+		bullet.pos = target.pos
+		b.advance(b.STEP)
+		v.sync(b.STEP)
+		require(b.total_hits == 1 and is_equal_approx(hp-target.hp,b.attack_damage()), "다섯 광류는 한 발의 적중/피해를 늘리지 않음")
+		var strand: PackedVector2Array = v.salvo_strand(salvo,2)
+		require(strand[-1].distance_to(v._point(target.pos)) < .01, "실제 적중 통지 뒤에만 도착점 기록")
+		require(v.shot_origins.is_empty() and not v.salvos.is_empty(), "살아있는 탄과 짧은 적중 잔광의 수명을 분리")
+		b.toggle_workshop()
+		var paused: float = v.motion.clock
+		v.sync(.1)
+		require(v.motion.clock == paused, "공방은 광류 잔광 시간도 정지")
+		b.toggle_workshop()
+		for i in range(9):v.sync(.1)
+		require(v.salvos.is_empty(), "완료/중단 광류는 .72초 후 회수")
+		for i in range(30):b._fire()
+		require(v.salvos.size() <= v.MAX_SALVOS, "최고 연사·정령 중첩에도 광류16개 상한")
+		b.round_number += 1
+		v.sync(0.0)
+		require(v.salvos.is_empty(), "재시작/환생의 새 전투에 이전 광류가 남지 않음")
+		b.free()
+
+func reward_checks() -> void:
+	var b := fresh()
+	b.equipped = 2
+	var v: Node2D = b.visuals
+	var expected: int = b.coins+b.reward_amount()
+	b._hit(b.enemies[0],b.enemies[0].hp)
+	v.sync(0.0)
+	var floats: Array = b.floats.duplicate(true)
+	require(b.coins == expected and v.reward_bursts.size() == 1, "실제 정화 지급 한 건만 보상 아이콘에 연결")
+	for i in range(12):v.sync(.1)
+	require(b.floats == floats and v.reward_bursts.size() == 1, "보상 그림 수명은 규칙 float/실제 지급을 연장하거나 소비하지 않음")
+	for i in range(12):v.sync(.1)
+	require(v.reward_bursts.is_empty() and b.coins == expected, "성장 수확 그림은2.05초 뒤 회수되고 중복 지급하지 않음")
+	for i in range(8):v.play_reward(Vector2(270,350))
+	require(v.reward_bursts.size() == 4 and b.coins == expected, "표현용4묶음 상한과 지급의 독립성")
+	b.round_number += 1
+	v.sync(0.0)
+	require(v.reward_bursts.is_empty(), "재시작에 수확 그림 잔류 없음")
+	b.free()

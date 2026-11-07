@@ -311,6 +311,48 @@
       "gpu_and_visual_verification": "PENDING_CONTROLLER_HOST_CHECK_AND_INDEPENDENT_REVIEW",
       "listening_verification": "NOT_HEARD",
       "user_design_reacceptance": "OPEN"
+    },
+    {
+      "id": "reference-motion-followup-single-port-and-overlap",
+      "files": [
+        "game/assets/art/cannon-single-port-skills.png",
+        "game/assets/art/motion-overrides.json",
+        "game/tests/single-port-observations.json",
+        "game/tests/weapon-axis-landmarks.json"
+      ],
+      "creator": "Root host Art 실제 image_gen 공급; experience Worker가 원본 바이트 보존·8셀/피벗/관측 좌표 통합",
+      "source": "/Users/nhn/.local/state/harness-v/witchburst/task-recovery-20261107/art-inputs/asset-contract.json",
+      "source_sha256": "ea9c52f6a61ea38b2fae360c4f883887504a91fb0cfa903edb6de3b2163ba7ba",
+      "original_generated_image": "/Users/nhn/.codex1/generated_images/01a1afba-1f82-7af2-b09b-615779173642/exec-f1b11e18-06bf-4017-875d-9683b57473a2.png",
+      "png_sha256": "052c668e7afa34b16578cb0cd7b4151aca150ebaafe3e254868574d2311ed5f7",
+      "format": "RGBA 1774x887; N/NE 각 정리·준비·발동·회복4셀. 기존 자체 witch-cannon-actions.png 참조 편집; 원작 자산 복사 없음",
+      "integration": "원본 픽셀 변경0; file_override로 cannon-actions4~7/12~15 선택. region/trim/밑창 foot/앞뒤 UV/410 표시기준은 motion-overrides.json. 이전 프레임/관측은 보존",
+      "independent_raw_observation": "/Users/nhn/.local/state/harness-v/witchburst/task-recovery-20261107/art-inputs/independent-candidate-landmarks.json",
+      "independent_raw_observation_sha256": "acee4320ba7657ed3dc9ca247e2564000a5b9262c5e099bb983ec6ee894738a0",
+      "raw_review_scope": "POSITIVE_SCOPED_RAW_SINGLE_PORT_AND_VISIBLE_DIRECTION_CANDIDATE; 실제 게임 통합/연속 실행 수용 아님",
+      "overlap_reuse": "기존 자체 wand/cannon-moving의 S4보행 하체만 의상 뒤10원본px 겹침. 원본PNG 불변·상체 제거 범위 불변. EA-003/005 새 독립 판독 전 PENDING",
+      "runtime_visual_acceptance": "PENDING_CONTROLLER_GPU_AND_INDEPENDENT_REVIEW",
+      "user_design_reacceptance": "OPEN"
+    },
+    {
+      "id": "reference-motion-followup-salvo-and-harvest",
+      "files": [
+        "game/storybook.gd",
+        "game/battle.gd"
+      ],
+      "creator": "reference-motion-followup experience Worker",
+      "source": "기존 실제 탄/적중/지급 통지와 자체 UiSkin 재화 아이콘 재사용. 신규 외부 그림·소리 없음",
+      "behavior": "tier2/3 실제 탄의 지난 위치 최대64점/16광류; 실제 적중 뒤0.72초 잔광. 실제 지급 뒤 최대2.05초 재화4묶음/48아이콘. 규칙상 탄/피해/재화/저장 변화 없음",
+      "reference_inputs": [
+        "reference-review/reference-85.png",
+        "reference-review/reference-89.png",
+        "reference-review/reference-2.png",
+        "reference-review/reference-8.png"
+      ],
+      "verification": "개별 headless 표현1040·기존 제품/모션/UI/행동 실패0; 환경오류 존재로 전체검사PASS 아님. 수정후 GPU/독립 시각 판독 PENDING_HOST",
+      "audio": "NOT_HEARD",
+      "human_fun": "NOT_MEASURED",
+      "user_design_reacceptance": "OPEN"
     }
   ],
   "verification": {

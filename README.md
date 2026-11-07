@@ -77,3 +77,5 @@ python3 tests/run.py --capture --artifacts /tmp/witchburst-review
 2026-11-06 당시 문서 채택은4915f61(이전7f702d4 이력 보존)이다. 방향×행동×전환/취소 추가는 [아트 계약](docs/art-direction.md), 중앙에 전달할 게임 소유 기록·미전달/미커밋 상태는 [개선 대기열](docs/improvement-queue.md)을 따른다. 실행기 pin17d4e6b·기존 task/STOP/한도는 유지한다.
 
 사용자 최신 원작 이탈 반려를 우선한다. 원작85/89/2/8을 매 제작 묶음 전후 직접 비교하는 지침을 AGENTS와 기존 아트/설계에 연결했다. 현재 프레임 수정은 전체 표현 수용이 아니며 S이동 시전 접합·원작의 크기/배경/화력 밀도/UI 위계는 미해결이다.
+
+reference-motion-followup의 현행 제품 변경·개별 실행 결과와 환경 오류는 [아트 반환](docs/art-direction.md#2026-11-07-reference-motion-followup--attempt3-회수와-현행-반환)을 따른다. 공급된 단일 관구8셀, S 하체 겹침과 성장 광류/수확 효과는 실제 GPU·독립 판독 대기다. Controller 호스트는 고정 커밋에서 `python3 tests/render_reference_motion.py --artifacts /새/자료경로`로 단계129장·1x보드17장·행동400·방향480·최고속480·자연성장240프레임과 입력SHA를 생성할 수 있다. 새 경로를 사용해 이전 실패를 보존하며, 자료 생성 성공은 시각/사용자 수용이 아니다.

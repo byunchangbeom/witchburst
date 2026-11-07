@@ -106,6 +106,8 @@ func weapon_landmark_checks() -> void:
 	for key: String in independent.sources:
 		var file: String = motion.metadata[key].file
 		require(FileAccess.get_sha256("res://assets/art/" + file) == independent.sources[key], "독립 Art가 실제 판독한 원 PNG와 검사 대상이 동일")
+	for file: String in independent.get("override_sources",{}):
+		require(FileAccess.get_sha256("res://assets/art/" + file) == independent.override_sources[file], "단일 관구 후보도 독립 원본 판독과 같은 PNG 바이트")
 	battle.spirit = false
 	while battle.enemies.size() > 1:
 		battle.enemies.pop_back()

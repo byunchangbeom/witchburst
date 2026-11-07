@@ -1,6 +1,36 @@
 # 마녀포격단 그림책 아트 방향
 
-## 2026-11-07 reference-motion-followup · 이번 제품 변경과 반환
+## 2026-11-07 reference-motion-followup · attempt3 회수와 현행 반환
+
+현재 기반은 `a517e2ed87e315b846ba7b8bb41ae16a69399d8b`다. 읽기 전용 공식 원장에서 선행 `storybook-visuals CLOSED/attempt11`, `ui-design-discussion DISCUSSED`, 본 작업 `WORK/attempt3`을 확인했다. 기존 timeout·전송 채널 종료·attempt1/2의 import 실패를 보존했다. 이 Worker는 task/DB/실행기/시도/집계를 변경하지 않았다. 아래 attempt1과 과거 후보는 당시 기록이다.
+
+원작85/89/2/8, 기반의 실제 `task-recovery-20261107/render-force-draw/{01-first,02-grown,07-workshop,05-won}-540x960.png`를 직접 다시 열었다. 원작85의 작은 사수·넓고 단순한 필드·현재값/가격 중심3강화와 달리 기반의 성장 화면은 여전히 한 줄 탄과 소수 보상이 중심이다. 공방의 장비3종과 작은 결과창은 재사용한다. 원작89는 훨씬 후기이므로 같은 밸런스/밀도 달성으로 표시하지 않는다. 이 비교는 기존 실행 자료의 판독이며 수정 후 실행이 아니다.
+
+이번 후보는 이전 시도가 남긴 변경을 보존해 다음을 통합한다.
+
+- 실제 성장탄/정령탄의 지난 위치만 최대64점, 최대16개 광류로 기록한다. tier0/1에 추가하지 않고 tier2/3에서 한 발의 마력 분지를 펼쳐 실제 적중 통지 뒤에만 도착점으로 합친다. 적중 뒤0.72초 잔광·실제 지급 뒤 최대2.05초 수확 아이콘(4묶음/48개 상한)을 표시한다. 피해/탄 수/발동/입력/가격/저장/복귀 규칙은 유지한다. 기존13표본 리본도 유지한다.
+- Root host Art의 실제 image_gen 공급 `WB-ART-SINGLE-PORT-20261107` PNG를 바이트 변경 없이 N/NE의 정리·준비·발동·회복8셀에만 연결한다. 원본 atlas/PNG·이전 판독은 보존한다. trim·밑창 피벗·실제 앞뒤점은 `motion-overrides.json`, 독립 원본 관측은 `single-port-observations.json`과 `weapon-axis-landmarks.json`에 연결했다. 원본 정지셀의 좁은 긍정 판독은 실제 게임 모션 수용이 아니다.
+- S 이동 하체의 기존 실제 보행4프레임을 재사용하며 의상 뒤에10원본px 연결 영역을 겹친다. 상체 제거 영역은 넓히지 않고 하체를 상체 뒤에 그린다. 부츠/몸 연결의 시각 수용은 새1x/연속 실행의 독립 판독 전 **PENDING**이다.
+
+작은 재현은 엔진을 재호출하지 않는 Python 검사부터 수행했다. `test_reference_motion.py`4개(원본SHA/좌표·누락/허위 방향 검출)와 기존 `test_host_gui.py`9개가 통과했다. 합성 행렬 검사는 자료 형식만 검증한다. 고정 review-source-v3의66파일SHA도 모두 일치했다. 기억 검색에 관련 항목이 없어 기억은 적용하지 않았다.
+
+제품 실행은 새 격리 사본에서 import 후 개별 씬을 직접 호출해 분리 확인했다. 실제 로그는 `/private/tmp/witchburst-motion-attempt3-path`가 가리키는 디렉터리에 있다. 최초 smoke/단계 검사는 `/var`와 `/private/var` 별칭 차이로 격리 가드가 거부했다. 이 실패를 보존하고 임시 경로를 `resolve()`한 뒤 해당 두 검사만 다시 실행했다. 제품 코드를 약화하거나 기존 진행/전역 설정을 바꾸지 않았다.
+
+실행 입력/로그 원장은 `/private/var/folders/9m/t9pdnp2x7t3ctz1ycll3rj680000gn/T/witchburst-motion-attempt3-xhmtpdwt/source-manifest.json`(SHA-256 `63b3a0697897add6fe3cf40a95b7e46f8d04dbfffdc7befd589446f3fe7c0ee9`)이다. 게임58입력 중57개는 실행 사본과 바이트가 같고 `project.godot`은 검사 전용 사용자 디렉터리 설정만 다르다. 원본·실행 설정SHA와 실패/성공 로그SHA를 함께 기록했다. 임시 자료이므로 Controller가 공식 고정 커밋 근거를 만들기 전까지 대체 수용 receipt로 사용하지 않는다.
+
+| 실제 실행 | 결과와 한계 |
+|---|---|
+| smoke | 8,017개 실패0. 기존 복귀 보상/저장·승패/재시작·환생 포함 |
+| motion / UI / actions | 749 / 44 / 74개 실패0. 실제 포신 랜드마크/프레임·입력 취소 회귀 포함 |
+| experience | 1,040개 실패0. 광류 실제1회 피해·실제 지급/회수·공방 정지·두 무기×8방향520 이동 포함 |
+| capture `--verify-stages` | 종료0, 상태 준비 완료. **PNG 없음**, 실제 GPU/시각 검증 아님 |
+| 공식 `tests/run.py` 계약 | 이전 import 실패 유지. 사용자 데이터/편집기 설정 경로·인증서 오류가 이번 개별 실행에도 존재하므로 **전체 PASS가 아님** |
+
+**수정 후 GPU 화면·1x 보드·연속 실행·독립 Experience/Art 판독은 PENDING_HOST**다. `tests/render_reference_motion.py --artifacts <새 경로>`는 같은 제품 사본/SHA로129장·17장·400프레임·방향480/최고속480·자연성장240을 생성하고 방향/전환 누락을 거부하는 호스트 진입점이다. Controller는 등록 검사와 함께 이 추가 자료를 고정 커밋에서 생성해 독립 판독에 전달한다. 원작85/89/2/8과 수정 후 초기→성장→공방→보스 스킬→승패/재시작·저장/복귀 비교가 아직 필요하다.
+
+EA-001/002의 과거 범위 한정 해소만 유지한다. EA-003/005와 WLM003의 이번 후보는 실제 실행 이미지 재판정 대기, EA-004 모든 전환/실시간/OS 입력·청취와 EA-006 원작 이탈/사용자 디자인 반려는 OPEN이다. 음향 **NOT_HEARD**, 사람 재미·실기기 **NOT_MEASURED**다. 공식 완료1/OPEN1을 이 작업으로 올리지 않는다. commit/독립 리뷰/통합/원격push/정리는 Controller 책임이다. 자산 출처·입력계약은 [asset-sources.json](asset-sources.json), 운영 이력은 [개선 대기열](improvement-queue.md)과 [사이클 기록](production-cycles.md)을 따른다.
+
+## 2026-11-07 reference-motion-followup · 이전 attempt1 반환
 
 현재 기반은 `a724565a950179f0ce6b5dc65719497620f128a4`이며, 과거 미커밋 후보 ae8083b와 구분한다. 선행 storybook-visuals는 공식 CLOSED 이후다. 이전 원작/캐릭터/버튼 반려·CHANGES_REQUIRED를 유지하며 아래 과거 현황은 당시 기록이다.
 

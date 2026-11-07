@@ -53,6 +53,15 @@ func setup(owner_visual: Node2D) -> void:
 	visual = owner_visual
 	battle = visual.battle
 	metadata = JSON.parse_string(FileAccess.get_file_as_string("res://assets/art/motion-atlas.json"))
+	# 원래 atlas/PNG와 과거 판독을 보존하며 이번 배정의 셀/겹침만 적용한다.
+	var overrides: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/art/motion-overrides.json"))
+	for key: String in overrides.cells:
+		for index: String in overrides.cells[key]:
+			metadata[key].cells[int(index)] = overrides.cells[key][index]
+	for key: String in overrides.overlaps:
+		for index: String in overrides.overlaps[key]:
+			var cell: Dictionary = metadata[key].cells[int(index)]
+			cell.leg_overlap_regions = cell.leg_regions + overrides.overlaps[key][index]
 	for key in metadata:
 		var library := SpriteFrames.new()
 		library.remove_animation("default")
@@ -90,7 +99,7 @@ func _pose(actor: AnimatedSprite2D, key: String, index: int, ground: Vector2, he
 	actor.animation = "poses"
 	actor.frame = index
 	var cell: Dictionary = metadata[key].cells[index]
-	actor.scale = Vector2.ONE * height / float(cell.get("canvas_size", [cell.region[2],cell.region[3]])[1])
+	actor.scale = Vector2.ONE * height / float(cell.get("display_canvas_height", cell.get("canvas_size", [cell.region[2],cell.region[3]])[1]))
 	actor.offset = Vector2(cell.region[2], cell.region[3]) * .5 - Vector2(cell.foot[0], cell.foot[1])
 	actor.position = ground
 
@@ -285,12 +294,16 @@ func split_legs(upper: AnimatedSprite2D, lower: AnimatedSprite2D, family: String
 	# 발끝 피벗은 접지에 유지하고 의상 아래 연결점의 가로축을 맞춘다.
 	# 보행 프레임마다 다른 지지발을 상체 중심으로 쓰면 다리가 옆으로 분리된다.
 	lower.position.x += _leg_joint_x(upper,upper_key) - _leg_joint_x(lower,family+"-moving")
+	# 보행 허벅지의 연결 가장자리는 의상 뒤에 겹친다. 위에 그리면
+	# 마스크 윗단이 치마까지 덮어 수평 절단선으로 보인다.
+	lower.z_index = upper.z_index - 1
 	upper.material.set_shader_parameter("split_part",-1)
 	upper.material.set_shader_parameter("upper_regions",_region_array(upper,upper_key))
 	upper.material.set_shader_parameter("upper_region_count",metadata[upper_key].cells[upper.frame].leg_regions.size())
 	lower.material.set_shader_parameter("split_part",1)
-	lower.material.set_shader_parameter("leg_regions",_region_array(lower,family+"-moving"))
-	lower.material.set_shader_parameter("leg_region_count",metadata[family+"-moving"].cells[lower.frame].leg_regions.size())
+	lower.material.set_shader_parameter("leg_regions",_region_array(lower,family+"-moving",true))
+	var lower_cell: Dictionary = metadata[family+"-moving"].cells[lower.frame]
+	lower.material.set_shader_parameter("leg_region_count",lower_cell.get("leg_overlap_regions",lower_cell.leg_regions).size())
 	lower.material.set_shader_parameter("pulse",battle.recoil*.6)
 
 func _leg_joint_x(actor: AnimatedSprite2D, key: String) -> float:
@@ -305,11 +318,12 @@ func _leg_joint_x(actor: AnimatedSprite2D, key: String) -> float:
 	var half := Vector2(cell.region[2],cell.region[3])*.5
 	return to_local(actor.to_global(joint-half+actor.offset)).x
 
-func _region_array(actor: AnimatedSprite2D, key: String) -> PackedVector4Array:
+func _region_array(actor: AnimatedSprite2D, key: String, overlap: bool = false) -> PackedVector4Array:
 	var regions := PackedVector4Array()
 	var cell: Dictionary = metadata[key].cells[actor.frame]
 	var half := Vector2(cell.region[2],cell.region[3])*.5
-	for r in cell.leg_regions:
+	var selected: Array = cell.get("leg_overlap_regions", cell.leg_regions) if overlap else cell.leg_regions
+	for r in selected:
 		var first := actor.to_global(Vector2(r[0],r[1])-half+actor.offset)
 		var last := actor.to_global(Vector2(r[2],r[3])-half+actor.offset)
 		regions.append(Vector4(minf(first.x,last.x),minf(first.y,last.y),maxf(first.x,last.x),maxf(first.y,last.y)))

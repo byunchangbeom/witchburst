@@ -2,6 +2,8 @@
 
 ## 2026-11-07 reference-motion-followup · 현재 작업 경계
 
+attempt3 현행: 기반a517e2e와 선행CLOSED/논의DISCUSSED를 읽기 전용 확인했다. 이전timeout/전송종료·attempt1/2 import 실패·호출/원문을 보존하고 작은Python검사→격리 개별 제품 실행으로 접근을 바꿨다. 실제 제품 실패0과 환경오류/공식계약 미통과·새GPU/독립판독 대기를 [아트 현행 반환](art-direction.md#2026-11-07-reference-motion-followup--attempt3-회수와-현행-반환)에 연결했다. 기존HV-Q-002/005/006/007·EA-003/004/005/006/WLM003의 후속이며 새ID/사이클완료로 세지 않는다. 추가에이전트·DB/상태전이·중앙수정·commit/통합/push 없음. 기록커밋은 Controller 발행 대기다. 아래 attempt1 관측은 당시 이력이다.
+
 현재 Worker의 기반은 `a724565a950179f0ce6b5dc65719497620f128a4`다. 공식 status의 선행 `storybook-visuals` CLOSED/attempt11/통합 a724565, `ui-design-discussion` DISCUSSED, 본 작업 WORK/attempt1을 확인한 뒤 수정했다. 현재 공식 집계는 완료1/OPEN1·실제70호출이며 아래 완료0/OPEN2·BLOCKED9·QUEUED·59호출 등은 당시 이력으로 보존한다. `task-recovery-20261107/initial-play-close-receipt.json`의 공식 최초 완료가 과거 거부 결과를 지우지는 않는다. 본 작업으로 사이클 수를 올리지 않는다.
 
 `harness.lock`17d4e6b와 `harness-cycles.lock`7304344는 보존한다. 7304344 문서/전환 이력과, Controller가 이후 명시 채택한 bbf9f9c 실행기 receipt(`task-recovery-20261107/executor-adoption.json`)는 별개다. 후자의 기존 원장은 executor-adoptions.json, 진입점은 tools/hv-cycle이다. 이 Worker는 채택·상태전이·DB 수정·운영 run/close를 수행하지 않는다.
