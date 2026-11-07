@@ -216,7 +216,7 @@ func _muzzle_checks() -> void:
 				var bullet: Dictionary = battle.bullets[0]
 				var sprite: Sprite2D = visual.witch_sprite
 				var pixel := Vector2(1061, 504.5) if tier == 0 else Vector2(1250, 504.5)
-				var actual_tip: Vector2 = visual.to_local(sprite.to_global(pixel - sprite.texture.get_size() * 0.5))
+				var actual_tip: Vector2 = preload("res://tests/pose_probe.gd").new().tip(visual)
 				require(visual.kick == 1.0, "최대 반동 재현")
 				require(actual_tip.distance_to(battle._world(battle.muzzle_position())) > 1.0, "변환 전 포구와 다른 비자명 재현")
 				require(visual.projectile_position(bullet).distance_to(actual_tip) < 0.01, "세 비율·네 성장·호흡별 실제 그림 포구에서 탄 표시")
@@ -226,7 +226,7 @@ func _muzzle_checks() -> void:
 				require(visual.shot_origins.size() == 1, "이전 사격 표현 자료 회수")
 				# 원본 그림의 포구와 포신 뒤쪽 픽셀을 각각 변환한다.
 				var back_pixel := Vector2(920, 664.5) if tier == 0 else Vector2(800, 699.5)
-				var axis: Vector2 = (sprite.to_global(pixel - sprite.texture.get_size() * 0.5) - sprite.to_global(back_pixel - sprite.texture.get_size() * 0.5)).normalized()
+				var axis: Vector2 = (actual_tip - preload("res://tests/pose_probe.gd").new().back(visual)).normalized()
 				var launch: Vector2 = bullet.pos
 				battle.witch.x += 12.0
 				visual.kick = 0.0
@@ -240,7 +240,7 @@ func _muzzle_checks() -> void:
 					require(head.is_finite() and tail.is_finite(), "유도 궤적의 유한 좌표")
 					require(head.distance_to(tail) <= minf(travel, 12 + tier * 12) * unit + 0.01, "꼬리 비행거리·성장 길이 상한")
 					if travel <= 28.0:
-						require(head.distance_to(actual_tip + axis * travel * unit) < 0.01, "세 비율·네 성장·호흡별 실제 포신 축으로 초기 비행")
+						require(head.distance_to(actual_tip + axis * travel * unit) < 0.01, "세 비율·네 성장·호흡별 실제 표적으로 초기 비행")
 						var along: float = (tail - actual_tip).dot(axis)
 						require(along >= -0.01 and absf((tail - actual_tip).cross(axis)) < 0.01, "초기 꼬리가 포구 뒤로 침범하지 않음")
 				var target: Dictionary = battle._enemy_by_id(bullet.target)
@@ -254,7 +254,7 @@ func _muzzle_checks() -> void:
 	battle.total_shots = 2
 	battle._fire()
 	var linked: Dictionary = battle.bullets[-1]
-	require(linked.get("spirit", false) and visual.projectile_tail(linked).distance_to(visual.to_local(visual.spirit_sprite.to_global(Vector2(420, 340) - visual.spirit_sprite.texture.get_size() * 0.5))) < 0.01, "정령 연계탄도 출발점에서 꼬리 길이 0")
+	require(linked.get("spirit", false) and visual.projectile_tail(linked).distance_to(preload("res://tests/pose_probe.gd").new().spirit_tip(visual)) < 0.01, "정령 연계탄도 출발점에서 꼬리 길이 0")
 	linked.pos += Vector2(0, -8)
 	require(visual.projectile_position(linked).distance_to(visual.projectile_tail(linked)) <= 8.0 * battle.content_width / 540.0 + 0.01, "정령 연계탄도 비행거리만큼 꼬리 성장")
 	# 표현 Tween과 sync 호출 횟수가 달라도 실제 전투 궤도·피해는 같아야 한다.
@@ -304,7 +304,7 @@ func _visual_checks() -> void:
 	visual.sync(0.0)
 	require(visual.background.texture.get_size() == Vector2(1052, 1495), "신규 풀밭 배경 실제 로드")
 	require(is_equal_approx(visual.background.scale.x, visual.background.scale.y), "풀밭·수목 원본 종횡비 보존")
-	require(visual.witch_sprite.texture.resource_path.ends_with("witch-starter.png"), "시작 마녀 그림 실제 적용")
+	require(visual.motion.witch.sprite_frames.get_frame_texture("poses", 0).atlas.resource_path.ends_with("witch-wand-directions.png"), "시작 마녀 실제 자세 프레임 적용")
 	require(visual.witch_sprite.texture.get_image().get_format() == Image.FORMAT_RGBA8, "마녀 투명 텍스처 로드")
 	require(visual.enemy_sprites.size() == 1 and visual.seed_texture.atlas == visual.CREATURES, "저주씨앗 아틀라스 실제 적용")
 	var enemy: Dictionary = battle.enemies[0]
@@ -323,7 +323,7 @@ func _visual_checks() -> void:
 	battle.equipped = 2
 	battle.spirit = true
 	visual.sync(0.0)
-	require(visual.witch_sprite.texture.resource_path.ends_with("witch-cannon.png") and visual.spirit_sprite.visible, "성장 마법포·여우정령 실제 적용")
+	require(visual.witch_sprite.texture.resource_path.ends_with("witch-cannon.png") and visual.motion.spirit.visible, "성장 마법포·여우정령 실제 적용")
 	require(visual.spirit_sprite.material.shader == visual.PULSE and visual.spirit_sprite.material.get_shader_parameter("pulse") > 0.0, "정령 맥동 셰이더 실제 적용")
 	battle._fire()
 	require(battle.bullets[-1].pos == battle.muzzle_position() and battle.bullets[-1].tier == 3, "성장 규칙 발사 좌표·단계 보존")
@@ -772,9 +772,9 @@ func _party_checks() -> void:
 			visual.shot_tween.pause()
 			var sprite: Sprite2D = visual.witch_sprite
 			var tip := Vector2(1061, 504.5) if equipped == -1 else Vector2(1250, 504.5)
-			var actual: Vector2 = visual.to_local(sprite.to_global(tip - sprite.texture.get_size() * 0.5))
+			var actual: Vector2 = preload("res://tests/pose_probe.gd").new().tip(visual)
 			var spirit_pixel: Vector2 = Vector2(420, 340) - visual.spirit_sprite.texture.get_size() * 0.5
-			var linked: Vector2 = visual.to_local(visual.spirit_sprite.to_global(spirit_pixel))
+			var linked: Vector2 = preload("res://tests/pose_probe.gd").new().spirit_tip(visual)
 			var frozen: Vector2 = visual.projectile_position(battle.bullets[0])
 			require(frozen.distance_to(actual) < 0.01 and visual.projectile_position(battle.bullets[1]).distance_to(linked) < 0.01, "드래그·최대 반동·정령 진동의 실제 그림 발사점")
 			battle.witch += Vector2(-25, -25)

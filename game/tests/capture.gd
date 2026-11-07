@@ -21,6 +21,7 @@ func fresh() -> void:
 	if is_instance_valid(battle):
 		battle.free()
 	battle = load("res://main.tscn").instantiate()
+	battle.set_script(load("res://tests/capture_battle.gd"))
 	fixture_id += 1
 	battle.save_path = OS.get_environment("WITCHBURST_TEST_ROOT").path_join("capture-%d.json" % fixture_id)
 	root.add_child(battle)
@@ -121,6 +122,10 @@ func _run() -> void:
 	quit(0)
 
 func capture_matrix(stage: String, phase: int, launch: bool = false, flight: float = 0.0) -> void:
+	if phase in [battle.Phase.WON,battle.Phase.LOST]:
+		battle.advance(.5)
+		for step in range(6):
+			battle.visuals.sync(1.0/12.0)
 	for dimensions in SIZES:
 		root.size = dimensions
 		# 창 크기와 stretch가 적용된 뒤 레이아웃을 읽는다.
@@ -160,6 +165,8 @@ func capture_matrix(stage: String, phase: int, launch: bool = false, flight: flo
 			require(viewport.encloses(battle.result_panel.get_rect()), "화면 내 결과 창 배치")
 			var panel_rect := Rect2(Vector2.ZERO, battle.result_panel.size)
 			for control in [battle.result_title, battle.result_text, battle.result_button, battle.rebirth_button]:
+				if not control.visible:
+					continue
 				require(panel_rect.encloses(control.get_rect()), "결과 창 내부 텍스트·버튼 배치")
 		var filename := "%s-%dx%d.png" % [stage, dimensions.x, dimensions.y]
 		var item := {"path": filename, "stage": stage, "size": [dimensions.x, dimensions.y],
@@ -175,7 +182,7 @@ func capture_matrix(stage: String, phase: int, launch: bool = false, flight: flo
 		if launch or flight > 0.0:
 			var sprite: Sprite2D = battle.visuals.witch_sprite
 			var pixel := Vector2(1061, 504.5) if battle.power_tier() == 0 else Vector2(1250, 504.5)
-			var muzzle: Vector2 = battle.visuals.to_local(sprite.to_global(pixel - sprite.texture.get_size() * 0.5))
+			var muzzle: Vector2 = preload("res://tests/pose_probe.gd").new().tip(battle.visuals)
 			var projectile: Vector2 = battle.visuals.projectile_position(battle.bullets[0])
 			var tail: Vector2 = battle.visuals.projectile_tail(battle.bullets[0])
 			var emitter: Vector2 = battle.visuals.emitters[0].position
@@ -183,7 +190,7 @@ func capture_matrix(stage: String, phase: int, launch: bool = false, flight: flo
 			if launch:
 				require(muzzle.distance_to(projectile) < 0.01 and muzzle.distance_to(tail) < 0.01, "발사 직후 탄·꼬리는 포구에 일치")
 			var back_pixel := Vector2(920, 664.5) if battle.power_tier() == 0 else Vector2(800, 699.5)
-			var back: Vector2 = battle.visuals.to_local(sprite.to_global(back_pixel - sprite.texture.get_size() * 0.5))
+			var back: Vector2 = preload("res://tests/pose_probe.gd").new().back(battle.visuals)
 			var bullet: Dictionary = battle.bullets[0]
 			var saved: Vector2 = bullet.pos
 			var origin: Vector2 = battle.visuals.shot_origins[0].start
@@ -256,9 +263,9 @@ func capture_party() -> void:
 				battle.visuals.sync(0.0)
 				var sprite: Sprite2D = battle.visuals.witch_sprite
 				var tip := Vector2(1061, 504.5) if equipped == -1 else Vector2(1250, 504.5)
-				var muzzle: Vector2 = battle.visuals.to_local(sprite.to_global(tip - sprite.texture.get_size() * 0.5))
+				var muzzle: Vector2 = preload("res://tests/pose_probe.gd").new().tip(battle.visuals)
 				var spirit_pixel: Vector2 = Vector2(420, 340) - battle.visuals.spirit_sprite.texture.get_size() * 0.5
-				var spirit_tip: Vector2 = battle.visuals.to_local(battle.visuals.spirit_sprite.to_global(spirit_pixel))
+				var spirit_tip: Vector2 = preload("res://tests/pose_probe.gd").new().spirit_tip(battle.visuals)
 				var main: Dictionary = battle.bullets[0]
 				var linked: Dictionary = battle.bullets[1]
 				var launch: Vector2 = battle.visuals.projectile_position(main)
@@ -267,7 +274,7 @@ func capture_party() -> void:
 				require(launch.distance_to(muzzle) < 0.01 and emitter.distance_to(muzzle) < 0.01, "드래그 행렬의 실제 그림·발사 입자·주탄 포구")
 				require(linked_launch.distance_to(spirit_tip) < 0.01, "진동 중 정령 실제 그림·연계탄 출발점")
 				var back_pixel := Vector2(920, 664.5) if equipped == -1 else Vector2(800, 699.5)
-				var breech: Vector2 = battle.visuals.to_local(sprite.to_global(back_pixel - sprite.texture.get_size() * 0.5))
+				var breech: Vector2 = preload("res://tests/pose_probe.gd").new().back(battle.visuals)
 				var rule_start: Vector2 = main.pos
 				main.pos += Vector2(0, -8)
 				var initial: Vector2 = battle.visuals.projectile_position(main)

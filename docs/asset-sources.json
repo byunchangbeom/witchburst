@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "마녀포격단 · Witchburst",
-  "scope": "first-battle-storybook-growth-save",
+  "scope": "storybook-visuals 기존 결과 보존 + living-motion 후속 로컬 제작",
   "assets": [
     {
       "id": "storybook-engine-art",
@@ -74,7 +74,7 @@
       "files": [
         "game/assets/art/witch-starter.png"
       ],
-      "creator": "사용자가 제공한 신규 imagegen 제작 자산",
+      "creator": "본 게임 세션의 도구 가용 호스트가 imagegen으로 생성·공급한 신규 자산",
       "source": "imagegen 생성 결과 01a1afba-1f82-7af2-b09b-615779173642/exec-d729f860-f2d5-4655-987b-50358953ac03.png",
       "contents": [
         "작은 지팡이를 든 시작 마녀"
@@ -94,7 +94,7 @@
       "files": [
         "game/assets/art/witch-cannon.png"
       ],
-      "creator": "사용자가 제공한 신규 imagegen 제작 자산",
+      "creator": "본 게임 세션의 도구 가용 호스트가 imagegen으로 생성·공급한 신규 자산",
       "source": "imagegen 생성 결과 01a1afba-1f82-7af2-b09b-615779173642/exec-327f0cb7-076d-46c0-9e00-594dac426c2d.png",
       "contents": [
         "민트황동 대형 마법포 성장 마녀"
@@ -114,7 +114,7 @@
       "files": [
         "game/assets/art/sunlit-meadow.png"
       ],
-      "creator": "사용자가 제공한 신규 imagegen 제작 자산",
+      "creator": "본 게임 세션의 도구 가용 호스트가 imagegen으로 생성·공급한 신규 자산",
       "source": "imagegen 생성 결과 01a1afba-1f82-7af2-b09b-615779173642/exec-510474b7-3dca-49c9-8fea-931026b9c525.png",
       "contents": [
         "밝은 사선 풀밭·절벽·수목"
@@ -134,7 +134,7 @@
       "files": [
         "game/assets/art/forest-creatures.png"
       ],
-      "creator": "사용자가 제공한 신규 imagegen 제작 자산",
+      "creator": "본 게임 세션의 도구 가용 호스트가 imagegen으로 생성·공급한 신규 자산",
       "source": "imagegen 생성 결과 01a1afba-1f82-7af2-b09b-615779173642/exec-be3e9560-40b2-4787-ade8-7afa3c1b21ec.png",
       "contents": [
         "저주씨앗·가시왕·민트 여우정령 3칸 아틀라스"
@@ -148,6 +148,128 @@
       "copy_policy": "원본을 보존하고 바이트 그대로 복사; 이미지 편집 없음",
       "reference_game_asset_copied": false,
       "inspection": "view_image 직접 확인 및 알파/치수 확인; 실제 엔진 PNG는 호스트 검증 대기"
+    },
+    {
+      "id": "imagegen-witch-wand-actions",
+      "files": [
+        "game/assets/art/witch-wand-actions.png"
+      ],
+      "creator": "Root host imagegen · 2026-11-06",
+      "original": "/Users/nhn/.codex/generated_images/01a1afba-1f82-7af2-b09b-615779173642/exec-938cffe9-b37c-4c39-910e-ffdd67f4326f.png",
+      "sha256": "f50ba5b1ac84b822369bf67e141fe09b5baae1729c074dec8f47adf5b59f48a5",
+      "size": [
+        1585,
+        992
+      ],
+      "mode": "RGBA",
+      "frames": 40,
+      "copy_policy": "생성 원본 보존·바이트 동일 복사. 픽셀 편집 없음",
+      "reference_game_asset_copied": false,
+      "visual_acceptance": "PENDING independent Experience/Art; 사용자 반려 OPEN"
+    },
+    {
+      "id": "imagegen-witch-cannon-actions",
+      "files": [
+        "game/assets/art/witch-cannon-actions.png"
+      ],
+      "creator": "Root host imagegen · 2026-11-06",
+      "original": "/Users/nhn/.codex/generated_images/01a1afba-1f82-7af2-b09b-615779173642/exec-4d403800-8e0b-4481-9390-6546ba361db5.png",
+      "sha256": "7fb9c0ecef8df406414984d33a578b2af8656b217177997e437b979aa319f5bf",
+      "size": [
+        1586,
+        992
+      ],
+      "mode": "RGBA",
+      "frames": 40,
+      "copy_policy": "생성 원본 보존·바이트 동일 복사. 픽셀 편집 없음",
+      "reference_game_asset_copied": false,
+      "visual_acceptance": "PENDING independent Experience/Art; 사용자 반려 OPEN"
+    },
+    {
+      "id": "imagegen-spirit-directions",
+      "files": [
+        "game/assets/art/spirit-directions.png"
+      ],
+      "creator": "Root host imagegen · 2026-11-06",
+      "original": "/Users/nhn/.codex/generated_images/01a1afba-1f82-7af2-b09b-615779173642/exec-08ca1bf2-a06f-4e64-830a-91d9f1c38b3d.png",
+      "sha256": "197ade85ddf3a5ea31adf3d5a0980cbb67c6a95ddb612cae74030c323bacf8ae",
+      "size": [
+        1122,
+        1402
+      ],
+      "mode": "RGBA",
+      "frames": 20,
+      "copy_policy": "생성 원본 보존·바이트 동일 복사. 픽셀 편집 없음",
+      "reference_game_asset_copied": false,
+      "visual_acceptance": "PENDING independent Experience/Art; 사용자 반려 OPEN"
+    },
+    {
+      "id": "imagegen-witch-wand-moving",
+      "files": [
+        "game/assets/art/witch-wand-moving.png"
+      ],
+      "creator": "Root host imagegen · 2026-11-06",
+      "original": "/Users/nhn/.codex/generated_images/01a1afba-1f82-7af2-b09b-615779173642/exec-82f2c334-627a-46f8-8caa-dcfc153ca3c5.png",
+      "sha256": "739bbb5dc0f93a5c5a28e30da25b540d1dce9a9b8b064dc4a5cd58db3319d55f",
+      "size": [
+        1122,
+        1402
+      ],
+      "mode": "RGBA",
+      "frames": 20,
+      "copy_policy": "생성 원본 보존·바이트 동일 복사. 픽셀 편집 없음",
+      "reference_game_asset_copied": false,
+      "visual_acceptance": "PENDING independent Experience/Art; 사용자 반려 OPEN"
+    },
+    {
+      "id": "imagegen-witch-cannon-moving",
+      "files": [
+        "game/assets/art/witch-cannon-moving.png"
+      ],
+      "creator": "Root host imagegen · 2026-11-06",
+      "original": "/Users/nhn/.codex/generated_images/01a1afba-1f82-7af2-b09b-615779173642/exec-1b3fb18b-9d2f-4e45-a532-e03caf686043.png",
+      "sha256": "2634bf88ef9f872e478dbb84c0c4001f67943643cd4f2bf1dde5a65340237be6",
+      "size": [
+        1122,
+        1402
+      ],
+      "mode": "RGBA",
+      "frames": 20,
+      "copy_policy": "생성 원본 보존·바이트 동일 복사. 픽셀 편집 없음",
+      "reference_game_asset_copied": false,
+      "visual_acceptance": "PENDING independent Experience/Art; 사용자 반려 OPEN"
+    },
+    {
+      "id": "imagegen-wand-recoil-hand-fix",
+      "files": [
+        "game/assets/art/witch-wand-recoil-fix.png"
+      ],
+      "original": "/Users/nhn/.codex/generated_images/01a1afba-1f82-7af2-b09b-615779173642/exec-f8c0b064-e649-494d-a0d3-6e11b3aced78.png",
+      "sha256": "ee9a5c0c7f983a0c099ea69f444a449574f5c9b3bdf2454d716b2361eeee0974",
+      "creator": "Root host imagegen edit",
+      "production_cells_used": [
+        35
+      ],
+      "layout": "8x5 생성 원본 중 S반동 한 셀만 사용, 나머지39자세는 기존 원본",
+      "reason": "독립 Experience/Art EA-002 무기 손 교체 수정",
+      "copy_policy": "원본 PNG 바이트 동일 복사, AtlasTexture 한 셀 선택",
+      "visual_acceptance": "PENDING same independent call recheck"
+    },
+    {
+      "id": "reference-meadow-flat-edit",
+      "files": [
+        "game/assets/art/reference-meadow.png"
+      ],
+      "creator": "Root host imagegen 2026-11-07",
+      "original": "/Users/nhn/.codex/generated_images/01a1afba-1f82-7af2-b09b-615779173642/exec-3dc27e46-ef20-4aa1-8d30-6eb6300cb7d1.png",
+      "sha256": "ec14de1f669953c46ff1b48b88a9618783855434042f50b4b6f392893de279b3",
+      "size": [
+        1038,
+        1515
+      ],
+      "reference_policy": "기존sunlit-meadow 지형배치 편집, 원작85는단순도형/명도/빈공간 비교만. 원작 캐릭터/UI/자산 복사 없음",
+      "copy_policy": "생성 원본 바이트 동일 복사; game engine에서 기존 지형 canvas 크기로 표시 정규화",
+      "status": "OPEN cycle reference-aligned-improvement rev2의 호스트 대표장면 후보. main 미통합/디자인 수용 아님"
     }
   ],
   "verification": {
@@ -164,5 +286,234 @@
     "muzzle_render_alignment": "NOT_MEASURED - 초기·성장·보스 발사/비행 각3비율을 포함한 총45 PNG. 실제 포구·포신과 초기 탄도·유도 궤적 독립 판독 대기",
     "projectile_tail_render": "NOT_MEASURED - 같은 유도 경로의 앞선 지점으로 꼬리 연결. 제품 회귀와 세 비율 실제 PNG 독립 판독 대기",
     "terrain_render_alignment": "NOT_MEASURED - 생성/이동/환생/보스의 발·그림자 풀밭 배치 회귀와 좌표 영수증 추가. 호스트 제품 회귀·PNG 직접 판독 대기"
+  },
+  "pending_storybook_reuse": {
+    "candidate_branch": "hv/work/storybook-visuals",
+    "candidate_commit": "ae8083b5467ab3f3f0e398fa5ffb82d0c1871081",
+    "task_state": "BLOCKED",
+    "integrated_in_main": false,
+    "canonical_candidate_art_doc": "docs/art-direction.md",
+    "assets": [
+      {
+        "id": "imagegen-witch-starter",
+        "files": [
+          "game/assets/art/witch-starter.png"
+        ],
+        "source": "imagegen 생성 결과 01a1afba-1f82-7af2-b09b-615779173642/exec-d729f860-f2d5-4655-987b-50358953ac03.png",
+        "size": [
+          1312,
+          1199
+        ],
+        "mode": "RGBA",
+        "sha256": "5fc43bf672134561dacee261af31cfaebe0d10a0bc7bd2f9d8cce3214665fb8d",
+        "creator": "본 게임 세션의 도구 가용 호스트가 imagegen으로 생성·공급한 신규 자산",
+        "reference_game_asset_copied": false
+      },
+      {
+        "id": "imagegen-witch-cannon",
+        "files": [
+          "game/assets/art/witch-cannon.png"
+        ],
+        "source": "imagegen 생성 결과 01a1afba-1f82-7af2-b09b-615779173642/exec-327f0cb7-076d-46c0-9e00-594dac426c2d.png",
+        "size": [
+          1312,
+          1199
+        ],
+        "mode": "RGBA",
+        "sha256": "4b10c4bdf861ca4e09091c357b6b49cf5df66afde520fde4b840e7e90d4766d6",
+        "creator": "본 게임 세션의 도구 가용 호스트가 imagegen으로 생성·공급한 신규 자산",
+        "reference_game_asset_copied": false
+      },
+      {
+        "id": "imagegen-sunlit-meadow",
+        "files": [
+          "game/assets/art/sunlit-meadow.png"
+        ],
+        "source": "imagegen 생성 결과 01a1afba-1f82-7af2-b09b-615779173642/exec-510474b7-3dca-49c9-8fea-931026b9c525.png",
+        "size": [
+          1052,
+          1495
+        ],
+        "mode": "RGB",
+        "sha256": "a9646f0e698aeeb1c300ae939f43959fe37f0f15057f54a91394ead0ae9fb551",
+        "creator": "본 게임 세션의 도구 가용 호스트가 imagegen으로 생성·공급한 신규 자산",
+        "reference_game_asset_copied": false
+      },
+      {
+        "id": "imagegen-forest-creatures",
+        "files": [
+          "game/assets/art/forest-creatures.png"
+        ],
+        "source": "imagegen 생성 결과 01a1afba-1f82-7af2-b09b-615779173642/exec-be3e9560-40b2-4787-ade8-7afa3c1b21ec.png",
+        "size": [
+          2172,
+          724
+        ],
+        "mode": "RGBA",
+        "sha256": "28f8888dce563609d5a2311971a661bb5f894e11b7d8f7026d89bb21c7e9c9d6",
+        "creator": "본 게임 세션의 도구 가용 호스트가 imagegen으로 생성·공급한 신규 자산",
+        "reference_game_asset_copied": false
+      }
+    ],
+    "policy": "기존 생성 원본·바이트 보존; 후보의 실제 자산/엔진 통합 재사용. 이 목록은 main에 파일이 존재하거나 사용자 디자인 수용이 완료됐다는 뜻이 아님. 필요한 수정만 도구 가용 호스트 Art가 공급. 원본 레퍼런스는 배포하지 않음."
+  },
+  "living_motion_development": {
+    "branch": "work/living-motion",
+    "base_commit": "ae8083b5467ab3f3f0e398fa5ffb82d0c1871081",
+    "status": "로컬 제작; 미커밋·독립 리뷰/통합 미실행",
+    "creator": "현재 호스트 Root의 imagegen 도구 제작, 원본 4개 자산/디자인 참조 재사용",
+    "assets": [
+      {
+        "file": "witch-wand-motion.png",
+        "source": "exec-a5382524-0fad-4262-9aba-3ba30d648762.png",
+        "sha256": "c296404e0868df130f696659c98c856b40b77427e335dca90e04ea60806ddbe7"
+      },
+      {
+        "file": "witch-cannon-motion.png",
+        "source": "exec-fe0ee973-d074-459f-861f-33a5feeeb8dc.png",
+        "sha256": "f8a4e506e1118d13f91496adfde05ea4182ac015fcf991c978c4af939a160809"
+      },
+      {
+        "file": "forest-motion.png",
+        "source": "exec-f6bdc40a-2bef-496c-b77f-2f2c247e35c7.png",
+        "sha256": "90496e12f19ef8586af948b0c4b92299e78fb3c6935f6739193ce671c39b7360"
+      },
+      {
+        "file": "witch-wand-directions.png",
+        "source": "exec-ebd69259-2b4c-456b-946e-541aead78912.png",
+        "sha256": "6cfce2b3eb1db016cf383cecdce548df22ba1da6c3ef99e668c96c01da1d8649"
+      },
+      {
+        "file": "witch-cannon-directions.png",
+        "source": "exec-67e378b7-5236-4743-afc8-836113806e36.png",
+        "sha256": "4710983f265477da18405d96b8fae7d677bb3ae40f202f05b60369149f98164d"
+      }
+    ],
+    "atlas_layout": "지팡이/큰포 각각5방향×6자세30프레임, 좌측대응 반전으로8방향; 생물12프레임. 기존 단방향8프레임2장도 보존",
+    "rejected_outputs": [
+      "exec-2ba9b6ce-175c-4acb-944e-35d63c4b25c8.png: 배경 알파 불량",
+      "exec-303f10ec-2b6a-477d-82f6-126a5e07348a.png: 투명 배경 잔여 노이즈, 미사용"
+    ],
+    "limits": "걷기 양발 교대·무기 성장 실루엣·모션 완성도는 미수용. 새 기술 PASS로 기존 사용자 디자인/생동감 반려를 지우지 않음"
+  },
+  "ui_rework_development": {
+    "branch": "work/living-motion",
+    "status": "로컬 후속, 미커밋·최종 독립 수용/통합 전",
+    "creator": "현재 도구 가용 호스트 Root의 실제 imagegen 제작",
+    "assets": [
+      {
+        "file": "ui-icons.png",
+        "source": "exec-34fafd66-2a99-4b00-92c3-725fd36bfec3.png",
+        "sha256": "d89dd0dae848da018153ef9a590c960bc342a1f6705045dd8763299cff7084ec"
+      },
+      {
+        "file": "ui-panels.png",
+        "source": "exec-58433797-f086-4fed-a713-6762bf5c3a18.png",
+        "sha256": "0c4dc95c6ab9170f1ba48a6d8ce895697d0c91f0305c110f0d5e8b319376a03d"
+      },
+      {
+        "file": "ui-tools.png",
+        "source": "exec-d3ed21bd-ac4a-40d2-8165-36b74b30c612.png",
+        "sha256": "dca295371db976506cd7ec771e71c6aee394a6f4cb37433de70f9366c3a150c1"
+      }
+    ],
+    "contents": "기능8아이콘·장비3그림·공유9patch4종. 원본바이트 보존, 엔진 AtlasTexture와9patch 적용. 텍스트/숫자/상태는 실제 UI로 그림",
+    "reference_assets_copied": false,
+    "design_acceptance": "OPEN 기존 반려 유지"
+  },
+  "verification_scope_note": "기존 verification 필드는 부모 아트 작업 작성 시점 스냅샷이며 수정하지 않았다. 현재 Root 로컬 검사/실제 이미지와 미수용은 docs/art-direction.md 및 runtime 최종 보고를 조회. Renderer manifest source_head는 미커밋 수정의 기준 커밋이며 실제 변경 소스를 그 커밋에 귀속하지 않는다.",
+  "latest_independent_review": {
+    "overall": "CHANGES_REQUIRED",
+    "scoped_followup": "POSITIVE_SCOPED",
+    "reviewer": "/root/experience_art_review",
+    "source_manifest": "runtime/cycle-continuation-20261107/review-source-final.json",
+    "manifest_sha256": "2d7f28ef9d6b5d99a01dd9828f5a834861c5185b964428c8d9dfbd1469cca950",
+    "report": "runtime/cycle-continuation-20261107/experience-art-review.md",
+    "report_sha256": "fa265f050c2cef309caea84b75438a78b4f30ece08d7b25b1a00906234aebc59",
+    "resolved_scoped": [
+      "EA005 specific82px NE island",
+      "failed-result workshop overlap in3ratios"
+    ],
+    "preserved_scoped": [
+      "main4558px foot component",
+      "selected S/SW/wandS poses"
+    ],
+    "open": [
+      "EA006 late density/art consistency/user rejection",
+      "EA004 all transitions/high speed/OS breadth",
+      "user design/fun/device/audio"
+    ],
+    "managed_acceptance": false
+  },
+  "cycle_reference_profile": {
+    "cycle": "reference-aligned-improvement",
+    "revision": 2,
+    "status": "HOST_INPUT_CANDIDATE_NOT_INTEGRATED",
+    "source_manifest": "runtime/cycle-adoption-20261107/reference-profile/review-source.json",
+    "sha256": "4e7bc422e55cacccff91ec42a74bc37cdc4c8207866d83c96d21d24c461fa519",
+    "new_asset": "game/assets/art/reference-meadow.png",
+    "reused": "existing actor/action frames, UI icons, original terrain layout and rules",
+    "independent_review": "CHANGES_REQUIRED",
+    "user_acceptance": "OPEN",
+    "previous_latest_review_is_history": true
+  },
+  "prior_independent_review_20261106": {
+    "verdict": "CHANGES_REQUIRED",
+    "reviewer": "/root/experience_art_review",
+    "source_manifest": "runtime/workflow-4915f61/review-source-v3.json",
+    "source_manifest_sha256": "be8e46d1e2a6a2951b59d3216d754e8076117f89bc0d217785a4d1b3449b7eed",
+    "raw_report": "runtime/workflow-4915f61/independent-experience-art-review.md",
+    "resolved_scoped": [
+      "EA-001",
+      "EA-002"
+    ],
+    "partial_or_open": [
+      "EA-003",
+      "EA-004",
+      "EA-005",
+      "EA-006"
+    ],
+    "user_acceptance": "OPEN",
+    "note": "기존 자산별 과거 inspection/PENDING 상태는 이력으로 보존. 원작 이탈과 S접합 미해결. 기술 PASS와 분리"
+  },
+  "current_host_candidate": {
+    "manifest": "runtime/cycle-continuation-20261107/review-source-final.json",
+    "sha256": "2d7f28ef9d6b5d99a01dd9828f5a834861c5185b964428c8d9dfbd1469cca950",
+    "game_inputs": 53,
+    "new_PNGs": false,
+    "reuse": "existing actual action/walk/skill/enemy/UI/background source PNG bytes; metadata masks and Godot state/geometry/VFX only",
+    "input_policy": "real bot earned rewards/actions, no currency/inventory/HP injection; manual native UI proof separate",
+    "independent_recheck": "POSITIVE_SCOPED for specific EA005 island + failed-result workshop overlap; overall CHANGES_REQUIRED/EA006 OPEN",
+    "user_acceptance": "OPEN",
+    "main_integrated": false,
+    "independent_report_sha256": "fa265f050c2cef309caea84b75438a78b4f30ece08d7b25b1a00906234aebc59"
+  },
+  "previous_independent_review_profile": {
+    "verdict": "CHANGES_REQUIRED",
+    "reviewer": "/root/experience_art_review",
+    "source_manifest": "runtime/cycle-adoption-20261107/reference-profile/review-source.json",
+    "source_manifest_sha256": "4e7bc422e55cacccff91ec42a74bc37cdc4c8207866d83c96d21d24c461fa519",
+    "raw_report": "runtime/cycle-adoption-20261107/reference-profile/independent-experience-art-review.md",
+    "report_sha256": "fb9deaf7c69903b3321997258c04cfe4747bd08d2cc2aec89a90af75eb228b50",
+    "directly_viewed": {
+      "boards": 17,
+      "product_screens": 8,
+      "action_frames": 29,
+      "skill_frames": 8
+    },
+    "improved_scoped": [
+      "EA-006.a start scale",
+      "EA-006.b background priority",
+      "EA-006.d UI hierarchy",
+      "reward icon expression"
+    ],
+    "partial_or_open": [
+      "EA-003",
+      "EA-004",
+      "EA-005",
+      "EA-006"
+    ],
+    "user_acceptance": "OPEN",
+    "managed_acceptance": false
   }
 }

@@ -7,11 +7,12 @@ func _rock(color: Color) -> bool:
 	return color.r > color.g + 0.12 and color.g < 0.70 and color.r > 0.28
 
 
-func _feet(sprite: Sprite2D, first_row: int) -> Array[Vector2]:
-	var key := sprite.texture.resource_path + str(sprite.texture.get_size()) + str(first_row)
+func _feet(sprite: Node2D, first_row: int) -> Array[Vector2]:
+	var texture: Texture2D = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame) if sprite is AnimatedSprite2D else sprite.texture
+	var key := str(texture.get_rid()) + str(texture.get_size()) + str(first_row)
 	if not contours.has(key):
 		var pixels: Array[Vector2] = []
-		var picture := sprite.texture.get_image()
+		var picture := texture.get_image()
 		for y in range(first_row, picture.get_height()):
 			var left := -1
 			var right := -1
@@ -28,9 +29,10 @@ func _feet(sprite: Sprite2D, first_row: int) -> Array[Vector2]:
 
 func measure(battle: Control) -> Dictionary:
 	var visual: Node2D = battle.visuals
-	var sprites := [visual.witch_sprite, visual.witch_shadow]
+	var sprites := [visual.motion.witch, visual.witch_shadow]
+	if visual.motion.legs.visible:sprites.append(visual.motion.legs)
 	if battle.spirit:
-		sprites.append(visual.spirit_sprite)
+		sprites.append(visual.motion.spirit)
 	var minimum := INF
 	var maximum := -INF
 	var count := 0
@@ -38,14 +40,24 @@ func measure(battle: Control) -> Dictionary:
 	var shadow_rock_fraction := 0.0
 	if terrain_image == null:
 		terrain_image = visual.MEADOW.get_image()
-	for sprite: Sprite2D in sprites:
+	for sprite: Node2D in sprites:
+		var texture: Texture2D = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame) if sprite is AnimatedSprite2D else sprite.texture
 		var pixels: Array[Vector2]
 		if sprite == visual.witch_shadow:
 			pixels = [Vector2(0, 0), Vector2(64, 0), Vector2(0, 24), Vector2(64, 24)]
 		else:
-			pixels = _feet(sprite, 500 if sprite == visual.spirit_sprite else 950)
+			pixels = _feet(sprite, int(texture.get_height() * .70))
 		for pixel in pixels:
-			var world: Vector2 = sprite.to_global(pixel - sprite.texture.get_size() * 0.5)
+			var world: Vector2 = sprite.to_global(pixel - texture.get_size() * 0.5 + sprite.offset)
+			if sprite is AnimatedSprite2D and sprite.material != null:
+				var part: Variant=sprite.material.get_shader_parameter("split_part")
+				if part != null and int(part)!=0:
+					var rects: Variant=sprite.material.get_shader_parameter("upper_regions" if int(part)<0 else "leg_regions")
+					var amount: int=sprite.material.get_shader_parameter("upper_region_count" if int(part)<0 else "leg_region_count")
+					var inside:=false
+					for r: Vector4 in rects.slice(0,amount):
+						if world.x>=r.x and world.x<r.z and world.y>=r.y and world.y<r.w:inside=true
+					if (int(part)<0 and inside) or (int(part)>0 and not inside):continue
 			var raw: Vector2 = visual.background.to_local(world) + visual.MEADOW.get_size() * 0.5
 			var diagonal := raw.y + raw.x * 0.5
 			minimum = minf(minimum, diagonal)

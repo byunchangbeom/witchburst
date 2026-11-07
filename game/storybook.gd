@@ -3,7 +3,10 @@ extends Node2D
 
 const STARTER = preload("res://assets/art/witch-starter.png")
 const CANNON = preload("res://assets/art/witch-cannon.png")
-const MEADOW = preload("res://assets/art/sunlit-meadow.png")
+const LEGACY_MEADOW = preload("res://assets/art/sunlit-meadow.png")
+const REFERENCE_MEADOW = preload("res://assets/art/reference-meadow.png")
+var MEADOW: Texture2D = LEGACY_MEADOW
+const UiSkin = preload("res://story_skin.gd")
 const CREATURES = preload("res://assets/art/forest-creatures.png")
 const FLASH = preload("res://shaders/hit_flash.gdshader")
 const PULSE = preload("res://shaders/magic_pulse.gdshader")
@@ -36,6 +39,10 @@ var shadow_texture: ImageTexture
 var witch_shadow: Sprite2D
 var enemy_shadows: Dictionary = {}
 var party_shift := Vector2.ZERO
+var motion: Node2D
+
+func actor_height(kind: String) -> float:
+	return {"wand":68.0,"cannon":102.0,"spirit":42.0,"seed":50.0,"boss":136.0}[kind]
 
 func _atlas(region: Rect2) -> AtlasTexture:
 	var texture := AtlasTexture.new()
@@ -58,6 +65,10 @@ func _sprite(texture: Texture2D) -> Sprite2D:
 
 func setup(owner_battle: Control) -> void:
 	battle = owner_battle
+	# 지형 canvas 기준은 보존하고 실제 표시/픽셀 검사는 새 자산을 함께 읽는다.
+	var picture := REFERENCE_MEADOW.get_image()
+	picture.resize(LEGACY_MEADOW.get_width(),LEGACY_MEADOW.get_height(),Image.INTERPOLATE_LANCZOS)
+	MEADOW = ImageTexture.create_from_image(picture)
 	# 전투 그림·숫자·입자는 HUD와 공방/결과 창보다 뒤에서 그린다.
 	z_index = -1
 	seed_texture = _atlas(Rect2(140, 144, 415, 530))
@@ -111,23 +122,32 @@ func setup(owner_battle: Control) -> void:
 		emitter_life.append(0.0)
 		emitter_positions.append(Vector2.ZERO)
 	sync(0.0)
+	motion = preload("res://living_motion.gd").new()
+	add_child(motion)
+	motion.setup(self)
 
 func play_shot(bullet: Dictionary) -> void:
 	if is_instance_valid(shot_tween):
 		shot_tween.kill()
 	kick = 1.0
+	if is_instance_valid(motion):
+		motion.on_shot(bullet, battle.bullets.any(func(item: Dictionary) -> bool: return item.get("spirit", false) and not shot_origins.any(func(shot: Dictionary) -> bool: return is_same(shot.bullet, item))))
 	# 반동·호흡을 먼저 적용한 그림의 실제 포구를 탄과 입자가 공유한다.
 	_sync_witch()
 	var muzzle: Vector2 = battle._from_screen(to_local(witch_muzzle.global_position))
 	# 원본 그림에서 판독한 지팡이/포신 축을 실제 Sprite 변환으로 읽는다.
 	var breech := Vector2(264, 65) if battle.power_tier() == 0 else Vector2(144, 100)
 	var axis: Vector2 = (witch_muzzle.global_position - witch_sprite.to_global(breech)).normalized()
+	if is_instance_valid(motion):
+		axis = (motion.muzzle - motion.breech).normalized()
 	_prune_shots()
 	shot_origins.append({"bullet": bullet, "start": bullet.pos, "muzzle": muzzle, "axis": axis})
 	for linked in battle.bullets:
 		if linked.get("spirit", false) and not shot_origins.any(func(shot: Dictionary) -> bool: return is_same(shot.bullet, linked)):
 			# 원본 아틀라스의 입 앞쪽을 현재 진동·공통 변위가 적용된 그림에서 읽는다.
 			var start: Vector2 = to_local(spirit_sprite.to_global(Vector2(420, 340) - spirit_texture.get_size() * 0.5))
+			if is_instance_valid(motion):
+				start = motion.spirit_mouth
 			var target: Dictionary = battle._enemy_by_id(linked.target)
 			shot_origins.append({"bullet": linked, "start": linked.pos, "muzzle": battle._from_screen(start),
 				"axis": (_point(target.pos) - start).normalized()})
@@ -222,6 +242,8 @@ func sync(_delta: float) -> void:
 	_sync_witch()
 	var unit: float = battle.content_width / 540.0
 	_sync_enemies(unit)
+	if is_instance_valid(motion):
+		motion.sync(_delta)
 	queue_redraw()
 
 func _point(pos: Vector2) -> Vector2:
@@ -252,7 +274,7 @@ func _sync_witch() -> void:
 	witch_sprite.position += Vector2(-kick * (2.0 + tier * 2.0), breath_amount * 1.5) * unit
 	witch_sprite.rotation = -kick * 0.035 * tier
 	witch_shadow.position = witch_sprite.position + Vector2(0, 1199 * sprite_scale * 0.47)
-	witch_shadow.scale = Vector2.ONE * unit
+	witch_shadow.scale = Vector2.ONE * unit * (0.68 if tier==0 else 0.85)
 	witch_sprite.material.set_shader_parameter("pulse", battle.recoil * 0.6)
 	spirit_sprite.visible = battle.spirit
 	spirit_sprite.position = battle._world(battle.witch + Vector2(-58, -18)) + Vector2(0, sin(battle.elapsed * 3.0) * 6.0)
@@ -278,10 +300,18 @@ func _sync_witch() -> void:
 	var safe_bottom := minf(bottom, upper)
 	var safe_top := maxf(lower, minf(top, safe_bottom - (bottom - top) * 0.35))
 	var mapped := lerpf(safe_top, safe_bottom, (base.y - top) / (bottom - top))
+	if battle.phase in [battle.Phase.WON,battle.Phase.LOST]:
+		# 결과 창이 큰 마도구의 발을 덮지 않도록 전환 시간에 맞춰 표현만 정돈한다.
+		var result_age: float=maxf(0.0,battle.elapsed-battle.result_at+.45)
+		var panel_height: float=196.0 if battle.boss_cleared else 140.0
+		var result_floor: float=battle.field_bottom-panel_height-24*unit
+		mapped=lerpf(mapped,minf(mapped,result_floor),smoothstep(0.0,.45,result_age))
 	party_shift = Vector2(0, mapped - base.y)
 	witch_sprite.position += party_shift
 	witch_shadow.position += party_shift
 	spirit_sprite.position += party_shift
+	if is_instance_valid(motion):
+		motion.sync_party()
 
 func _sprite_corners(sprite: Sprite2D, pixels: Rect2) -> Array[Vector2]:
 	var points: Array[Vector2] = []
@@ -310,7 +340,7 @@ func _sync_enemies(unit: float) -> void:
 			tween.tween_property(sprite, "skew", 0.0, 0.2).set_trans(Tween.TRANS_BACK)
 			hit_tweens[enemy.id] = tween
 		last_flashes[enemy.id] = enemy.flash
-		var height: float = (152.0 if enemy.boss else 62.0) * unit
+		var height: float = actor_height("boss" if enemy.boss else "seed") * unit
 		sprite.scale = Vector2.ONE * height / sprite.texture.get_height()
 		sprite.scale.y *= 1.0 + sin(battle.elapsed * 3.5 + enemy.id) * 0.025
 		sprite.position = _point(enemy.pos) + Vector2(enemy.flash * 5.0, -enemy.flash * 4.0)
@@ -318,7 +348,7 @@ func _sync_enemies(unit: float) -> void:
 		sprite.material.set_shader_parameter("flash", enemy.flash)
 		var ground: Sprite2D = enemy_shadows[enemy.id]
 		ground.position = _point(enemy.pos) + Vector2(0, height * 0.44)
-		ground.scale = Vector2.ONE * (1.8 if enemy.boss else 0.65) * unit
+		ground.scale = Vector2.ONE * (1.8*0.8 if enemy.boss else 0.65*0.68) * unit
 	for id in enemy_sprites.keys():
 		if id not in active:
 			# 즉시 회수하여 headless 고속 진행에도 대기 노드를 쌓지 않는다.
@@ -349,9 +379,34 @@ func _draw() -> void:
 			draw_line(tail, p, BROWN, r * 1.8 + 3, true)
 			draw_line(tail, p, Color("6fddac"), r * 1.8, true)
 			draw_line(tail, p, Color("fffacb"), r * 0.65, true)
+		if bullet.tier>=2 and tail.distance_to(p)>12*unit:
+			var normal := (p-tail).normalized().orthogonal()
+			for side in [-1.0,1.0]:
+				var strand := PackedVector2Array()
+				for sample in range(9):
+					var t:=sample/8.0
+					strand.append(tail.lerp(p,t)+normal*sin(t*PI)*(r+4*unit)*side)
+				draw_polyline(strand,Color("bcf7d9"),2.5*unit,true)
 		draw_circle(p, r * 0.6, Color.WHITE)
+	var reward_visual_budget := 48
 	for floating in battle.floats:
 		var p := _point(floating.pos)
+		if floating.text.begins_with("+") and floating.text.contains("별빛") and reward_visual_budget>0:
+			var amount:=mini(3+battle.power_tier()*2,reward_visual_budget)
+			reward_visual_budget-=amount
+			var age: float=clampf(1.0-floating.life,0.0,1.0)
+			var target: Vector2=battle.wallet_label.position+battle.wallet_label.size*.5
+			for i in range(amount):
+				var angle:=i*2.39996
+				var burst:=Vector2(cos(angle),sin(angle))*(14.0+i*3.0)*unit*sin(age*PI)
+				var point: Vector2=(_point(floating.pos)+burst).lerp(target,smoothstep(.45,1.0,age))
+				var diameter: float=(11.0+battle.power_tier())*unit
+				var icon:=UiSkin.icon("material" if i%4==3 else "coin")
+				draw_texture_rect(icon,Rect2(point-Vector2.ONE*diameter*.5,Vector2.ONE*diameter),false,Color(1,1,1,minf(floating.life*4,1.0)))
+		if not floating.text.begins_with("+") and battle.power_tier()>=2:
+			var impact_age: float=clampf(1.0-floating.life,0.0,1.0)
+			var impact_center: Vector2=_point(floating.pos+Vector2(0,30+impact_age*30))
+			draw_arc(impact_center,(10+impact_age*44)*unit,0,TAU,28,Color(.65,1,.83,floating.life*.55),2*unit,true)
 		var color: Color = floating.color
 		color.a = minf(floating.life * 3.0, 1.0)
 		var font_size := 22 if not floating.text.begins_with("+") else 18
@@ -360,9 +415,11 @@ func _draw() -> void:
 		draw_string(battle.font, p - offset, floating.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
 	if battle.dragging:
 		draw_arc(battle._world(battle.witch) + party_shift, 44 * unit, 0, TAU, 32, Color("fff4be"), 3, true)
-	if battle.skill_flash > 0:
-		for i in range(7):
-			var start: Vector2 = battle._world(Vector2(75 + i * 62, 205))
-			var end: Vector2 = battle._world(Vector2(95 + i * 55, 450))
-			draw_line(start, end, Color(0.4, 0.85, 0.72, battle.skill_flash * 0.7), 12, true)
-			draw_line(start, end, Color(1, 1, 0.86, battle.skill_flash), 4, true)
+	if battle.skill_flash > 0 and is_instance_valid(motion):
+		# 판정 순간의 실제 표적에 별비가 도착한다. 보스가 제거돼도 그 위치를 유지한다.
+		for target: Vector2 in motion.skill_targets:
+			for i in range(7):
+				var end: Vector2 = target + Vector2((i-3)*16,8+absi(i-3)*3)*unit
+				var start: Vector2 = end + Vector2(-36,-170)*unit
+				draw_line(start,end,Color(.4,.85,.72,battle.skill_flash*.7),12*unit,true)
+				draw_line(start,end,Color(1,1,.86,battle.skill_flash),4*unit,true)

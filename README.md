@@ -1,6 +1,22 @@
 # 마녀포격단 · Witchburst
 
+현행 중앙 문서 선택은 aa96f24이며 게임 실행기7304344는 유지한다. [연속 사이클 계획](docs/production-cycles.md)·[자료 원장](docs/storage-ledger.json)을 따르며 정상 사이클 경계에서 중단하지 않는다.
+
+2026-11-07 공식 사이클 집계로 전환했다. 현재 완료0·OPEN2(초기 완료 근거의 legacy product-base 연결 거부 포함)이며 작업/호출 수를 제작 횟수로 세지 않는다. [실행기 pin·매핑·근거](docs/production-cycles.md)와 tools/hv-cycle을 따른다. 기존 harness.lock17d4e6b는 보존하고 별도 명시 승인한 사이클 실행기7304344는 harness-cycles.lock에 기록했다.
+
+
 꼬마 마녀와 정령이 저주를 정화하는 모바일 우선 방치형 RPG의 첫 플레이다. 방향 정본은 [GAME-BRIEF.md](GAME-BRIEF.md)다. 출시 패키지는 아직 없다.
+
+2026-11-06 기준 main은 성장·저장 통합본이며, 신규 그림책 아트는 `hv/work/storybook-visuals`의 `ae8083b`에 보존돼 있다. 해당 작업은 최신 관리 렌더러 검사 실패로 BLOCKED이고 main에 미통합이다. 캐릭터·배경·버튼에 대한 사용자 디자인 반려는 유지한다.
+
+2026-11-06 당시 문서 선택: `game-production-v1`만 Harness V `4915f6197432094fa4d7e8c5b521bb9e70e951c5:docs/game-production-workflow.md`에서 선택 채택했다. 실행기 pin `17d4e6b`와 `harness.lock`은 유지한다. [현재 단계·다음 완결 플레이·출시 표현 목표·역할과 완료 조건](docs/design.md)에 기존 아트의 재사용·실제 화면 비교와 후속 확장을 연결했다. 문서 채택은 실행기 교체나 기존 task 입력 갱신이 아니다.
+
+후속 로컬 제작은 `work/living-motion`에 있다. 기존 아트를 재사용해 방향별 자세·이동 거리 기반 걷기·준비/발사/반동/회복·피격/정화·정령 연계를 연결했다. 현재 소스의 실행은 이 worktree에서 아래 명령을 사용한다. 기존 `storybook-visuals` BLOCKED와 main은 보존했으며 이 로컬 변경은 미커밋·독립 검토/통합 전이다. 정적인 이동·방향 불일치에 대한 사용자 반려는 유지한다. 프레임 자료와 실제 제작은 [아트 방향](docs/art-direction.md)에 기록했다.
+
+버튼·상태창은 원작과 동종 게임 공식 이미지를 직접 비교하고 실제 Director→QA→Director 논의 후 재구성했다. 공유9patch·실제 아이콘/장비 그림, 분리한 자원/진행/시간, 상태별 강화/장착/한도, 모든 환생 결과의 초기화/보존 안내를 연결했다. [현재 논의·반영·검증/미검증](docs/art-direction.md)을 참조한다. 2026-11-06 당시 호출 집계는59/60이었으며 기존 BLOCKED는 유지한다. 호스트 독립 Experience/Art는 CHANGES_REQUIRED다. 사용자 디자인 재수용·정상 관리 파이프라인의 후속 리뷰·main 통합은 미실행이다.
+
+
+2026-11-07 전환 후 같은 개선 사이클에서 원작85/89를 재대조해 실제 배경·사수 비율·3강화/HUD·성장 보상 표현 후보를 제작했다. 제품 검사 실패0, 실제129화면·17프레임 보드·400연속 프레임과 독립 재검토를 [현행 아트 기록](docs/art-direction.md#2026-11-07-같은-open-사이클의-원작-대조-후보)에 연결했다. 관리 후속은 선행 BLOCKED에 의존한 QUEUED이며 호스트 후보를 main 통합/사이클 완료로 표시하지 않는다.
 
 ## 실행과 첫 플레이
 
@@ -55,3 +71,7 @@ python3 tests/run.py --capture --artifacts /tmp/witchburst-review
 **시각 교체 구현은 사용자 디자인 재수용을 뜻하지 않는다. 기존 반려는 유지하며 최종 수용은 NOT_MEASURED다.** 이번 소스의 실제 렌더러·독립 아트 리뷰·OS 입력은 호스트 검증 대기다. 음향은 NOT_HEARD, 사람 재미·모바일 실기기와 Android/iOS/Windows/웹 내보내기는 NOT_MEASURED다. 자동 검사와 캡처 생성만으로 시각 품질이나 재미를 PASS로 판정하지 않는다.
 
 자산 출처는 [asset-sources.json](docs/asset-sources.json)에 있다. 독립 리뷰·통합·push·정리 상태의 정본은 Harness V runtime이다.
+
+2026-11-06 당시 문서 채택은4915f61(이전7f702d4 이력 보존)이다. 방향×행동×전환/취소 추가는 [아트 계약](docs/art-direction.md), 중앙에 전달할 게임 소유 기록·미전달/미커밋 상태는 [개선 대기열](docs/improvement-queue.md)을 따른다. 실행기 pin17d4e6b·기존 task/STOP/한도는 유지한다.
+
+사용자 최신 원작 이탈 반려를 우선한다. 원작85/89/2/8을 매 제작 묶음 전후 직접 비교하는 지침을 AGENTS와 기존 아트/설계에 연결했다. 현재 프레임 수정은 전체 표현 수용이 아니며 S이동 시전 접합·원작의 크기/배경/화력 밀도/UI 위계는 미해결이다.
