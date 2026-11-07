@@ -1,0 +1,352 @@
+{
+  "cells": [
+    {
+      "region": [
+        83,
+        8,
+        285,
+        397
+      ],
+      "bounds": [
+        0,
+        0,
+        285,
+        397
+      ],
+      "foot": [
+        141,
+        392
+      ],
+      "canvas_size": [
+        443,
+        443
+      ],
+      "trim_offset": [
+        83,
+        8
+      ],
+      "source_cell": [
+        0,
+        0,
+        443,
+        443
+      ],
+      "display_canvas_height": 410,
+      "muzzle_uv": [
+        0.5649122807017544,
+        0.6423173803526449
+      ],
+      "breech_uv": [
+        0.5649122807017544,
+        0.5163727959697733
+      ],
+      "file_override": "cannon-south-moving-skills.png",
+      "leg_regions": []
+    },
+    {
+      "region": [
+        528,
+        8,
+        283,
+        397
+      ],
+      "bounds": [
+        0,
+        0,
+        283,
+        397
+      ],
+      "foot": [
+        139,
+        392
+      ],
+      "canvas_size": [
+        444,
+        443
+      ],
+      "trim_offset": [
+        85,
+        8
+      ],
+      "source_cell": [
+        443,
+        0,
+        444,
+        443
+      ],
+      "display_canvas_height": 410,
+      "muzzle_uv": [
+        0.558303886925795,
+        0.6120906801007556
+      ],
+      "breech_uv": [
+        0.558303886925795,
+        0.4987405541561713
+      ],
+      "file_override": "cannon-south-moving-skills.png",
+      "leg_regions": []
+    },
+    {
+      "region": [
+        971,
+        10,
+        283,
+        397
+      ],
+      "bounds": [
+        0,
+        0,
+        283,
+        397
+      ],
+      "foot": [
+        140,
+        392
+      ],
+      "canvas_size": [
+        443,
+        443
+      ],
+      "trim_offset": [
+        84,
+        10
+      ],
+      "source_cell": [
+        887,
+        0,
+        443,
+        443
+      ],
+      "display_canvas_height": 410,
+      "muzzle_uv": [
+        0.5512367491166078,
+        0.6171284634760705
+      ],
+      "breech_uv": [
+        0.5653710247349824,
+        0.4987405541561713
+      ],
+      "file_override": "cannon-south-moving-skills.png",
+      "leg_regions": []
+    },
+    {
+      "region": [
+        1414,
+        11,
+        284,
+        394
+      ],
+      "bounds": [
+        0,
+        0,
+        284,
+        394
+      ],
+      "foot": [
+        140,
+        389
+      ],
+      "canvas_size": [
+        444,
+        443
+      ],
+      "trim_offset": [
+        84,
+        11
+      ],
+      "source_cell": [
+        1330,
+        0,
+        444,
+        443
+      ],
+      "display_canvas_height": 410,
+      "muzzle_uv": [
+        0.5563380281690141,
+        0.6218274111675127
+      ],
+      "breech_uv": [
+        0.5704225352112676,
+        0.5050761421319797
+      ],
+      "file_override": "cannon-south-moving-skills.png",
+      "leg_regions": []
+    },
+    {
+      "region": [
+        81,
+        454,
+        288,
+        399
+      ],
+      "bounds": [
+        0,
+        0,
+        288,
+        399
+      ],
+      "foot": [
+        143,
+        394
+      ],
+      "canvas_size": [
+        443,
+        444
+      ],
+      "trim_offset": [
+        81,
+        11
+      ],
+      "source_cell": [
+        0,
+        443,
+        443,
+        444
+      ],
+      "display_canvas_height": 410,
+      "muzzle_uv": [
+        0.5555555555555556,
+        0.7568922305764411
+      ],
+      "breech_uv": [
+        0.5659722222222222,
+        0.6466165413533834
+      ],
+      "file_override": "cannon-south-moving-skills.png",
+      "leg_regions": []
+    },
+    {
+      "region": [
+        524,
+        454,
+        290,
+        397
+      ],
+      "bounds": [
+        0,
+        0,
+        290,
+        397
+      ],
+      "foot": [
+        143,
+        392
+      ],
+      "canvas_size": [
+        444,
+        444
+      ],
+      "trim_offset": [
+        81,
+        11
+      ],
+      "source_cell": [
+        443,
+        443,
+        444,
+        444
+      ],
+      "display_canvas_height": 410,
+      "muzzle_uv": [
+        0.5620689655172414,
+        0.7556675062972292
+      ],
+      "breech_uv": [
+        0.5689655172413793,
+        0.6347607052896725
+      ],
+      "file_override": "cannon-south-moving-skills.png",
+      "leg_regions": []
+    },
+    {
+      "region": [
+        972,
+        454,
+        287,
+        403
+      ],
+      "bounds": [
+        0,
+        0,
+        287,
+        403
+      ],
+      "foot": [
+        139,
+        398
+      ],
+      "canvas_size": [
+        443,
+        444
+      ],
+      "trim_offset": [
+        85,
+        11
+      ],
+      "source_cell": [
+        887,
+        443,
+        443,
+        444
+      ],
+      "display_canvas_height": 410,
+      "muzzle_uv": [
+        0.5400696864111498,
+        0.7866004962779156
+      ],
+      "breech_uv": [
+        0.5470383275261324,
+        0.6501240694789082
+      ],
+      "file_override": "cannon-south-moving-skills.png",
+      "leg_regions": []
+    },
+    {
+      "region": [
+        1412,
+        454,
+        289,
+        402
+      ],
+      "bounds": [
+        0,
+        0,
+        289,
+        402
+      ],
+      "foot": [
+        142,
+        397
+      ],
+      "canvas_size": [
+        444,
+        444
+      ],
+      "trim_offset": [
+        82,
+        11
+      ],
+      "source_cell": [
+        1330,
+        443,
+        444,
+        444
+      ],
+      "display_canvas_height": 410,
+      "muzzle_uv": [
+        0.5570934256055363,
+        0.7786069651741293
+      ],
+      "breech_uv": [
+        0.5605536332179931,
+        0.6442786069651741
+      ],
+      "file_override": "cannon-south-moving-skills.png",
+      "leg_regions": []
+    }
+  ],
+  "contract": "WB-ART-SOUTH-MOVING-20261108",
+  "fps": "이동 거리 stride의4위상, 준비0~3/발동4~7. 회복은발동행/취소는준비행",
+  "pivot": "각canvas x224 / alpha>45 실제밑창바닥-2px. 표시기준높이410. atlas는실제불투명외곽에3px여유. 원PNG불변",
+  "visual_acceptance": "PENDING_INDEPENDENT_REVIEW"
+}

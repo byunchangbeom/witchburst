@@ -189,3 +189,19 @@ WB-IMP-010/012의 중앙 접수와 공식 복구 구현은 bbf9f9c341f55a3b21e0d
 현재 작성 경로는 `/Users/nhn/.local/state/harness-v/witchburst/worktrees/reference-motion-followup/docs/improvement-queue.md`다. 게임 정본 경로 `/Users/nhn/brainspace/workspace/games/witchburst`와 기존 HV-Q-001~009/WB-IMP-010~012를 유지한다. 중앙의 공식 복구 구현 RECEIVED_IMPLEMENTED와 선행 CLOSED를 현재 receipt로 구분하되, 이 기록의 실제 커밋은 **PENDING_CONTROLLER_COMMIT**, 중앙 전달은 **NOT_SENT**다. Controller는 이 파일이 포함된 실제 커밋을 발행/확인한 뒤 게임 경로·WB-IMP-010/012·그 SHA를 중앙 담당자에게 전달한다. Worker는 가짜 SHA·중앙 수신 기록을 만들지 않는다.
 
 이번 sandbox에서 tests/run.py는 Godot 사용자/편집기 디렉터리 접근 거부와 시스템 인증서 오류로 import 로그 검사를 실패했다(`/tmp/witchburst-reference-motion-followup-product-1/import.log`). 이후 Python 전체 진입점 검사도 14개 중3개 실패했다. `test_entrypoints.py`가 실제 엔진을 재실행한다는 것을 실행 뒤 확인했으며 추가 엔진 진단은 중단했다. HV-Q-007의 호스트 검사 인계 사례이며 제품/GPU PASS로 표시하지 않는다. 전역 설정·엔진 복제·인증서 변경·새 서비스는 수행하지 않았다.
+
+
+### WB-IMP-013 · 원 receipt 보존 지시와 자동 원문 회수의 충돌
+
+- 발견/Writer: 2026-11-08 Root와 독립 cycle_adoption_review. 기존 ID와 Writer 경계 보존.
+- 근거: bbf retention.collect는 OPEN 사이클 밖 CLOSED 중 최근2개가 아닌 task의 원문을 run 반환 후 자동 회수한다. initial-play 종료 및 storybook 수용 뒤 first-battle 원13call은 raw_deleted_at/DB요약만 있고 원result.json은 현재 없다. 과거 실제 원문 검증 시점과 현재 가용성을 구분하며 DB/기억으로 receipt를 재생성하지 않는다. task-recovery-20261107/independent-adoption-recovery-review-20261108.md 참조.
+- 영향: 명시적 원receipt 보존 지시와 기본 자동 정책이 충돌한다. DB 호출·실패 이력은 보존되지만 사라진 원문 재감사는 현재 불가능하다. 누락13건을 UNKNOWN 호출이나 PASS 원문으로 꾸미지 않는다.
+- 실제 대응/게임 채택: 남은 원46call·821파일을 protected-original-call-raw/manifest.json으로 별도 보호하고 독립 해시 불일치0을 확인했다. 이후 반환 호출은 preserve-returned-call-raw.py로 각 공식 run 전에 읽기 전용 대조·보호한다. DB/고정 실행기/원receipt는 수정하지 않는다. DB raw_available=false는 보호사본이 있어도 역사 그대로 유지한다. 13건 RAW_UNAVAILABLE, 보호46건 EXTERNAL_RAW_COPY_AVAILABLE을 구분한다.
+- 제안: 명시적 증거보존 hold와 공식 task/cycle pin 또는 검증된 archive-before-GC receipt가 필요하다. 사용자 보존 지시 우선 계약을 중앙에 요청한다. 이름/mtime/단순중복으로 수동 삭제하지 않는다.
+- 중앙 처리: NOT_SENT / 미접수·미구현. 중앙 대기열 직접 수정 없음. 게임 경로·WB-IMP-013·실제 기록 커밋을 정상 수용 뒤 전달한다.
+- 기록 커밋: PENDING_CONTROLLER_PUBLICATION. 후속 recovery-record-publication에서 자료원장·현황과 연결한다. 전체 Art/사용자 반려 OPEN과 구분한다.
+
+
+## WORK4 · HV-Q-001/007/008과 기존 EA finding 연결
+
+호스트 마스크·효과 후보와 S 실제 전신8프레임을 정상 WORK4에서 통합하고, REVIEW3의 규칙/표현 시간 불일치 캡처를 수정했다. [구현·재현·실제 검증 한계](art-direction.md#2026-11-08--reference-motion-followup-work4-구현-반환)를 정본으로 연결한다. Python 계약6개 PASS이며 sandbox 제품 import는 사용자폴더/인증서 오류로 FAIL, 제품 회귀·신규1746PNG·독립 판독은 Controller 호스트 대기다. EA-003/005·R3-001 미수용, EA-004 미검증, EA-006/사용자 반려 OPEN을 보존한다. 이 보완은 같은 작업의 수정이며 새 사이클/완료가 아니다. 기존ID·WB-IMP-013·Writer 경계·원 receipt와 두 lock은 보존한다. 기록 커밋 PENDING_CONTROLLER_COMMIT / 중앙 전달 NOT_SENT.

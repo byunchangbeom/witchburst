@@ -361,3 +361,32 @@ WLM003: 일부 cannon-actions N/NE의 두 관구처럼 보이는 원통의 의�
 실제 실행 입력: `motion-landmarks-skills`의8방향×2무기480프레임(생성/독립 판독 상태는 해당 source-manifest·runtime 보고서에서 조회). skill_direction_preview는 명시GPU draw와 실제 포구/뒤점·발사시 저장축을 기록한다. 이 보조 호스트 자료를 원 관리 check receipt로 가장하지 않는다. 다음 공식 host 인수 뒤 새로운 관리 CHECK/REVIEW/통합/push/정리를 수행한다.
 
 같은game54의 새 실제480프레임이78.838초/종료0으로 생성됐다. 고정입력은 motion-landmarks-skills/source-manifest.json이다. 제안한2포구의 실제실행 범위 판독은 별도독립 Experience/Art의 task-recovery-20261107/weapon-landmarks-render-review.md를 조회하며, 이 작성시점은 검토진행중이다. 새관리수용/전체아트PASS로 표시하지 않는다.
+
+
+## 2026-11-08 · reference-motion-followup WORK4 구현 반환
+
+착수 시 공식 DB를 읽기 전용으로 조회하여 선행 storybook-visuals CLOSED/attempt11, ui-design-discussion DISCUSSED, 본 작업 WORK/attempt4와 worker_base cb822b4를 확인했다. 기존 attempt9 반려·REVIEW3·입력·STOP·receipt는 수정하지 않았다. 고정 review-source-v3의66파일 SHA 불일치0을 확인하고 독립 CHANGES_REQUIRED를 읽었다. 이 Worker는 commit/checkout/다른 세션 실행/실행기 운영/채택/중앙 수정/원격 작업을 수행하지 않았다. 관련 기억 검색 결과가 없어 기억은 미적용이다.
+
+반복 원인은 서로 다르다. N/NE는 상체에 남은 원래 부츠 외곽과 하체 마스크가 선택한 장비 조각이 별개여서 한쪽 마스크 확대만으로 제거되지 않았다. 호스트가 이 두 레이어를 분리 진단하여 넘긴 motion-overrides.json·storybook.gd 후보를 보존했다. S는 상체/옆방향 하체를 잘라 합성하는 구조의 수평 이음새가 반복되었으므로 같은 마스크 여유 조정 대신 실제 전신 프레임을 통합했다. 캡처는 규칙 advance만 호출해 motion.clock이 정지한 상태에서 효과의 born만 누적되던 별도 결함이었다.
+
+### 실제 구현과 작은 재현
+
+- Root host image_gen이 공급한 cannon-south-moving-skills.png 원본 SHA `7bf80dce7451e5e7c83f4a3f07d9c33f5cb687164f81e347ade56004d12247f7`을 변경 없이 사용했다. 이 Worker가 이미지를 생성했다고 표시하지 않는다. 신규 metadata는 같은 이름의 JSON, 출처는 asset-sources.json, Worker 직접 판독 좌표는 game/tests/south-moving-observations.json이다. 기존90점 독립 Art 출처와 신규8셀의 비독립 관측을 분리했다.
+- S 조준 이동 시전의 준비/취소는 전신0~3, 발동/회복은4~7을 실제 이동거리 stride에 연결한다. 이 구간의 기존 하체 Sprite와 절단 마스크를 비활성화하며, 이동 정지 때 기존 정지 자세로 돌아간다. 102게임단위/410원본px, 가로pivot224 고정, alpha>45 실제 밑창 하단-2px 접지, atlas 외곽3px 여유다. 거의 투명한 원본 잔여를 발 기준으로 쓰지 않는다. 물리/입력/피해/발동/난수/저장 제품 코드는 변경하지 않았다.
+- experience_checks.gd의 south_skill_checks가 S 조준·좌우 최고속·실제4보행자세·취소 무발동·재시전1회·회복·정지를 작은 재현으로 검사한다. 격리 호스트 프로젝트에서 `--script res://tests/experience_checks.gd -- --south-only`로 이 재현만 먼저 실행할 수 있다. 이후 기존 전체 회귀를 실행한다. 이 재현은 이 sandbox에서 실행되지 않았다.
+- frame_board.gd는 제품과 같은 전신 선택을3행에 사용하고, skill_direction_preview는 실제 pose_key/whole_body/upper_frame/lower_visible을 기록한다. 연속자료 검증은 전신의 실제 보행위상 진행도 검사하며, 하나의 프레임 반복은 거부한다. 준비→발동 외에 회복/취소/공방/정지 및 보통속도·최고속은 연속자료로 재검토해야 한다.
+- capture.gd의 until_phase 및 초반/성장/보스/스킬/결과 대기는 규칙과 표현을 같은 작은 dt로 진행한다. until_phase에 두 시간 진행량 일치 검사를 추가했다. natural_growth_preview의600초 가속도 매 규칙 스텝에 같은 dt로 sync하고, 캡처 자체는 추가 시간을 더하지 않는다. 자연자료 각 프레임에 시뮬레이션/표현 시각 일치 검사를 넣었다. 두 자료 모두 motion_clock과 잔광/보상 묶음 수를 기록한다. 과거03-boss 및 가속 직후 표본은 새 화력 비교 수용 근거로 재사용하지 않는다.
+
+### 직접 비교와 검증 한계
+
+원작85/89/2/8을 이미지 도구로 직접 다시 열었다. 작은 사수·억제된 전투 바탕, 초기 단발 대비 후기 공격/획득 밀도, 하단 현재값/가격3강화, 장비 수집·패배 결과가 기준이다. 실제 원작 앱 플레이나 음향 확인은 아니다. 신규 전신 PNG8셀도 직접 판독했으나 **새 통합 소스의 Godot 화면/연속 재생을 확보하지 못했다.** 원작↔새 실행의 묶음 전후 비교는 미완료다.
+
+최종 미커밋 제품61입력과 검사기 SHA는 `/tmp/witchburst-reference-work4-return/source-manifest.json`에 고정했다. 이는 관리 receipt나 변경 포함 커밋이 아니다.
+
+실제 실행: `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p test_reference_motion.py -v`의6개 검사 PASS, git diff --check PASS. 이는 원본 SHA·trim/피벗/포구 좌표 계약과 합성자료 검증기 검사다. shader 마스크64영역 상한의 읽기 대조에서 최대56/잘못된 사각형0이었다. 제품 엔진/시각 PASS가 아니다.
+
+`python3 tests/run.py --artifacts /tmp/witchburst-reference-work4-product-1`은 import에서 실제 사용자 폴더 접근 거부와 macOS 시스템 인증서 오류로 FAIL(return0이어도 오류 검출)했다. smoke/motion/ui/actions/experience/capture-stages는 실행하지 못했다. 이 시도는 최종 보드/검사 보완 전이므로 최종 소스 컴파일 근거도 아니다. 원로그는 해당 경로에 보존했고 추가 엔진/GUI 진단·권한 변경·엔진 복제·설치는 하지 않았다.
+
+Controller 재개 순서: 최종 허용 diff를 기록 → 격리 소스에서 S 작은 재현과 tests/run.py 전체 → 같은 소스에서 tests/render_reference_motion.py --artifacts <새 고유 경로> 실행(129장면+17보드+400행동+480방향+480최고속+240자연=1746PNG) → 이미지 판독 가능한 별도 실제 세션의 독립 검토다. 특히 N/NE3행·action333, S 준비/발동/회복/취소/최고속·정지, 초기→성장→공방→보스→승패/재시작·저장/복귀를 다시 확인한다. 원본13이미지·과거 manifest·기존 반려는 보존한다. 전체 재생·OS 입력·청취·사람 재미·실기기는 별도 근거가 필요하다.
+
+EA-003/005·R3-001은 수정 후보 통합/독립 재검토 대기, EA-004는 모든 전환/실시간/OS 등 미검증, EA-006과 사용자 원작/디자인 반려는 **OPEN**이다. 제품 검사로 반려를 닫거나 본 task로 사이클 완료 수를 올리지 않는다. 호스트 인계1746PNG와 과거 자동 PASS도 이번 최종 입력의 수용으로 승격하지 않는다. 실제 검토/커밋/통합/push/정리/사이클 종료는 Controller가 수행한다.

@@ -353,6 +353,24 @@
       "audio": "NOT_HEARD",
       "human_fun": "NOT_MEASURED",
       "user_design_reacceptance": "OPEN"
+    },
+    {
+      "id": "cannon-south-moving-skills-work4",
+      "files": [
+        "game/assets/art/cannon-south-moving-skills.png",
+        "game/assets/art/cannon-south-moving-skills.json",
+        "game/tests/south-moving-observations.json"
+      ],
+      "creator": "Root host image_gen 신규8전신프레임; reference-motion-followup Worker4는원PNG불변통합",
+      "source": "runtime/task-recovery-20261107/art-inputs/cannon-south-moving-contract.json / WB-ART-SOUTH-MOVING-20261108",
+      "original": "/Users/nhn/.codex1/generated_images/01a1afba-1f82-7af2-b09b-615779173642/exec-8a09fc46-1373-4987-8a3d-651e49437837.png",
+      "png_sha256": "7bf80dce7451e5e7c83f4a3f07d9c33f5cb687164f81e347ade56004d12247f7",
+      "method": "기존자체마녀PNG를참고한image_gen편집산출물을호스트에서공급. 원작85/89/2/8배포복사없음. 이Worker의image_gen실행없음",
+      "layout": "1774x887,4열2행. 준비4/발동4; 회복은발동행·취소는준비행. S조준이동에만사용",
+      "playback": "실제이동거리stride의4위상. 102게임단위/410원본px비율. 고정가로pivot224/alpha>45밑창하단-2px. atlas외곽3px여유. 전신마스크없음",
+      "landmarks": "신규8셀포구/뒤점은Worker직접원본판독±4px. 기존90점독립Art와분리,독립재검토PENDING",
+      "visual_acceptance": "PENDING_SAME_SOURCE_HOST_RENDER_AND_INDEPENDENT_ART",
+      "external_asset_copied": false
     }
   ],
   "verification": {
@@ -608,6 +626,23 @@
     "independent_back_landmarks": "90셀 관측, source PNG6장의 SHA와 직접 alpha 대조",
     "front_status": "2셀 독립 Art 제안 적용; 나머지88 기존 수동표기. 전체 front/중복관구 의미/전체Art 수용 OPEN",
     "user_acceptance": "OPEN",
+    "main_integrated": false,
+    "scope_note": "보존한 이전 호스트 후보54입력. 현재 Worker4 통합 후보는 current_worker_candidate이며 이 호스트 자료를 신규PNG통합 수용 근거로 쓰지 않음"
+  },
+  "current_worker_candidate": {
+    "task": "reference-motion-followup",
+    "attempt": 4,
+    "base_commit": "cb822b4d6847f8ba21f810c3fd026dc10f39a07b",
+    "source_dirty": true,
+    "art_id": "cannon-south-moving-skills-work4",
+    "new_PNGs": true,
+    "image_creation_by_this_worker": false,
+    "runtime_integration": "IMPLEMENTED_NOT_ENGINE_VERIFIED",
+    "host_product_check": "REQUIRED_IMPORT_FAILED_IN_SANDBOX",
+    "same_source_render": "NOT_MEASURED",
+    "independent_art": "PENDING_CONTROLLER",
+    "EA003_EA005_R3_001": "RECHECK_REQUIRED",
+    "EA006_user_acceptance": "OPEN",
     "main_integrated": false
   }
 }

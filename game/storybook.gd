@@ -22,7 +22,9 @@ var shot_origins: Array[Dictionary] = []
 const MAX_SALVOS := 16
 var salvos: Array[Dictionary] = []
 var reward_bursts: Array[Dictionary] = []
+var impact_pulses: Array[Dictionary] = []
 var salvo_round := -1
+var salvo_layer: Node2D
 var spirit_sprite: Sprite2D
 var enemy_sprites: Dictionary = {}
 var emitters: Array[CPUParticles2D] = []
@@ -80,6 +82,11 @@ func setup(owner_battle: Control) -> void:
 	spirit_texture = _atlas(Rect2(1558, 10, 500, 700))
 	background = _sprite(MEADOW)
 	background.z_index = -10
+	salvo_layer = Node2D.new()
+	salvo_layer.name = "SalvoAfterglow"
+	salvo_layer.z_index = -3
+	add_child(salvo_layer)
+	salvo_layer.draw.connect(_draw_salvos)
 	var shadow := Image.create(64, 24, false, Image.FORMAT_RGBA8)
 	shadow.fill(Color.TRANSPARENT)
 	for y in range(24):
@@ -174,6 +181,11 @@ func _prune_shots() -> void:
 		return battle.bullets.any(func(bullet: Dictionary) -> bool: return is_same(bullet, shot.bullet)))
 
 func play_impact(bullet: Dictionary, target: Vector2) -> void:
+	# 실제 적중에만 짧고 응집된 섬광을 더한다. 새 피해나 보상 호출은 없다.
+	if bullet.tier >= 1:
+		if impact_pulses.size() >= 16:
+			impact_pulses.pop_front()
+		impact_pulses.append({"pos":target,"born":motion.clock,"tier":bullet.tier,"linked":bullet.get("spirit",false)})
 	# 판정 직전의 실제 적중 통지만 받는다. 표시 효과가 피해를 호출하지 않는다.
 	for salvo: Dictionary in salvos:
 		if is_same(salvo.shot.bullet,bullet):
@@ -200,6 +212,7 @@ func _sync_salvos() -> void:
 	if salvo_round != battle.round_number:
 		salvos.clear()
 		reward_bursts.clear()
+		impact_pulses.clear()
 		salvo_round = battle.round_number
 	for salvo: Dictionary in salvos:
 		if salvo.ended >= 0.0:
@@ -210,7 +223,8 @@ func _sync_salvos() -> void:
 		else:
 			# 표적 소멸/장면 전환으로 사라진 탄에는 가짜 적중점을 추가하지 않는다.
 			salvo.ended = motion.clock
-	var hold := .72
+	impact_pulses = impact_pulses.filter(func(pulse: Dictionary) -> bool: return motion.clock-pulse.born < .18)
+	var hold := .32
 	salvos = salvos.filter(func(salvo: Dictionary) -> bool: return salvo.ended < 0.0 or motion.clock - salvo.ended < hold)
 	reward_bursts = reward_bursts.filter(func(burst: Dictionary) -> bool: return motion.clock-burst.born < 1.0+burst.tier*.35)
 
@@ -224,7 +238,7 @@ func salvo_strand(salvo: Dictionary, lane: int) -> PackedVector2Array:
 		var tangent: Vector2 = battle._world(points[mini(i+1,points.size()-1)]) - battle._world(points[maxi(0,i-1)])
 		var t := float(i) / (points.size()-1)
 		# 같은 한 발의 마력 분지. 실제 지난 경로 양옆으로 펼쳐졌다 실제 적중점에 합류한다.
-		strand.append(battle._world(points[i]) + tangent.normalized().orthogonal() * sin(t*PI) * lane * (10.0 + salvo.tier*3.0) * unit)
+		strand.append(battle._world(points[i]) + tangent.normalized().orthogonal() * sin(t*PI) * lane * (2.0 + salvo.tier*.7) * unit)
 	return strand
 
 func projectile_position(bullet: Dictionary) -> Vector2:
@@ -330,6 +344,8 @@ func sync(_delta: float) -> void:
 	if is_instance_valid(motion):
 		motion.sync(_delta)
 		_sync_salvos()
+	if is_instance_valid(salvo_layer):
+		salvo_layer.queue_redraw()
 	queue_redraw()
 
 func _point(pos: Vector2) -> Vector2:
@@ -447,20 +463,37 @@ func _sync_enemies(unit: float) -> void:
 			enemy_sprites[id].free()
 			enemy_sprites.erase(id)
 
-func _draw() -> void:
-	if not is_instance_valid(battle):
+func _draw_salvos() -> void:
+	# 실제 궤적만 남기되 캐릭터/표적보다 뒤에서 읽히는 짧고 응집된 광류다.
+	if not is_instance_valid(battle) or not is_instance_valid(salvo_layer):
 		return
 	var unit: float = battle.content_width / 540.0
 	for salvo: Dictionary in salvos:
-		var fade: float = 1.0 if salvo.ended < 0.0 else clampf(1.0-(motion.clock-salvo.ended)/.72,0.0,1.0)
+		var fade: float = 1.0 if salvo.ended < 0.0 else clampf(1.0-(motion.clock-salvo.ended)/.32,0.0,1.0)
 		var color := Color("ffce6f") if salvo.linked else Color("62dba9")
-		var lanes: int = 2 if salvo.tier >= 3 else 1
+		var lanes: int = 1 if salvo.tier >= 3 else 0
 		for lane in range(-lanes,lanes+1):
 			var strand := salvo_strand(salvo,lane)
 			if strand.size() < 2:
 				continue
-			draw_polyline(strand,Color(color,fade*.26),(12.0-abs(lane)*2.0)*unit,true)
-			draw_polyline(strand,Color(color.lightened(.35),fade*.8),(3.5-abs(lane)*.6)*unit,true)
+			if lane == 0:
+				salvo_layer.draw_polyline(strand,Color(color,fade*.14),18.0*unit,true)
+				salvo_layer.draw_polyline(strand,Color(color.darkened(.25),fade*.38),10.0*unit,true)
+				salvo_layer.draw_polyline(strand,Color("fffacb",fade*.82),3.6*unit,true)
+			else:
+				salvo_layer.draw_polyline(strand,Color(color.lightened(.35),fade*.32),1.6*unit,true)
+
+func _draw() -> void:
+	if not is_instance_valid(battle):
+		return
+	var unit: float = battle.content_width / 540.0
+	for pulse: Dictionary in impact_pulses:
+		var age: float = clampf((motion.clock-pulse.born)/.18,0.0,1.0)
+		var at := _point(pulse.pos)
+		var side: float = (12.0+pulse.tier*12.0)*unit*(.8+age*.35)
+		var ink := Color("ffe0a0") if pulse.linked else Color("baf9e5")
+		draw_texture_rect(star_texture,Rect2(at-Vector2.ONE*side*.5,Vector2.ONE*side),false,Color(ink,(1.0-age)*.82))
+		draw_arc(at,side*.38,0.0,TAU,16,Color("fffacb",(1.0-age)*.65),1.8*unit,true)
 	for enemy in battle.enemies:
 		var p := _point(enemy.pos)
 		var width: float = (104.0 if enemy.boss else 42.0) * unit

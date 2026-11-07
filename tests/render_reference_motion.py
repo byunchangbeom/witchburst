@@ -40,7 +40,13 @@ def validate_directions(records, maximum=False):
             raise ValueError(f"시전/취소 전환 누락: {tier}/{direction}")
         if any(r["facing"] != direction for r in frames if r["state"].startswith("skill_")):
             raise ValueError(f"실제 시전 방향 불일치: {tier}/{direction}")
-        if len({r["lower_frame"] for r in frames if r["lower_visible"]}) < 2:
+        whole = [r for r in frames if r.get("whole_body")]
+        if any(tier != 3 or direction != "S" or r.get("pose_key") != "witch-cannon-south-skills"
+               or r["lower_visible"] or not 0 <= r["upper_frame"] < 8 for r in whole):
+            raise ValueError("전신 프레임 계약 불일치")
+        gait = {("whole", r["upper_frame"] % 4) if r.get("whole_body") else ("split", r["lower_frame"])
+                for r in frames if r.get("whole_body") or r["lower_visible"]}
+        if len(gait) < 2:
             raise ValueError(f"실제 하체 프레임 진행 누락: {tier}/{direction}")
         if maximum and sum(abs(r["actual_rule_speed"]-520) < .1 for r in frames) < 20:
             raise ValueError(f"최고속520 실제 이동 부족: {tier}/{direction}")

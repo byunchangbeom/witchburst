@@ -245,3 +245,23 @@ Root가 실제 도구로 UI그림/9patch를 공급하고 같은 후속 브랜치
 원본 호스트 living-motion의 game53 입력은 review-source-final.json(SHA256 2d7f28ef9d6b5d99a01dd9828f5a834861c5185b964428c8d9dfbd1469cca950)과 같다. 참고 영상/보드/Art 보고서는 cycle-continuation-20261107에 있고 부분 판독은 관리 검사를 대체하지 않는다. 기존 allowed 밖의 docs/improvement-queue.md·storage-ledger.json·production-cycles.md·executor-adoptions.json 및 AGENTS/tools는 원본에 보존해 docs를 소유한 정상 후속 Writer가 현재 실제 상태와 대조해 발행한다. 전체 아트·EA006 원작 이탈·사용자 디자인 반려는 OPEN이며 기술 PASS로 닫지 않는다.
 
 현재 복구 후 추가 검토: BLOCKED11의 두 실제 P2를 별도 호스트에서 보완 중이다. 실제 보행/분리하체를 거치는 지형/포구 검증과 독립 Art90셀 뒤점을 연결하며 기존 입력·물리·저장을 보존한다. 세부 source SHA/동일 소스 캡처/잔여WLM003/004 및 전체아트 OPEN은 art-direction.md를 따른다. 기술 수용 뒤 docs를 소유한 정상 후속에서 WB-IMP-010/012 기록을 발행하며 기존 living-motion 원본73파일은 계속 보존한다.
+
+
+## 2026-11-08 · 정상 WORK4 호스트 인계와 미해결 검토
+
+별도 Root 단일 Writer의 두 제품 수정 후보를 기존 reference-motion-followup의 REVIEW3 반려 후 정상 WORK4/attempt4 경계에서 인계했다. task 입력·ID·시도·원review·DB는 바꾸지 않았다. 실제 Worker4가 이어서 구현·새 검사·독립 리뷰를 받고 Controller가 commit/통합/push한다.
+
+- 원문: runtime task-recovery-20261107/mask-vfx-final-source-archive/manifest.json 및 reference-work4-host-handoff.json. cb822 기준 제품 차이는 storybook.gd와 motion-overrides.json 두 파일이다. 원본 living-motion73은 보존했고 임시 probe는 raw11파일/patch/base/58입력 보호 후 정상 정리했다.
+- 보조 제품 검사: 8017+749+44+74+1040 실패0. 같은 후보58입력의 실제1746 PNG는 mask-vfx-final-host/source-manifest.json, 실제 실행사본 대조는 mask-vfx-final-actual-copy-audit.json. 기존 관리4call이 이 전체자료를 실행했다고 표시하지 않는다.
+- 마스크: N/NE 상체 발 외곽과 하체에 잡힌 무기 조각 제거, S 상체 제거경계3px 보완은 후보다. 실제 Art 수용 전 미확정. mask-vfx-final-art-review.md가 존재하면 실제 남은 finding을 확인한다.
+- 효과: 넓은 잔광 망을 캐릭터 뒤쪽의 짧은 실제 궤적으로 좁히고 실제 적중에만 섬광을 더했다. 판정/재화/난수/물리는 변경하지 않는다. EA006 전체 표현·사용자 디자인 반려 OPEN.
+- 실제 REVIEW3 추가 반려: capture.gd until_phase가 규칙시간만 진행하여 motion.clock 기반 잔광이 누적된다. 기존 03-boss 등은 화력 비교 수용 근거에서 제외한다. Worker4는 규칙·표현 시간을 함께 진행하도록 수정하고 같은 소스 장면·방향/최고속/자연 자료를 다시 검증해야 한다. natural_growth_preview의600초 가속도 sync(0)이므로 첫 성장 표본48~101은 비교에서 제외하며 가속 중 표현시간도 함께 진행하도록 검토한다. 규칙을 바꾸거나 효과 밀도를 위해 캡처를 조작하지 않는다.
+- 전면 Art·OS 입력·전체 실시간 재생·청취·사람 재미·실기기는 호스트 검사로 수용하지 않는다. 남은 반려와 원시 실패를 보존한다.
+
+
+### WORK4 S 이동 시전 · 실제8프레임 신규자산 인계
+
+독립 Art는 새 padding 후보에서도 S prep1/3 긴 수평 절단선이 남아 CHANGES_REQUIRED라고 판독했다. 재차 마스크 확대만으로 완료 처리하지 않는다. Root host가 실제 image_gen으로 의상·허벅지·부츠가 이어진 S full-body 이동 준비4/이동 발동4프레임을 제작해 game/assets/art/cannon-south-moving-skills.png로 공급했다. 원PNG/계약은 runtime task-recovery-20261107/art-inputs/cannon-south-moving-contract.json이며 독립 원본 판독이 이어진다. 해당 S 이동 시전에는 새 실제 전신프레임을 stride와 연결하여 기존 split seam을 대신한다. 준비·발동·회복/취소 전환, foot접지와 muzzle/breech/효과방향을 실제 자산에 맞추고 기존 물리/입력/판정을 보존한다. 단일그림변형/다리합성만으로 완료 처리하지 않는다. 기존수용다른방향/행동은재사용한다. Root58입력1746은 이 PNG통합 전 보조후보여서 새 완료 근거가 아니며 Worker4 최종같은소스 전체보드/방향480/최고속480/자연성장과 새독립검토가 필요하다.
+
+
+WORK4 Worker 반환: S 이동 시전은 공급된 실제 전신8프레임을 stride에 연결하고, 준비/발동/회복/취소의 기존 절단 합성을 대신한다. capture의 상태 대기와 자연 성장600초 가속은 규칙·표현 시간을 함께 진행하도록 수정했다. 자산 계약·작은 재현·검사 결과와 한계는 [아트 기록](art-direction.md#2026-11-08--reference-motion-followup-work4-구현-반환)에 연결한다. Python 계약6개 PASS, Godot 제품 검사는 sandbox import 환경 오류로 미실행이며 새1x보드/연속자료·독립Art·사용자 수용은 대기다. 기존 EA003/005·R3-001의 실제 해소와 EA006 원작 반려를 완료로 바꾸지 않는다.

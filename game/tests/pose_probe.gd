@@ -1,8 +1,14 @@
 extends RefCounted
 ## 실제 표시 AtlasTexture와 Sprite 변환을 읽는 검사측 그림 랜드마크다.
 var landmarks: Dictionary = {}
+var south_landmarks: Dictionary = {}
 
 func record(visual: Node2D) -> Dictionary:
+	if visual.motion.pose_key == "witch-cannon-south-skills":
+		# 신규8셀은 Worker 원본 판독이다. 기존90점 독립 Art 출처와 구분한다.
+		if south_landmarks.is_empty():
+			south_landmarks = JSON.parse_string(FileAccess.get_file_as_string("res://tests/south-moving-observations.json"))
+		return south_landmarks.frames[visual.motion.pose_key][str(visual.motion.witch.frame)]
 	if landmarks.is_empty():
 		landmarks = JSON.parse_string(FileAccess.get_file_as_string("res://tests/weapon-axis-landmarks.json"))
 	return landmarks.frames.get(visual.motion.pose_key, {}).get(str(visual.motion.witch.frame), {})

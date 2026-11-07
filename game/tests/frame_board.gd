@@ -63,13 +63,18 @@ func run() -> void:
 				label_at(("이동 사격" if moving else "기존 걷기")+str(i%4+1),Vector2(x-48,394),15)
 			for i in range(8):
 				var x:=110.0+i*140
-				var upper:=pose(family+"-actions",row*8+(5 if i<4 else 6),Vector2(x,560),height,flip)
-				var lower:=AnimatedSprite2D.new()
-				layer.add_child(lower)
-				var move_dir: String=DIRECTIONS[(DIRECTIONS.find(dir)+2)%8]
-				b.visuals.motion.split_legs(upper,lower,family,move_dir,float(i%4),Vector2(x,560),height,1.0)
+				var action := "skill_prepare" if i<4 else "skill_release"
+				var whole: Dictionary = b.visuals.motion.moving_skill_pose(family,dir,action,float(i%4))
+				if not whole.is_empty():
+					pose(whole.key,whole.index,Vector2(x,560),height)
+				else:
+					var upper:=pose(family+"-actions",row*8+(5 if i<4 else 6),Vector2(x,560),height,flip)
+					var lower:=AnimatedSprite2D.new()
+					layer.add_child(lower)
+					var move_dir: String=DIRECTIONS[(DIRECTIONS.find(dir)+2)%8]
+					b.visuals.motion.split_legs(upper,lower,family,move_dir,float(i%4),Vector2(x,560),height,1.0)
 				label_at(("이동 준비" if i<4 else "이동 시전")+str(i%4+1),Vector2(x-48,582),15)
-			label_at("실제 상체/하체 합성 · 3행은 조준과 직각인 이동 다리 · 물리/판정 지연 없음",Vector2(18,632),16)
+			label_at("3행: 조준과 직각 이동 · 마법포S는 신규 전신8자세, 나머지는 실제 파츠 · 판정 지연 없음",Vector2(18,632),16)
 			await save("board-%s-%s"%[family,dir])
 	root.size=Vector2i(1000,640)
 	root.content_scale_size=Vector2i(1000,640)

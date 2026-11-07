@@ -23,6 +23,11 @@ func fresh() -> Control:
 	return b
 
 func run() -> void:
+	south_skill_checks()
+	if "--south-only" in OS.get_cmdline_user_args():
+		print("S 이동 시전 작은 재현: ", checks, "개, 실패 ", failures)
+		quit(1 if failures else 0)
+		return
 	salvo_checks()
 	reward_checks()
 	for dimensions in [Vector2(540,960), Vector2(540,1200), Vector2(720,960)]:
@@ -99,6 +104,52 @@ func run() -> void:
 	print("원작 대조 표현·최고속 회귀: ", checks, "개, 실패 ", failures)
 	quit(1 if failures else 0)
 
+func south_skill_checks() -> void:
+	# 기존 접합 반례의 작은 재현: S 조준 중 양방향 최고속 이동·취소·재시전.
+	var b := fresh()
+	b.equipped = 2
+	b.witch = Vector2(270,575)
+	b._start_boss()
+	b.shot_clock = 10.0
+	var v: Node2D = b.visuals
+	v.sync(0.0)
+	var m: Node2D = v.motion
+	b.enemies[0].pos = b._from_screen(v.witch_shadow.position+Vector2(0,150))
+	b.skill_button.button_down.emit()
+	var before := [b.boss_hp,b.skill_uses,b.cooldown]
+	var gait := {}
+	b.dragging = true
+	for i in range(18):
+		b.drag_target = b.witch+Vector2(60 if (i/3)%2==0 else -60,0)
+		var start: Vector2 = b.witch
+		b.advance(b.STEP)
+		v.sync(b.STEP)
+		gait[m.witch.frame] = true
+		require(m.state == "skill_prepare" and m.pose_key == m.SOUTH_SKILLS and m.witch.frame < 4, "S 이동 준비는 신규 전신4자세 선택")
+		require(not m.legs.visible and m.witch.material.get_shader_parameter("split_part") == 0, "S 전신에 기존 하체나 절단 마스크를 겹치지 않음")
+		require(absf(b.witch.distance_to(start)/b.STEP-520.0)<.01, "전신 교체가 실제 최고속 이동을 지연하지 않음")
+	require(gait.size()==4 and before==[b.boss_hp,b.skill_uses,b.cooldown], "준비4자세와 피해/쿨다운 무발동 보존")
+	b.skill_button.mouse_exited.emit()
+	v.sync(0.0)
+	require(m.state=="skill_settle" and m.pose_key==m.SOUTH_SKILLS and before==[b.boss_hp,b.skill_uses,b.cooldown], "S 취소도 접합 없는 전신으로 복귀하며 발동 없음")
+	b.enemies[0].pos = b._from_screen(v.witch_shadow.position+Vector2(0,150))
+	b.skill_button.button_down.emit()
+	require(b.cast_skill(), "S 이동 중 기존 스킬 즉시 발동")
+	v.sync(0.0)
+	require(m.state=="skill_release" and m.pose_key==m.SOUTH_SKILLS and m.witch.frame>=4 and b.skill_uses==before[1]+1, "S 전신 방출과 실제 한 번 발동")
+	var observation := preload("res://tests/pose_probe.gd").new()
+	require(observation.tip(v).distance_to(m.muzzle)<.01 and observation.back(v).distance_to(m.breech)<.01, "Worker 원본 관측점과 새 Sprite의 포구/뒤점 변환 일치; 독립 Art 수용 별도")
+	for i in range(10):
+		b.drag_target = b.witch+Vector2(60 if (i/3)%2==0 else -60,0)
+		b.advance(b.STEP)
+		v.sync(b.STEP)
+	require(m.state=="skill_recover" and m.pose_key==m.SOUTH_SKILLS and not m.legs.visible, "S 이동 회복도 전신 자세 유지")
+	b.drag_target = b.witch
+	b.advance(b.STEP)
+	v.sync(b.STEP)
+	require(not m.moving and m.pose_key=="witch-cannon-actions" and not m.legs.visible, "이동 중단은 기존 정지 회복으로 복귀")
+	b.free()
+
 func salvo_checks() -> void:
 	for tier in [0,3]:
 		var b := fresh()
@@ -141,8 +192,8 @@ func salvo_checks() -> void:
 		v.sync(.1)
 		require(v.motion.clock == paused, "공방은 광류 잔광 시간도 정지")
 		b.toggle_workshop()
-		for i in range(9):v.sync(.1)
-		require(v.salvos.is_empty(), "완료/중단 광류는 .72초 후 회수")
+		for i in range(4):v.sync(.1)
+		require(v.salvos.is_empty() and v.impact_pulses.is_empty(), "완료 광류 .32초·적중 섬광 .18초 뒤 회수")
 		for i in range(30):b._fire()
 		require(v.salvos.size() <= v.MAX_SALVOS, "최고 연사·정령 중첩에도 광류16개 상한")
 		b.round_number += 1

@@ -48,11 +48,13 @@ var aim_axis := Vector2.UP
 var muzzle := Vector2.ZERO
 var breech := Vector2.ZERO
 var spirit_mouth := Vector2.ZERO
+const SOUTH_SKILLS := "witch-cannon-south-skills"
 
 func setup(owner_visual: Node2D) -> void:
 	visual = owner_visual
 	battle = visual.battle
 	metadata = JSON.parse_string(FileAccess.get_file_as_string("res://assets/art/motion-atlas.json"))
+	metadata[SOUTH_SKILLS] = JSON.parse_string(FileAccess.get_file_as_string("res://assets/art/cannon-south-moving-skills.json"))
 	# 원래 atlas/PNG와 과거 판독을 보존하며 이번 배정의 셀/겹침만 적용한다.
 	var overrides: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/art/motion-overrides.json"))
 	for key: String in overrides.cells:
@@ -168,6 +170,13 @@ func reset_actions() -> void:
 	transition_at = -100.0
 	skill_preparing = false
 
+func moving_skill_pose(family: String, aim: String, action: String, gait: float) -> Dictionary:
+	# S 접합은 잘라 붙이지 않고 호스트가 공급한 실제 전신8프레임으로 재생한다.
+	if family != "witch-cannon" or aim != "S" or not action.begins_with("skill_"):
+		return {}
+	var row := 1 if action in ["skill_release", "skill_recover"] else 0
+	return {"key": SOUTH_SKILLS, "index": row * 4 + int(gait) % 4}
+
 func sync_party() -> void:
 	var tier: int = battle.power_tier()
 	if last_round != battle.round_number:
@@ -247,12 +256,16 @@ func sync_party() -> void:
 		columns = 6
 		column = int(stride) % 4
 		state = "walk"
-	pose_key = key
 	var index := direction_row(facing) * columns + column
+	var whole := moving_skill_pose(family, facing, state, stride) if moving else {}
+	if not whole.is_empty():
+		key = whole.key
+		index = whole.index
+	pose_key = key
 	_pose(witch, key, index, visual.witch_shadow.position, visual.actor_height("wand" if tier==0 else "cannon")*unit)
 	if facing in ["NW","W","SW"]:
 		witch.scale.x *= -1.0
-	legs.visible = moving and (state in ["release","recoil","recover","skill_prepare","skill_release","skill_recover","skill_settle"])
+	legs.visible = moving and whole.is_empty() and (state in ["release","recoil","recover","skill_prepare","skill_release","skill_recover","skill_settle"])
 	if legs.visible:
 		split_legs(witch,legs,family,move_direction,stride,visual.witch_shadow.position,visual.actor_height("wand" if tier==0 else "cannon")*unit,unit)
 	else:

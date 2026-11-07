@@ -1,0 +1,348 @@
+{
+  "png_sha256": "7bf80dce7451e5e7c83f4a3f07d9c33f5cb687164f81e347ade56004d12247f7",
+  "observer": "reference-motion-followup Worker4 직접원본판독; 독립 Art 아님",
+  "records": [
+    {
+      "index": 0,
+      "source_cell": [
+        0,
+        0,
+        443,
+        443
+      ],
+      "region": [
+        83,
+        8,
+        285,
+        397
+      ],
+      "front": [
+        244,
+        263
+      ],
+      "back": [
+        244,
+        213
+      ],
+      "sole": [
+        224,
+        400
+      ]
+    },
+    {
+      "index": 1,
+      "source_cell": [
+        443,
+        0,
+        444,
+        443
+      ],
+      "region": [
+        528,
+        8,
+        283,
+        397
+      ],
+      "front": [
+        243,
+        251
+      ],
+      "back": [
+        243,
+        206
+      ],
+      "sole": [
+        224,
+        400
+      ]
+    },
+    {
+      "index": 2,
+      "source_cell": [
+        887,
+        0,
+        443,
+        443
+      ],
+      "region": [
+        971,
+        10,
+        283,
+        397
+      ],
+      "front": [
+        240,
+        255
+      ],
+      "back": [
+        244,
+        208
+      ],
+      "sole": [
+        224,
+        402
+      ]
+    },
+    {
+      "index": 3,
+      "source_cell": [
+        1330,
+        0,
+        444,
+        443
+      ],
+      "region": [
+        1414,
+        11,
+        284,
+        394
+      ],
+      "front": [
+        242,
+        256
+      ],
+      "back": [
+        246,
+        210
+      ],
+      "sole": [
+        224,
+        400
+      ]
+    },
+    {
+      "index": 4,
+      "source_cell": [
+        0,
+        443,
+        443,
+        444
+      ],
+      "region": [
+        81,
+        454,
+        288,
+        399
+      ],
+      "front": [
+        241,
+        313
+      ],
+      "back": [
+        244,
+        269
+      ],
+      "sole": [
+        224,
+        405
+      ]
+    },
+    {
+      "index": 5,
+      "source_cell": [
+        443,
+        443,
+        444,
+        444
+      ],
+      "region": [
+        524,
+        454,
+        290,
+        397
+      ],
+      "front": [
+        244,
+        311
+      ],
+      "back": [
+        246,
+        263
+      ],
+      "sole": [
+        224,
+        403
+      ]
+    },
+    {
+      "index": 6,
+      "source_cell": [
+        887,
+        443,
+        443,
+        444
+      ],
+      "region": [
+        972,
+        454,
+        287,
+        403
+      ],
+      "front": [
+        240,
+        328
+      ],
+      "back": [
+        242,
+        273
+      ],
+      "sole": [
+        224,
+        409
+      ]
+    },
+    {
+      "index": 7,
+      "source_cell": [
+        1330,
+        443,
+        444,
+        444
+      ],
+      "region": [
+        1412,
+        454,
+        289,
+        402
+      ],
+      "front": [
+        243,
+        324
+      ],
+      "back": [
+        244,
+        270
+      ],
+      "sole": [
+        224,
+        408
+      ]
+    }
+  ],
+  "frames": {
+    "witch-cannon-south-skills": {
+      "0": {
+        "muzzle_canvas_uv": [
+          0.5507900677200903,
+          0.5936794582392777
+        ],
+        "rear_canvas_uv": [
+          0.5507900677200903,
+          0.48081264108352145
+        ],
+        "status": "WORKER_RAW_OBSERVATION_NOT_INDEPENDENT",
+        "uncertainty_canvas_px": [
+          4,
+          4
+        ]
+      },
+      "1": {
+        "muzzle_canvas_uv": [
+          0.5472972972972973,
+          0.5665914221218962
+        ],
+        "rear_canvas_uv": [
+          0.5472972972972973,
+          0.4650112866817156
+        ],
+        "status": "WORKER_RAW_OBSERVATION_NOT_INDEPENDENT",
+        "uncertainty_canvas_px": [
+          4,
+          4
+        ]
+      },
+      "2": {
+        "muzzle_canvas_uv": [
+          0.5417607223476298,
+          0.5756207674943566
+        ],
+        "rear_canvas_uv": [
+          0.5507900677200903,
+          0.46952595936794583
+        ],
+        "status": "WORKER_RAW_OBSERVATION_NOT_INDEPENDENT",
+        "uncertainty_canvas_px": [
+          4,
+          4
+        ]
+      },
+      "3": {
+        "muzzle_canvas_uv": [
+          0.545045045045045,
+          0.5778781038374717
+        ],
+        "rear_canvas_uv": [
+          0.5540540540540541,
+          0.47404063205417607
+        ],
+        "status": "WORKER_RAW_OBSERVATION_NOT_INDEPENDENT",
+        "uncertainty_canvas_px": [
+          4,
+          4
+        ]
+      },
+      "4": {
+        "muzzle_canvas_uv": [
+          0.5440180586907449,
+          0.704954954954955
+        ],
+        "rear_canvas_uv": [
+          0.5507900677200903,
+          0.6058558558558559
+        ],
+        "status": "WORKER_RAW_OBSERVATION_NOT_INDEPENDENT",
+        "uncertainty_canvas_px": [
+          4,
+          4
+        ]
+      },
+      "5": {
+        "muzzle_canvas_uv": [
+          0.5495495495495496,
+          0.7004504504504504
+        ],
+        "rear_canvas_uv": [
+          0.5540540540540541,
+          0.5923423423423423
+        ],
+        "status": "WORKER_RAW_OBSERVATION_NOT_INDEPENDENT",
+        "uncertainty_canvas_px": [
+          4,
+          4
+        ]
+      },
+      "6": {
+        "muzzle_canvas_uv": [
+          0.5417607223476298,
+          0.7387387387387387
+        ],
+        "rear_canvas_uv": [
+          0.54627539503386,
+          0.6148648648648649
+        ],
+        "status": "WORKER_RAW_OBSERVATION_NOT_INDEPENDENT",
+        "uncertainty_canvas_px": [
+          4,
+          4
+        ]
+      },
+      "7": {
+        "muzzle_canvas_uv": [
+          0.5472972972972973,
+          0.7297297297297297
+        ],
+        "rear_canvas_uv": [
+          0.5495495495495496,
+          0.6081081081081081
+        ],
+        "status": "WORKER_RAW_OBSERVATION_NOT_INDEPENDENT",
+        "uncertainty_canvas_px": [
+          4,
+          4
+        ]
+      }
+    }
+  },
+  "independent_review": "PENDING_CONTROLLER",
+  "sole_method": "원PNG alpha>45 외곽의 하단-2px. 거의투명한배경잔여를접지에사용하지않음. 가로피벗은고정224"
+}

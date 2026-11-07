@@ -16,10 +16,11 @@ func capture(label: String) -> void:
 	RenderingServer.force_draw(false)
 	assert(root.get_texture().get_image().save_png(directory.path_join("skill-%03d.png"%observations.size()))==OK)
 	var m: Node2D=b.visuals.motion
+	var whole_body: bool = m.pose_key == m.SOUTH_SKILLS
 	var emitted_axes: Array = []
 	for shot: Dictionary in b.visuals.shot_origins:
 		emitted_axes.append([shot.axis.x, shot.axis.y])
-	observations.append({"index":observations.size(),"label":label,"case_direction":case_direction,"case_tier":case_tier,"state":m.state,"facing":m.facing,"move":m.move_direction,"upper_frame":m.witch.frame,"lower_frame":m.legs.frame,"lower_visible":m.legs.visible,"stride":m.stride,"muzzle":[m.muzzle.x,m.muzzle.y],"breech":[m.breech.x,m.breech.y],"emitted_axes":emitted_axes,"skill_uses":b.skill_uses,"max_speed_fixture":max_speed,"actual_rule_speed":actual_speed})
+	observations.append({"index":observations.size(),"label":label,"case_direction":case_direction,"case_tier":case_tier,"state":m.state,"facing":m.facing,"move":m.move_direction,"pose_key":m.pose_key,"whole_body":whole_body,"upper_frame":m.witch.frame,"lower_frame":m.legs.frame,"lower_visible":m.legs.visible,"stride":m.stride,"muzzle":[m.muzzle.x,m.muzzle.y],"breech":[m.breech.x,m.breech.y],"emitted_axes":emitted_axes,"skill_uses":b.skill_uses,"max_speed_fixture":max_speed,"actual_rule_speed":actual_speed})
 func run() -> void:
 	directory=OS.get_environment("WITCHBURST_ARTIFACTS")
 	max_speed = "--max-speed" in OS.get_cmdline_user_args()

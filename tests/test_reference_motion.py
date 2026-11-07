@@ -17,7 +17,7 @@ class ReferenceMotion(unittest.TestCase):
         self.assertEqual(hashlib.sha256(image).hexdigest(), raw["png_sha256"])
         self.assertEqual(struct.unpack(">II", image[16:24]), (1774, 887))
         cells = json.loads((game / "assets/art/motion-overrides.json").read_text())["cells"]["witch-cannon-actions"]
-        self.assertEqual(set(cells), {str(i) for i in [4, 5, 6, 7, 12, 13, 14, 15]})
+        self.assertEqual(set(cells), {str(i) for i in [4, 5, 6, 7, 12, 13, 14, 15, 36, 37, 38, 39]})
         for record in raw["records"]:
             cell = cells[str(record["index"])]
             self.assertEqual(cell["region"], record["region"])
@@ -32,6 +32,40 @@ class ReferenceMotion(unittest.TestCase):
                 self.assertGreater(record["front"][0], record["back"][0], "NE 관구는 실제 관측상 오른쪽")
             self.assertLess(record["front"][1], record["back"][1], "관구의 앞이 실제 관측상 위쪽")
             self.assertLessEqual(len(cell["leg_regions"]), 64)
+
+    def test_south_whole_body_raw_contract(self):
+        game = Path(__file__).resolve().parents[1] / "game"
+        raw = json.loads((game / "tests/south-moving-observations.json").read_text())
+        image = (game / "assets/art/cannon-south-moving-skills.png").read_bytes()
+        self.assertEqual(hashlib.sha256(image).hexdigest(), raw["png_sha256"])
+        self.assertEqual(struct.unpack(">II", image[16:24]), (1774, 887))
+        cells = json.loads((game / "assets/art/cannon-south-moving-skills.json").read_text())["cells"]
+        self.assertEqual(len(cells), 8)
+        self.assertEqual(len({tuple(c["region"]) for c in cells}), 8)
+        for record, cell in zip(raw["records"], cells):
+            self.assertEqual(cell["region"], record["region"])
+            self.assertEqual(cell["leg_regions"], [], "전신 셀은 절단용 마스크를 쓰지 않음")
+            self.assertEqual(cell["file_override"], "cannon-south-moving-skills.png")
+            for key, observed in [("muzzle_uv", "front"), ("breech_uv", "back")]:
+                for axis in range(2):
+                    decoded = cell[key][axis]*cell["region"][axis+2]+cell["trim_offset"][axis]
+                    self.assertAlmostEqual(decoded, record[observed][axis])
+            self.assertGreater(record["front"][1], record["back"][1], "실제 S 포구는 뒤점보다 아래")
+            for axis in range(2):
+                self.assertEqual(cell["foot"][axis]+cell["trim_offset"][axis], record["sole"][axis])
+
+    def test_whole_body_gait_is_measured_and_cannot_hide_single_frame(self):
+        records = self.records()
+        for record in records:
+            if (record["case_tier"], record["case_direction"]) == (3, "S"):
+                record.update(whole_body=True, pose_key="witch-cannon-south-skills", lower_visible=False,
+                              upper_frame=record["index"] % 8)
+        self.assertEqual(validate_directions(records, True)["cases"], 16)
+        for record in records:
+            if record.get("whole_body"):
+                record["upper_frame"] = 0
+        with self.assertRaisesRegex(ValueError, "실제 하체 프레임 진행 누락"):
+            validate_directions(records, True)
 
     def records(self):
         result = []
