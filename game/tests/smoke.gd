@@ -17,8 +17,11 @@ func require(condition: bool, message: String) -> void:
 		quit(1)
 	assert(condition, message)
 
-func fresh(existing_path: String = "") -> Control:
+func fresh(existing_path: String = "", test_time: int = -1) -> Control:
 	var battle := scene.instantiate() as Control
+	if test_time >= 0:
+		battle.set_script(preload("res://tests/clock_battle.gd"))
+		battle.test_time = test_time
 	fixture_id += 1
 	battle.save_path = existing_path if not existing_path.is_empty() else OS.get_environment("WITCHBURST_TEST_ROOT").path_join("smoke-%d.json" % fixture_id)
 	root.add_child(battle)
@@ -183,9 +186,167 @@ func _run() -> void:
 	b.free()
 	_growth_checks()
 	_save_checks()
+	_lifecycle_checks()
+	_party_checks()
+	_muzzle_checks()
+	_terrain_checks()
+	_visual_checks()
 	await _input_checks()
 	print("제품 자동 검사: ", checks, "개, 실패 ", failures)
 	quit(1 if failures else 0)
+
+func _muzzle_checks() -> void:
+	var battle := fresh()
+	var visual: Node2D = battle.visuals
+	visual.breath.pause()
+	# 같은 좌표 헬퍼끼리 비교하지 않고, 원본 그림에서 판독한 포구 픽셀을
+	# 실제 Sprite2D 변환으로 옮겨 그리기에 쓰는 탄·입자 좌표와 대조한다.
+	for dimensions in [Vector2(540, 960), Vector2(540, 1200), Vector2(720, 960)]:
+		battle.size = dimensions
+		battle._layout_ui()
+		for tier in range(4):
+			battle.equipped = tier - 1
+			for breathing in [-1.0, 0.0, 1.0]:
+				visual.breath_amount = breathing
+				battle.bullets.clear()
+				visual.emitter_life.fill(0.0)
+				battle._fire()
+				visual.shot_tween.pause()
+				visual.sync(0.0)
+				var bullet: Dictionary = battle.bullets[0]
+				var sprite: Sprite2D = visual.witch_sprite
+				var pixel := Vector2(1061, 504.5) if tier == 0 else Vector2(1250, 504.5)
+				var actual_tip: Vector2 = preload("res://tests/pose_probe.gd").new().tip(visual)
+				require(visual.kick == 1.0, "최대 반동 재현")
+				require(actual_tip.distance_to(battle._world(battle.muzzle_position())) > 1.0, "변환 전 포구와 다른 비자명 재현")
+				require(visual.projectile_position(bullet).distance_to(actual_tip) < 0.01, "세 비율·네 성장·호흡별 실제 그림 포구에서 탄 표시")
+				require(visual.projectile_tail(bullet).distance_to(actual_tip) < 0.01, "비행거리 0의 꼬리는 포구에서 길이 0")
+				require(visual.emitters[0].position.distance_to(actual_tip) < 0.01, "실제 그림 포구에서 발사 입자 생성")
+				require(bullet.pos == battle.muzzle_position(), "표현 반동이 규칙상 발사 좌표를 바꾸지 않음")
+				require(visual.shot_origins.size() == 1, "이전 사격 표현 자료 회수")
+				# 원본 그림의 포구와 포신 뒤쪽 픽셀을 각각 변환한다.
+				var back_pixel := Vector2(920, 664.5) if tier == 0 else Vector2(800, 699.5)
+				var axis: Vector2 = (actual_tip - preload("res://tests/pose_probe.gd").new().back(visual)).normalized()
+				var launch: Vector2 = bullet.pos
+				battle.witch.x += 12.0
+				visual.kick = 0.0
+				visual.sync(0.0)
+				require(visual.projectile_position(bullet).distance_to(actual_tip) < 0.01 and visual.emitters[0].position.distance_to(actual_tip) < 0.01, "발사 후 포구가 움직여도 탄·입자 출발점 유지")
+				var unit: float = battle.content_width / 540.0
+				for travel in [1.0, 8.0, 24.0, 28.0, 48.0, 80.0, 200.0]:
+					bullet.pos = launch + Vector2(0, -travel)
+					var head: Vector2 = visual.projectile_position(bullet)
+					var tail: Vector2 = visual.projectile_tail(bullet)
+					require(head.is_finite() and tail.is_finite(), "유도 궤적의 유한 좌표")
+					require(head.distance_to(tail) <= minf(travel, 12 + tier * 12) * unit + 0.01, "꼬리 비행거리·성장 길이 상한")
+					if travel <= 28.0:
+						require(head.distance_to(actual_tip + axis * travel * unit) < 0.01, "세 비율·네 성장·호흡별 실제 표적으로 초기 비행")
+						var along: float = (tail - actual_tip).dot(axis)
+						require(along >= -0.01 and absf((tail - actual_tip).cross(axis)) < 0.01, "초기 꼬리가 포구 뒤로 침범하지 않음")
+				var target: Dictionary = battle._enemy_by_id(bullet.target)
+				bullet.pos = target.pos
+				require(visual.projectile_position(bullet).distance_to(visual._point(target.pos)) < 0.01, "표현 궤적은 풀밭에 배치한 표적으로 도착")
+				battle.witch.x -= 12.0
+	battle.bullets.clear()
+	visual.sync(0.0)
+	require(visual.shot_origins.is_empty(), "남은 탄이 없으면 표현 자료 전체 회수")
+	battle.spirit = true
+	battle.total_shots = 2
+	battle._fire()
+	var linked: Dictionary = battle.bullets[-1]
+	require(linked.get("spirit", false) and visual.projectile_tail(linked).distance_to(preload("res://tests/pose_probe.gd").new().spirit_tip(visual)) < 0.01, "정령 연계탄도 출발점에서 꼬리 길이 0")
+	linked.pos += Vector2(0, -8)
+	require(visual.projectile_position(linked).distance_to(visual.projectile_tail(linked)) <= 8.0 * battle.content_width / 540.0 + 0.01, "정령 연계탄도 비행거리만큼 꼬리 성장")
+	# 표현 Tween과 sync 호출 횟수가 달라도 실제 전투 궤도·피해는 같아야 한다.
+	var reference := fresh()
+	var animated := fresh()
+	for i in range(120):
+		animated.visuals.breath_amount = sin(i)
+		animated.visuals.kick = float(i % 2)
+		animated.visuals.sync(0.0)
+		reference.advance(1.0 / 60.0)
+		animated.advance(1.0 / 60.0)
+	require(reference.bullets == animated.bullets and reference.enemies == animated.enemies and reference.total_hits == animated.total_hits and reference.random.state == animated.random.state, "호흡·반동·렌더 횟수가 달라도 전투 규칙 동일")
+	reference.free()
+	animated.free()
+	battle.free()
+
+func _terrain_checks() -> void:
+	var battle := fresh()
+	var visual: Node2D = battle.visuals
+	for dimensions in [Vector2(540, 960), Vector2(540, 1200), Vector2(720, 960)]:
+		battle.size = dimensions
+		battle._layout_ui()
+		for boss in [false, true]:
+			for x in ([205, 270, 335] if boss else [99, 115, 270, 425, 441]):
+				for y in ([300, 312, 324] if boss else [245, 350, 465]):
+					var enemy: Dictionary = battle.enemies[0]
+					enemy.boss = boss
+					enemy.pos = Vector2(x, y)
+					# 생물 종류에 맞는 실제 텍스처로 검사한다.
+					visual.enemy_sprites[enemy.id].texture = visual.boss_texture if boss else visual.seed_texture
+					visual.sync(0.0)
+					var shadow: Sprite2D = visual.enemy_shadows[enemy.id]
+					var foot: Vector2 = visual.background.to_local(shadow.global_position) + visual.MEADOW.get_size() * 0.5
+					# 원본을 직접 보고 잡은 보수 풀밭 영역. 그림자 폭도 경계 안에 둔다.
+					var half_width: float = 32 * shadow.scale.x / visual.background.scale.x
+					require(foot.y > 650.0 - (foot.x - half_width) * 0.5, "세 비율·생성/이동 범위에서 발과 그림자가 절벽 아래 풀밭에 놓임")
+					require(foot.y < 1480.0 - (foot.x + half_width) * 0.5, "아래 절벽에도 발과 그림자가 들어가지 않음")
+					var sprite: Sprite2D = visual.enemy_sprites[enemy.id]
+					require(absf(sprite.position.x - shadow.position.x) < 0.01 and sprite.position.y < shadow.position.y, "생물과 발밑 그림자 정렬")
+					require(enemy.pos == Vector2(x, y), "풀밭 보정이 규칙 좌표를 쓰지 않음")
+	battle.free()
+
+func _visual_checks() -> void:
+	# 텍스처·재질의 실제 연결과 표현 계층의 상한을 검사한다. GPU 판정은 아니다.
+	var battle := fresh()
+	var visual: Node2D = battle.visuals
+	visual.sync(0.0)
+	require(visual.background.texture.get_size() == Vector2(1052, 1495), "신규 풀밭 배경 실제 로드")
+	require(is_equal_approx(visual.background.scale.x, visual.background.scale.y), "풀밭·수목 원본 종횡비 보존")
+	require(visual.motion.witch.sprite_frames.get_frame_texture("poses", 0).atlas.resource_path.ends_with("witch-wand-directions.png"), "시작 마녀 실제 자세 프레임 적용")
+	require(visual.witch_sprite.texture.get_image().get_format() == Image.FORMAT_RGBA8, "마녀 투명 텍스처 로드")
+	require(visual.enemy_sprites.size() == 1 and visual.seed_texture.atlas == visual.CREATURES, "저주씨앗 아틀라스 실제 적용")
+	var enemy: Dictionary = battle.enemies[0]
+	var sprite: Sprite2D = visual.enemy_sprites[enemy.id]
+	battle._hit(enemy, 1.0)
+	visual.sync(0.0)
+	require(sprite.material is ShaderMaterial and sprite.material.shader == visual.FLASH and sprite.material.get_shader_parameter("flash") == 1.0, "피격 흰색 셰이더 실제 연결·값")
+	var snapshot: Dictionary = battle.progress_data()
+	var shots: int = battle.total_shots
+	var random_state: int = battle.random.state
+	for i in range(30):
+		visual.sync(1.0 / 60.0)
+	require(battle.progress_data() == snapshot and battle.total_shots == shots and battle.random.state == random_state, "렌더링이 성장·저장·전투 난수에 영향 없음")
+	battle._fire()
+	require(battle.bullets[-1].pos == battle.muzzle_position(), "초기 규칙 발사 좌표 보존")
+	battle.equipped = 2
+	battle.spirit = true
+	visual.sync(0.0)
+	require(visual.witch_sprite.texture.resource_path.ends_with("witch-cannon.png") and visual.motion.spirit.visible, "성장 마법포·여우정령 실제 적용")
+	require(visual.spirit_sprite.material.shader == visual.PULSE and visual.spirit_sprite.material.get_shader_parameter("pulse") > 0.0, "정령 맥동 셰이더 실제 적용")
+	battle._fire()
+	require(battle.bullets[-1].pos == battle.muzzle_position() and battle.bullets[-1].tier == 3, "성장 규칙 발사 좌표·단계 보존")
+	var baseline: int = visual.get_child_count()
+	for i in range(100):
+		battle._burst(battle.witch, battle.MINT, 40)
+	require(visual.get_child_count() == baseline and visual.emitters.size() == 12, "입자 100회에도 12슬롯 재사용·노드 증가 없음")
+	require(visual.emitters.all(func(emitter: CPUParticles2D) -> bool: return emitter.amount <= 18 and emitter.one_shot), "동시 입자 상한 216·일회 방출")
+	require(visual.emitters.all(func(emitter: CPUParticles2D) -> bool: return visual.z_index + emitter.z_index < battle.workshop.z_index), "보상 입자가 공방·결과 창과 강화 UI를 덮지 않음")
+	battle.advance(1.0)
+	visual.sync(1.0)
+	battle._burst(battle.witch, battle.MINT, 25)
+	require(visual.emitter_life.any(func(until: float) -> bool: return until > battle.elapsed), "만료 후 입자 슬롯 재사용")
+	battle.enemies.clear()
+	visual.sync(0.0)
+	require(visual.enemy_sprites.is_empty() and visual.get_child_count() < baseline, "정화된 적 스프라이트 회수")
+	battle._start_boss()
+	visual.sync(0.0)
+	sprite = visual.enemy_sprites[battle.enemies[0].id]
+	require(sprite.texture == visual.boss_texture and sprite.material.shader == visual.FLASH, "큰 가시왕 그림·피격 재질 적용")
+	battle._refresh_ui()
+	require(battle.upgrades.attack.get("value") == str(roundi(battle.attack_damage())) and battle.upgrades.speed.get("value").ends_with("/초"), "강화 카드 현재 능력값 표시")
+	battle.free()
 
 func _input_checks() -> void:
 	var battle := fresh()
@@ -422,4 +583,217 @@ func _save_checks() -> void:
 	battle = fresh(filename)
 	require(battle.coins == 0 and battle.rebirths == 0 and battle.store.valid(battle.progress_data()), "주·백업 모두 불량이어도 새 진행 복구")
 	require(Array(DirAccess.get_files_at(filename.get_base_dir())).any(func(entry: String) -> bool: return entry.begins_with(filename.get_file() + ".invalid-")), "불량 저장 원문 별도 보존")
+	battle.free()
+
+func _lifecycle_checks() -> void:
+	var pause := MainLoop.NOTIFICATION_APPLICATION_PAUSED
+	var resume := MainLoop.NOTIFICATION_APPLICATION_RESUMED
+	var out := MainLoop.NOTIFICATION_APPLICATION_FOCUS_OUT
+	var inside := MainLoop.NOTIFICATION_APPLICATION_FOCUS_IN
+	# 단일 종류·중복·교차·무관한 양의 알림. 먼저 해제된 사유만으로 풀리지 않는다.
+	for order in [[out, inside], [pause, resume], [out, pause, inside, resume],
+		[pause, out, resume, inside], [out, out, resume, inside], [pause, pause, inside, resume],
+		[inside, resume, out, pause, pause, resume, inside, inside, resume]]:
+		var battle := fresh("", 1000000)
+		battle.coins = 137
+		battle.materials = 11
+		battle.pending_coins = 7
+		battle.rebirths = 2
+		battle.boss_cleared = true
+		battle._start_boss()
+		var entered := false
+		var paused := false
+		var focused_out := false
+		for event in order:
+			if event == out:
+				focused_out = true
+			elif event == inside:
+				focused_out = false
+			elif event == pause:
+				paused = true
+			elif event == resume:
+				paused = false
+			if not entered and (paused or focused_out):
+				entered = true
+			battle.test_time = 1000600 if event in [inside, resume] else 1000000
+			battle.notification(event)
+			require(battle.is_suspended() == (paused or focused_out), "종류별 정지 사유·교차/중복 알림 해제")
+			if battle.is_suspended():
+				var snapshot: Dictionary = battle.progress_data()
+				var elapsed: float = battle.elapsed
+				var boss_time: float = battle.boss_time
+				var shots: int = battle.total_shots
+				var disk: String = FileAccess.get_file_as_string(battle.save_path)
+				battle.advance(600)
+				battle._process(600)
+				require(not battle.buy_upgrade("attack") and battle.draw_tool() == -1 and not battle.craft_tool() and not battle.merge_tool(0) and not battle.equip_tool(-1) and not battle.unlock_spirit() and not battle.rebirth() and not battle.cast_skill() and not battle.claim_offline() and not battle.save_progress(), "정지 중 성장·수령·스킬·일반 저장 차단")
+				battle._fire()
+				battle.restart_battle()
+				require(battle.progress_data() == snapshot and battle.elapsed == elapsed and battle.boss_time == boss_time and battle.total_shots == shots, "정지 중 메모리·전투·보스 시간 보존")
+				require(FileAccess.get_file_as_string(battle.save_path) == disk and battle.suspended_at == 1000000, "중복 진입·자동저장이 최초 기준과 디스크를 덮지 않음")
+			require(not entered or battle.coins == 137, "진입/복귀에 오래된 파일을 재로드하지 않음")
+		require(entered and not battle.is_suspended() and battle.pending_coins == 47 and battle.reward_cursor == 1000600, "10분 복귀·기존 pending·환생별 비율 한 번 정산")
+		var elapsed: float = battle.elapsed
+		battle._process(600)
+		require(battle.elapsed == elapsed and battle.boss_time == battle.BOSS_LIMIT, "복귀 첫 큰 delta와 누적 시뮬레이션 따라잡기 폐기")
+		battle.test_time = 1000605
+		battle._process(5.0)
+		require(battle.pending_coins == 47 and battle.reward_cursor == 1000605, "복귀 다음 자동저장이 정산 보상을 보존")
+		require(battle.claim_offline() and battle.coins == 184 and not battle.claim_offline(), "복귀 보상 한 번 수령")
+		var filename: String = battle.save_path
+		battle.free()
+		battle = fresh(filename, 1000605)
+		require(battle.pending_coins == 0 and battle.coins == 184, "자동저장·수령·새 씬 재로드 손실/중복 없음")
+		battle.free()
+	# 경계 시간·미래 커서·시계 역행. saved_at도 후퇴하지 않는다.
+	for fixture in [[59, 0, 0, 0], [60, 0, 0, 2], [600, 7, 0, 27],
+		[86400 * 3, 12, 0, 2880], [600, 2875, 0, 2880],
+		[600, 7, 3600, 7], [-600, 7, 0, 7], [3660, 7, 3600, 9]]:
+		var battle := fresh("", 1000000)
+		battle.pending_coins = fixture[1]
+		battle.reward_cursor = 1000000 + fixture[2]
+		battle.saved_at = battle.reward_cursor
+		battle.notification(out)
+		battle.test_time += fixture[0]
+		battle.notification(inside)
+		require(not battle.is_suspended() and battle.pending_coins == fixture[3], "분 버림·24h·총 pending 상한·미래 커서·역행: " + str(fixture))
+		require(battle.reward_cursor == maxi(1000000 + fixture[2], battle.test_time) and battle.saved_at == maxi(1000000 + fixture[2], battle.test_time), "복귀 커서·저장시각 단조 증가")
+		battle.free()
+	# 진입 및 복귀 원자저장 실패: 미저장 메모리 진행·최초 기준을 성공까지 고정한다.
+	for entry_fails in [false, true]:
+		var battle := fresh("", 1000000)
+		var filename: String = battle.save_path
+		var old_disk: String = FileAccess.get_file_as_string(filename)
+		battle.coins = 333
+		battle.materials = 17
+		battle.inventory = [2, 1, 0]
+		battle.equipped = 1
+		battle.pending_coins = 11
+		battle.levels.attack = 3
+		battle.shot_clock = 1000.0
+		var memory: Dictionary = battle.progress_data()
+		var invalid_path := OS.get_environment("WITCHBURST_TEST_ROOT").path_join("missing-resume/progress.json")
+		if entry_fails:
+			battle.store.path = invalid_path
+		battle.notification(out)
+		require(battle.is_suspended() and battle.progress_data() == memory, "진입 저장 성공/실패 모두 메모리 스냅샷 보존")
+		if entry_fails:
+			require(FileAccess.get_file_as_string(filename) == old_disk, "진입 실패 시 원본 파일 보존")
+		battle.store.path = invalid_path
+		battle.test_time = 1000600
+		battle.notification(inside)
+		require(battle.is_suspended() and battle.progress_data() == memory, "복귀 저장 실패 후보를 메모리에 노출하지 않음")
+		var disk: String = FileAccess.get_file_as_string(filename)
+		battle.test_time = 1000900
+		battle._process(600)
+		battle.notification(inside)
+		require(battle.is_suspended() and battle.progress_data() == memory and not battle.save_progress(), "실패 중 지연 재시도·중복 복귀·일반저장에도 메모리 불변")
+		require(FileAccess.get_file_as_string(filename) == disk, "실패 후보가 기존 디스크 커서를 덮지 않음")
+		# 재실제 진입이 오면 최초 기준은 유지하면서 두 번째 사유를 기다린다.
+		battle.notification(pause)
+		require(not battle._save_suspend_entry(), "정지 중 종료용 스냅샷 저장 실패도 계속 정지")
+		battle.store.path = filename
+		require(battle._save_suspend_entry(), "종료용 저장은 최초 정지 시각만 확정")
+		var frozen_disk: Dictionary = battle.store._read(filename)
+		require(frozen_disk.reward_cursor == 1000000 and frozen_disk.pending_coins == 11 and battle.progress_data() == memory, "종료용 저장이 복귀 실패 중 커서를 앞지르지 않음")
+		battle.test_time = 1001200
+		battle._process(1)
+		require(battle.is_suspended() and battle.suspended_at == 1000000, "재진입 사유가 남으면 성공 경로에서도 재개 금지")
+		battle.notification(resume)
+		require(not battle.is_suspended() and battle.pending_coins == 51 and battle.reward_cursor == 1001200, "지연 성공 시 최초 pending에서 20분 재계산·한 번 반영")
+		require(battle.coins == 333 and battle.materials == 17 and battle.inventory == [2, 1, 0] and battle.levels.attack == 3, "진입 실패 뒤 현재 진행 보존")
+		battle._process(600)
+		battle.test_time += 5
+		battle._process(5)
+		require(battle.claim_offline() and battle.coins == 384, "실패 회복 후 자동저장·수령")
+		battle.free()
+		battle = fresh(filename, 1001205)
+		require(battle.pending_coins == 0 and battle.coins == 384 and battle.levels.attack == 3, "실패 회복 뒤 새 씬 디스크 재로드")
+		battle.free()
+	# 추가 알림 없이도 _process의 제한된 재시도로 성공할 수 있다.
+	var battle := fresh("", 1000000)
+	var filename: String = battle.save_path
+	battle.notification(pause)
+	battle.store.path = OS.get_environment("WITCHBURST_TEST_ROOT").path_join("missing-auto/progress.json")
+	battle.test_time = 1000600
+	battle.notification(resume)
+	battle.store.path = filename
+	battle.test_time = 1000900
+	battle._process(1.0)
+	require(not battle.is_suspended() and battle.pending_coins == 30, "추가 OS 알림 없는 지연 재시도도 성공 시각까지 정산")
+	battle.free()
+
+func _party_checks() -> void:
+	var probe := preload("res://tests/party_probe.gd").new()
+	var battle := fresh()
+	var visual: Node2D = battle.visuals
+	visual.breath.pause()
+	battle.spirit = true
+	for dimensions in [Vector2(540, 960), Vector2(540, 1200), Vector2(720, 960)]:
+		battle.size = dimensions
+		battle._layout_ui()
+		for equipped in [-1, 2]:
+			battle.equipped = equipped
+			for breath_value in [-1.0, 0.0, 1.0]:
+				visual.breath_amount = breath_value
+				for kick_value in [0.0, 1.0]:
+					visual.kick = kick_value
+					for x in [65.0, 270.0, 440.0, 475.0]:
+						var previous_y := -INF
+						var previous_rule_y := 0.0
+						for y in [490.0, 490.1, 510.0, 575.0, 625.0, 659.9, 660.0]:
+							battle.witch = Vector2(x, y)
+							battle.elapsed = PI / 6 if breath_value > 0 else -PI / 6
+							var state: Dictionary = battle.progress_data()
+							visual.sync(0.0)
+							var measured: Dictionary = probe.measure(battle)
+							require(measured.rock_fraction < 0.10 and measured.shadow_rock_fraction < 0.40, "원본 배경 픽셀에서 발·그림자의 갈색 절벽 영역 침범 없음")
+							require(measured.samples > 100 and measured.min_diagonal > 650.0 and measured.max_diagonal < 1480.0, "실제 불투명 발·그림자·정령이 두 절벽 사이 풀밭 안")
+							require(measured.display[1] > previous_y, "고정 x의 세로 입력은 멈춤·도약·역행 없이 증가")
+							if is_finite(previous_y):
+								var original_step: float = battle._world(Vector2(x, y)).y - battle._world(Vector2(x, previous_rule_y)).y
+								require(measured.display[1] - previous_y <= original_step + 0.01, "경계 미소 입력의 도약·비연속 없음")
+							previous_y = measured.display[1]
+							previous_rule_y = y
+							require(battle.witch == Vector2(x, y) and battle.progress_data() == state, "표현 변위를 규칙/저장에 되먹이지 않음")
+			# 실제 드래그 이동·해제·자동복귀와 발사 후 이동을 검사한다.
+			battle.witch = Vector2(270, 625)
+			battle.dragging = true
+			battle._drag_position(battle._world(Vector2(440, 660)))
+			battle.shot_clock = 1000
+			visual.motion.previous_rule = battle.witch
+			var walking_frames := {}
+			for frame in range(50):
+				battle.advance(1.0 / 60.0)
+				visual.sync(1.0 / 60.0)
+				if visual.motion.state == "walk":
+					walking_frames[visual.motion.witch.frame] = true
+				var measured: Dictionary = probe.measure(battle)
+				require(measured.min_diagonal > 650 and measured.max_diagonal < 1480, "드래그 경계로 이동 중에도 실제 발·그림자 풀밭 유지")
+			require(walking_frames.size() >= 2, "지형 회귀가 정지 그림 대신 실제 보행 프레임을 거침")
+			battle._drag_position(battle._world(Vector2(65, 490)))
+			battle.advance(1.0 / 60.0)
+			visual.sync(1.0 / 60.0)
+			battle.total_shots = 2
+			battle.bullets.clear()
+			battle._fire()
+			visual.shot_tween.pause()
+			require(visual.motion.moving and visual.motion.legs.visible, "지형 회귀가 실제 이동 발사·분리 하체를 거침")
+			var sprite: Sprite2D = visual.witch_sprite
+			var tip := Vector2(1061, 504.5) if equipped == -1 else Vector2(1250, 504.5)
+			var actual: Vector2 = preload("res://tests/pose_probe.gd").new().tip(visual)
+			var spirit_pixel: Vector2 = Vector2(420, 340) - visual.spirit_sprite.texture.get_size() * 0.5
+			var linked: Vector2 = preload("res://tests/pose_probe.gd").new().spirit_tip(visual)
+			var frozen: Vector2 = visual.projectile_position(battle.bullets[0])
+			require(frozen.distance_to(actual) < 0.01 and visual.projectile_position(battle.bullets[1]).distance_to(linked) < 0.01, "드래그·최대 반동·정령 진동의 실제 그림 발사점")
+			battle.witch += Vector2(-25, -25)
+			visual.sync(0.0)
+			require(visual.projectile_position(battle.bullets[0]).distance_to(frozen) < 0.01, "발사 뒤 본체 이동에도 출발점 유지")
+			battle.dragging = false
+			battle.manual_grace = 0.0
+			for frame in range(180):
+				battle.advance(1.0 / 60.0)
+				visual.sync(1.0 / 60.0)
+				var measured: Dictionary = probe.measure(battle)
+				require(measured.min_diagonal > 650 and measured.max_diagonal < 1480, "해제 후 자동 이동 중 풀밭 유지")
 	battle.free()

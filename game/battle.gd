@@ -7,11 +7,11 @@ const FOREST_GOAL := 12
 const BOSS_HP := 720.0
 const BOSS_LIMIT := 24.0
 const SKILL_COOLDOWN := 8.0
-const INK := Color("eef4e6")
-const MUTED := Color("9bb9b3")
-const GOLD := Color("ffdb89")
+const INK := Color("543725")
+const MUTED := Color("76533a")
+const GOLD := Color("fff0a0")
 const MINT := Color("8af2cc")
-const LAVENDER := Color("c1a9ff")
+const LAVENDER := Color("f6c783")
 
 const Store = preload("res://progress_store.gd")
 const DRAW_COST := 12
@@ -31,6 +31,13 @@ var save_path := "user://progress.json"
 var store = Store.new()
 var save_status := "기기 내 자동 저장"
 var save_clock := 0.0
+# 정지 사유는 알림 종류별로만 해제한다. 실패 후보는 메모리에 반영하지 않는다.
+var pause_reason := false
+var focus_reason := false
+var suspend_snapshot: Dictionary = {}
+var suspended_at := 0
+var resume_retry_clock := 0.0
+var skip_resume_delta := false
 var growth_random := RandomNumberGenerator.new()
 var workshop: Panel
 var workshop_button: Button
@@ -69,10 +76,10 @@ var recoil := 0.0
 var skill_flash := 0.0
 var enemies: Array[Dictionary] = []
 var bullets: Array[Dictionary] = []
-var particles: Array[Dictionary] = []
 var floats: Array[Dictionary] = []
 var random := RandomNumberGenerator.new()
 var font: SystemFont
+var visuals: Node2D
 var sound: Node
 var status_label: Label
 var wallet_label: Label
@@ -113,7 +120,15 @@ func _ready() -> void:
 	theme = game_theme
 	sound = load("res://sound.gd").new()
 	add_child(sound)
+	visuals = preload("res://storybook.gd").new()
+	add_child(visuals)
+	visuals.setup(self)
 	_build_ui()
+	for region_label in [title_label,chapter_label]:
+		region_label.add_theme_color_override("font_color",Color.WHITE)
+		region_label.add_theme_color_override("font_outline_color",INK)
+		region_label.add_theme_constant_override("outline_size",3)
+	visuals.motion.bind_controls()
 	resized.connect(_layout_ui)
 	_layout_ui()
 	_spawn_enemy()
@@ -144,6 +159,8 @@ func power_tier() -> int:
 	return maxi(2 if levels.attack >= 4 else (1 if levels.attack >= 2 else 0), equipped + 1)
 
 func buy_upgrade(kind: String) -> bool:
+	if is_suspended():
+		return false
 	if not levels.has(kind) or levels[kind] >= 20:
 		return false
 	var cost := upgrade_cost(kind)
@@ -163,15 +180,28 @@ func buy_upgrade(kind: String) -> bool:
 	return true
 
 func _process(delta: float) -> void:
+	if is_suspended():
+		if not pause_reason and not focus_reason:
+			resume_retry_clock += minf(delta, 1.0)
+			if resume_retry_clock >= 1.0:
+				resume_retry_clock = 0.0
+				_resume_progress()
+		return
+	if skip_resume_delta:
+		skip_resume_delta = false
+		return
 	advance(delta)
 	save_clock += delta
 	if save_clock >= 5.0:
 		save_clock = 0.0
 		save_progress()
 	_refresh_ui()
+	visuals.sync(delta)
 	queue_redraw()
 
 func advance(delta: float) -> void:
+	if is_suspended():
+		return
 	# 프레임 수가 아닌 경과 초를 누적한다. 검사는 같은 함수를 사용한다.
 	accumulator += delta
 	while accumulator + 0.0000001 >= STEP:
@@ -179,15 +209,12 @@ func advance(delta: float) -> void:
 		_tick(STEP)
 
 func _tick(dt: float) -> void:
+	if is_suspended():
+		return
 	elapsed += dt
 	recoil = maxf(0.0, recoil - dt * 5.0)
 	skill_flash = maxf(0.0, skill_flash - dt * 2.0)
 	notice_time = maxf(0.0, notice_time - dt)
-	for p in particles:
-		p.pos += p.velocity * dt
-		p.velocity *= exp(-dt * 3.0)
-		p.life -= dt
-	particles = particles.filter(func(p: Dictionary) -> bool: return p.life > 0.0)
 	for f in floats:
 		f.pos.y -= 30.0 * dt
 		f.life -= dt
@@ -253,19 +280,23 @@ func _enemy_by_id(id: int) -> Dictionary:
 	return {}
 
 func _fire() -> void:
+	if is_suspended():
+		return
 	var target: Dictionary = enemies[0]
 	for enemy in enemies:
 		if enemy.pos.distance_squared_to(witch) < target.pos.distance_squared_to(witch):
 			target = enemy
-	bullets.append({"pos": witch + Vector2(25, -26), "target": target.id, "damage": attack_damage(), "life": 2.0, "tier": power_tier()})
+	var bullet := {"pos": muzzle_position(), "target": target.id, "damage": attack_damage(), "life": 2.0, "tier": power_tier()}
+	bullets.append(bullet)
 	total_shots += 1
 	# 해금한 정령은 매 세 번째 사격에 연계탄을 보탠다.
 	if spirit and total_shots % 3 == 0:
 		bullets.append({"pos": witch + Vector2(-58, -18), "target": target.id, "damage": attack_damage() * 0.65, "life": 2.0, "tier": power_tier(), "spirit": true})
 		spirit_shots += 1
 	recoil = 1.0
-	_burst(witch + Vector2(25, -26), MINT, 3 + power_tier() * 2)
-	sound.play("shot")
+	if is_instance_valid(visuals):
+		visuals.play_shot(bullet)
+	sound.play("shot" if power_tier() == 0 else "cannon")
 
 func _hit(enemy: Dictionary, damage: float) -> void:
 	if enemy.hp <= 0:
@@ -274,7 +305,7 @@ func _hit(enemy: Dictionary, damage: float) -> void:
 	enemy.flash = 1.0
 	total_hits += 1
 	_burst(enemy.pos, LAVENDER, 6 + power_tier() * 3)
-	_float_text(enemy.pos + Vector2(0, -30), str(int(ceil(damage))), INK)
+	_float_text(enemy.pos + Vector2(0, -30), str(int(ceil(damage))), Color("fffef1"))
 	sound.play("hit")
 	if enemy.boss:
 		boss_hp = enemy.hp
@@ -307,11 +338,15 @@ func _start_boss() -> void:
 	_refresh_ui()
 
 func cast_skill() -> bool:
+	if is_suspended() or (is_instance_valid(workshop) and workshop.visible):
+		return false
 	if phase != Phase.BOSS or cooldown > 0.0:
 		return false
 	cooldown = SKILL_COOLDOWN
 	skill_uses += 1
 	skill_flash = 1.0
+	if is_instance_valid(visuals.motion):
+		visuals.motion.on_skill()
 	sound.play("skill")
 	for enemy in enemies.duplicate():
 		_hit(enemy, 210.0 + attack_damage() * 5.0)
@@ -319,6 +354,7 @@ func cast_skill() -> bool:
 	return true
 
 func _finish(won: bool) -> void:
+	result_at = elapsed + .45
 	phase = Phase.WON if won else Phase.LOST
 	bullets.clear()
 	dragging = false
@@ -332,6 +368,8 @@ func _finish(won: bool) -> void:
 	_refresh_ui()
 
 func restart_battle() -> void:
+	if is_suspended():
+		return
 	if phase != Phase.LOST and phase != Phase.WON:
 		return
 	round_number += 1
@@ -355,19 +393,23 @@ func _set_notice(message: String) -> void:
 	notice = message
 	notice_time = 4.0
 
+func muzzle_position() -> Vector2:
+	return witch + (Vector2(24, -32) if power_tier() == 0 else Vector2(41, -36))
+
 func _burst(pos: Vector2, color: Color, count: int) -> void:
-	for i in range(count):
-		var direction := Vector2.from_angle(random.randf_range(0, TAU))
-		particles.append({"pos": pos, "velocity": direction * random.randf_range(35, 150), "life": random.randf_range(0.25, 0.6), "color": color})
+	if is_instance_valid(visuals):
+		visuals.emit_burst(pos, color, count)
 
 func _float_text(pos: Vector2, value: String, color: Color) -> void:
+	if floats.size() >= 32:
+		floats.pop_front()
 	floats.append({"pos": pos, "text": value, "color": color, "life": 1.0})
 
 func _world(pos: Vector2) -> Vector2:
-	return Vector2(content_left + pos.x * content_width / 540.0, 190.0 + (pos.y - 190.0) * (field_bottom - 190.0) / 520.0)
+	return Vector2(content_left + pos.x * content_width / 540.0, 88.0 + (pos.y - 190.0) * (field_bottom - 88.0) / 520.0)
 
 func _from_screen(pos: Vector2) -> Vector2:
-	return Vector2((pos.x - content_left) * 540.0 / content_width, 190.0 + (pos.y - 190.0) * 520.0 / (field_bottom - 190.0))
+	return Vector2((pos.x - content_left) * 540.0 / content_width, 190.0 + (pos.y - 88.0) * 520.0 / (field_bottom - 88.0))
 
 func _drag_position(pos: Vector2) -> void:
 	var local_pos := _from_screen(pos)
@@ -375,6 +417,8 @@ func _drag_position(pos: Vector2) -> void:
 	manual_grace = 2.0
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_suspended():
+		return
 	if workshop.visible or phase == Phase.LOST or phase == Phase.WON:
 		return
 	if event is InputEventScreenTouch:
@@ -404,25 +448,95 @@ func _input(event: InputEvent) -> void:
 		dragging = false
 		active_touch = -1
 
+func is_suspended() -> bool:
+	return not suspend_snapshot.is_empty()
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		if save_progress():
+		# 정지 중 종료도 보상 커서를 일반 저장으로 앞지르지 않는다.
+		if is_suspended():
+			var stored := _save_suspend_entry() if pause_reason or focus_reason else _resume_progress()
+			if stored:
+				get_tree().quit()
+		elif save_progress():
 			get_tree().quit()
-	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
-		if not local_owner_id.is_empty():
-			save_progress()
-	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
-		dragging = false
-		active_touch = -1
+	else:
+		_handle_lifecycle(what)
+
+func _handle_lifecycle(what: int, now: int = -1) -> void:
+	if local_owner_id.is_empty():
+		return
+	match what:
+		NOTIFICATION_APPLICATION_PAUSED:
+			pause_reason = true
+		NOTIFICATION_APPLICATION_FOCUS_OUT:
+			focus_reason = true
+		NOTIFICATION_APPLICATION_RESUMED:
+			pause_reason = false
+		NOTIFICATION_APPLICATION_FOCUS_IN:
+			focus_reason = false
+		_:
+			return
+	var timestamp := clampi(_now() if now == -1 else now, 0, 4102444800)
+	if pause_reason or focus_reason:
+		if is_instance_valid(visuals) and is_instance_valid(visuals.motion):
+			visuals.motion.cancel_skill_preview()
+		if not is_suspended():
+			suspended_at = timestamp
+			suspend_snapshot = progress_data().duplicate(true)
+			dragging = false
+			active_touch = -1
+			accumulator = 0.0
+			# 진입 저장 실패에도 현재 메모리와 최초 정산 기준을 보존한다.
+			_save_suspend_entry()
+	elif is_suspended():
+		_resume_progress(timestamp)
+
+func _save_suspend_entry() -> bool:
+	var entry := suspend_snapshot.duplicate(true)
+	entry.reward_cursor = maxi(int(entry.reward_cursor), suspended_at)
+	entry.saved_at = maxi(int(entry.saved_at), suspended_at)
+	if not store.write(entry):
+		save_status = "저장 실패 · 복귀 때 재시도"
+		return false
+	return true
+
+func _resume_progress(now: int = -1) -> bool:
+	if not is_suspended() or pause_reason or focus_reason:
+		return false
+	var timestamp := clampi(_now() if now == -1 else now, 0, 4102444800)
+	# 실패할 때마다 최초 스냅샷에서 성공 시각까지 재계산한다.
+	var candidate := suspend_snapshot.duplicate(true)
+	var start := maxi(suspended_at, int(candidate.reward_cursor))
+	var gap := mini(Store.MAX_OFFLINE, maxi(0, timestamp - start))
+	var rate := 2 + int(candidate.rebirths)
+	candidate.pending_coins = mini(1440 * rate, int(candidate.pending_coins) + int(gap / 60) * rate)
+	candidate.reward_cursor = maxi(start, timestamp)
+	candidate.saved_at = maxi(maxi(int(candidate.saved_at), suspended_at), timestamp)
+	if not store.write(candidate):
+		save_status = "저장 실패 · 복귀 정산 재시도"
+		return false
+	_apply_progress(candidate)
+	suspend_snapshot.clear()
+	save_clock = 0.0
+	accumulator = 0.0
+	resume_retry_clock = 0.0
+	skip_resume_delta = true
+	save_status = "기기 내 자동 저장"
+	_refresh_ui()
+	return true
 
 func _in_field(pos: Vector2) -> bool:
-	return Rect2(content_left, 195, content_width, field_bottom - 195).has_point(pos)
+	return Rect2(content_left, 88, content_width, field_bottom - 88).has_point(pos)
 
 func _panel_style(color: Color, border: Color = Color.TRANSPARENT, radius: int = 18) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = color
 	style.border_color = border
-	style.set_border_width_all(1)
+	style.set_border_width_all(3)
+	style.shadow_color = Color("765035")
+	style.shadow_size = 0
+	style.shadow_offset = Vector2(0, 4)
 	style.set_corner_radius_all(radius)
 	return style
 
@@ -436,73 +550,105 @@ func _label(text_value: String, font_size: int = 18, color: Color = INK) -> Labe
 	return label
 
 func _button(text_value: String, color: Color) -> Button:
-	var button := Button.new()
+	var button := preload("res://story_button.gd").new()
 	button.text = text_value
 	button.add_theme_font_size_override("font_size", 17)
 	button.add_theme_color_override("font_color", INK)
-	button.add_theme_color_override("font_disabled_color", Color("819b9a"))
-	button.add_theme_stylebox_override("normal", _panel_style(color, color.lightened(0.2)))
-	button.add_theme_stylebox_override("hover", _panel_style(color.lightened(0.12), MINT))
-	button.add_theme_stylebox_override("pressed", _panel_style(color.darkened(0.15), GOLD))
-	button.add_theme_stylebox_override("disabled", _panel_style(Color("172f39"), Color("2a4650")))
-	button.add_theme_stylebox_override("focus", _panel_style(Color(0, 0, 0, 0), GOLD))
+	button.add_theme_color_override("font_hover_color", INK)
+	button.add_theme_color_override("font_pressed_color", INK)
+	button.add_theme_color_override("font_disabled_color", Color("886d4c"))
+	button.add_theme_stylebox_override("normal", UiSkin.panel(3 if color.r > color.g else 2))
+	button.add_theme_stylebox_override("hover", UiSkin.panel(3 if color.r > color.g else 2, Color(1.04,1.04,1.04)))
+	button.add_theme_stylebox_override("pressed", UiSkin.panel(3 if color.r > color.g else 2, Color(.88,.88,.88)))
+	button.add_theme_stylebox_override("disabled", UiSkin.panel(1))
+	var focus := _panel_style(Color.TRANSPARENT, Color("db9c46"), 14)
+	focus.shadow_size = 0
+	button.add_theme_stylebox_override("focus", focus)
 	button.mouse_filter = Control.MOUSE_FILTER_STOP
 	button.focus_mode = Control.FOCUS_ALL
 	add_child(button)
 	return button
 
+const UiSkin = preload("res://story_skin.gd")
+var leaf_label: Label
+var timer_label: Label
+var result_at := -100.0
 var title_label: Label
 var chapter_label: Label
 var footer_label: Label
 
 func _build_ui() -> void:
-	title_label = _label("마녀포격단", 28)
-	chapter_label = _label("첫 번째 숲  /  잠든 이끼길", 16, MUTED)
-	sound_button = _button("소리 켬", Color("294552"))
-	sound_button.add_theme_font_size_override("font_size", 15)
+	title_label = _label("잠든 이끼숲", 19)
+	chapter_label = _label("마녀포격단 · 1지역", 13, MUTED)
+	sound_button = _button("\n소리 켬", Color("ffe3a2"))
+	sound_button.set("symbol", "sound")
+	sound_button.add_theme_font_size_override("font_size", 12)
+	sound_button.text = ""
 	sound_button.pressed.connect(func() -> void:
 		sound.enabled = not sound.enabled
-		sound_button.text = "소리 켬" if sound.enabled else "소리 끔")
-	wallet_label = _label("", 19, GOLD)
-	status_label = _label("", 17)
+		sound_button.tooltip_text = "소리 켬" if sound.enabled else "소리 끔"
+		sound_button.modulate.a = 1.0 if sound.enabled else .55)
+	wallet_label = _label("", 17, INK)
+	leaf_label = _label("", 17, INK)
+	timer_label = _label("",16,INK)
+	status_label = _label("", 16)
+	status_label.z_index = 1
+	status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	status_label.add_theme_color_override("font_color",Color("fff8e7"))
+	status_label.add_theme_color_override("font_outline_color",INK)
+	status_label.add_theme_constant_override("outline_size",3)
+	timer_label.z_index = 1
+	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	timer_label.add_theme_color_override("font_color",Color("fff2d4"))
+	timer_label.add_theme_color_override("font_outline_color",INK)
+	timer_label.add_theme_constant_override("outline_size",2)
 	bar = ProgressBar.new()
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bar.show_percentage = false
-	bar.add_theme_stylebox_override("background", _panel_style(Color("233d49")))
-	bar.add_theme_stylebox_override("fill", _panel_style(MINT))
+	bar.add_theme_stylebox_override("background", _panel_style(Color("c6b087"), INK, 6))
+	bar.add_theme_stylebox_override("fill", _panel_style(Color("a9dd7c"), INK, 6))
 	add_child(bar)
-	hint_label = _label("", 16, MINT)
+	hint_label = _label("", 15, INK)
+	hint_label.add_theme_color_override("font_outline_color", Color("fff6d6"))
+	hint_label.add_theme_constant_override("outline_size", 5)
 	hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	skill_button = _button("별비 · 보스에서 사용", Color("4a3c72"))
+	skill_button = _button("\n별비", Color("ffd98e"))
+	skill_button.set("symbol", "star")
 	skill_button.pressed.connect(cast_skill)
 	stats_label = _label("", 16, MUTED)
 	for kind in ["attack", "speed", "yield"]:
-		var button := _button("", Color("254b50"))
+		var button := _button("", Color("9fe4c8") if kind != "speed" else Color("ffe9b4"))
+		button.set("card", true)
+		button.add_theme_stylebox_override("normal", UiSkin.panel(1))
+		button.add_theme_stylebox_override("hover", UiSkin.panel(1, Color(1.03,1.03,1.03)))
+		button.set("symbol", {"attack": "cannon", "speed": "speed", "yield": "leaf"}[kind])
 		button.pressed.connect(buy_upgrade.bind(kind))
 		upgrades[kind] = button
-	workshop_button = _button("장비 · 정령", Color("395569"))
+	workshop_button = _button("\n마도구", Color("ffdf9d"))
+	workshop_button.set("symbol", "book")
 	workshop_button.pressed.connect(toggle_workshop)
 	footer_label = _label("", 13, MUTED)
 	footer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	result_panel = Panel.new()
-	result_panel.add_theme_stylebox_override("panel", _panel_style(Color("152d3b"), Color("739b94"), 24))
+	result_panel.add_theme_stylebox_override("panel", UiSkin.panel(0))
 	result_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(result_panel)
 	result_title = Label.new()
-	result_title.add_theme_font_size_override("font_size", 29)
+	result_title.add_theme_font_size_override("font_size", 24)
 	result_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	result_title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	result_panel.add_child(result_title)
 	result_text = Label.new()
-	result_text.add_theme_font_size_override("font_size", 17)
+	result_text.add_theme_font_size_override("font_size", 13)
 	result_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	result_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	result_panel.add_child(result_text)
-	result_button = _button("", Color("416951"))
+	result_button = _button("", Color("a9e0b6"))
 	remove_child(result_button)
 	result_panel.add_child(result_button)
 	result_button.pressed.connect(restart_battle)
-	rebirth_button = _button("환생 · 영구 마법 +25%", Color("564276"))
+	rebirth_button = _button("환생 · 영구 +25%", Color("f2c998"))
+	rebirth_button.add_theme_font_size_override("font_size",15)
 	remove_child(rebirth_button)
 	result_panel.add_child(rebirth_button)
 	rebirth_button.pressed.connect(rebirth)
@@ -515,219 +661,144 @@ func _place(control: Control, rect: Rect2) -> void:
 func _layout_ui() -> void:
 	content_width = minf(size.x, 600.0)
 	content_left = (size.x - content_width) * 0.5
-	field_bottom = size.y - 258.0
-	var left := content_left + 24.0
-	var width := content_width - 48.0
-	_place(title_label, Rect2(left, 22, width - 110, 40))
-	_place(chapter_label, Rect2(left, 64, width, 27))
-	_place(sound_button, Rect2(left + width - 90, 28, 90, 48))
-	_place(wallet_label, Rect2(left, 106, width, 30))
-	_place(status_label, Rect2(left, 144, width, 29))
-	_place(bar, Rect2(left, 180, width, 7))
-	_place(hint_label, Rect2(left, field_bottom - 44, width, 30))
-	_place(workshop_button, Rect2(left, field_bottom + 6, 170, 54))
-	_place(skill_button, Rect2(left + width - 208, field_bottom + 6, 208, 54))
-	_place(stats_label, Rect2(left, field_bottom + 76, width, 26))
+	field_bottom = size.y - 140.0
+	var left := content_left + 18.0
+	var width := content_width - 36.0
+	_place(title_label, Rect2(left + 8, 11, width*.44, 25))
+	_place(chapter_label, Rect2(left + 8, 36, width*.44, 20))
+	_place(wallet_label, Rect2(left + width - 230, 14, 78, 26))
+	_place(leaf_label, Rect2(left + width - 112, 14, 58, 26))
+	_place(status_label, Rect2(left + 12, 62, width - 105, 23))
+	_place(bar, Rect2(left + 8, 65, width - 96, 18))
+	_place(timer_label, Rect2(left + width - 79, 61, 74, 26))
+	_place(sound_button, Rect2(left + width - 48, 6, 48, 48))
+	_place(hint_label, Rect2(left, field_bottom - 34, width, 28))
+	_place(workshop_button, Rect2(left - 8, field_bottom - 194, 72, 72))
+	_place(skill_button, Rect2(left + width - 74, field_bottom - 112, 82, 72))
+	_place(stats_label, Rect2(left, field_bottom + 3, width, 24))
+	stats_label.text = ""
 	var index := 0
 	for kind in upgrades:
-		_place(upgrades[kind], Rect2(left + index * (width + 10) / 3.0, size.y - 140, (width - 20) / 3.0, 86))
+		_place(upgrades[kind], Rect2(left + index * (width + 10) / 3.0, size.y - 133, (width - 20) / 3.0, 108))
 		index += 1
-	_place(footer_label, Rect2(left - 8, size.y - 40, width + 16, 24))
-	_place(result_panel, Rect2(left + 12, 240, width - 24, 330))
-	_place(result_title, Rect2(16, 24, width - 56, 45))
-	_place(result_text, Rect2(12, 79, width - 48, 108))
-	_place(result_button, Rect2(28, 196, width - 80, 54))
-	_place(rebirth_button, Rect2(28, 262, width - 80, 54))
-	_place(workshop, Rect2(left, 210, width, 460))
-	_place(workshop_text, Rect2(16, 14, width - 32, 178))
-	_place(draw_button, Rect2(16, 198, (width - 42) / 2, 52))
-	_place(craft_button, Rect2(width / 2 + 5, 198, (width - 42) / 2, 52))
+	_place(footer_label, Rect2(left, size.y - 22, width, 20))
+	_layout_result()
+	_place(workshop, Rect2(left, size.y * 0.21, width, 460))
+	_place(workshop.get_node("공방제목"), Rect2(20, 14, width - 120, 36))
+	_place(workshop.get_node("공방그림"), Rect2(width - 93, 10, 72, 72))
+	_place(workshop_text, Rect2(18, 62, width - 36, 44))
+	_place(draw_button, Rect2(16, 278, (width - 42) / 2, 48))
+	_place(craft_button, Rect2(width / 2 + 5, 278, (width - 42) / 2, 48))
 	for i in range(3):
-		_place(equip_buttons[i], Rect2(16 + i * (width - 22) / 3, 262, (width - 42) / 3, 48))
-	_place(merge_button, Rect2(16, 322, (width - 42) / 2, 52))
-	_place(spirit_button, Rect2(width / 2 + 5, 322, (width - 42) / 2, 52))
-	_place(claim_button, Rect2(16, 386, width - 120, 52))
-	_place(workshop.get_node("닫기"), Rect2(width - 94, 386, 78, 52))
+		_place(equip_buttons[i], Rect2(16 + i * (width - 22) / 3, 112, (width - 42) / 3, 154))
+	_place(merge_button, Rect2(16, 338, (width - 42) / 2, 48))
+	_place(spirit_button, Rect2(width / 2 + 5, 338, (width - 42) / 2, 48))
+	_place(claim_button, Rect2(16, 398, width - 120, 48))
+	_place(workshop.get_node("닫기"), Rect2(width - 94, 398, 78, 48))
+	if is_instance_valid(visuals):
+		visuals.sync(0.0)
 	queue_redraw()
+
+func _layout_result() -> void:
+	# 결과를 하단에 압축해 보스/마녀와 정화 반응을 필드에 남긴다.
+	var panel_width := content_width - 48.0
+	var panel_height := 196.0 if boss_cleared else 140.0
+	_place(result_panel,Rect2(content_left+24,field_bottom-panel_height-8,panel_width,panel_height))
+	_place(result_title,Rect2(10,8,panel_width-20,32))
+	_place(result_text,Rect2(12,44,panel_width-24,88 if boss_cleared else 30))
+	var action_y := panel_height-56
+	if boss_cleared:
+		var action_width := (panel_width-36)*.5
+		_place(result_button,Rect2(12,action_y,action_width,48))
+		_place(rebirth_button,Rect2(24+action_width,action_y,action_width,48))
+	else:
+		_place(result_button,Rect2(12,action_y,panel_width-24,48))
 
 func _refresh_ui() -> void:
 	if not is_instance_valid(wallet_label):
 		return
-	wallet_label.text = "✦ 별빛 %d     ·     정화잎 %d" % [coins, materials]
+	wallet_label.text = UiSkin.compact(coins)
+	wallet_label.tooltip_text = "별빛 %d" % coins
+	leaf_label.text = UiSkin.compact(materials)
+	leaf_label.tooltip_text = "정화잎 %d" % materials
+	chapter_label.text = "1지역 · %d번째 탐험" % round_number
 	if phase == Phase.BOSS:
-		status_label.text = "가시왕  ·  HP %d / %d     남은 시간 %.1f초" % [ceil(boss_hp), BOSS_HP, boss_time]
+		status_label.text = "가시왕  %d / %d" % [ceil(boss_hp), BOSS_HP]
+		timer_label.text = "%.1f초" % boss_time
+		timer_label.add_theme_color_override("font_color",Color("ffbd92") if boss_time < 5.0 else Color("fff2d4"))
 		bar.max_value = BOSS_HP
 		bar.value = boss_hp
 	else:
-		status_label.text = "숲 정화 %d / %d     ·     %d번째 탐험" % [kills, FOREST_GOAL, round_number]
+		status_label.text = "정화 %d / %d" % [kills, FOREST_GOAL]
+		timer_label.text = "숲 탐험"
 		bar.max_value = FOREST_GOAL
 		bar.value = kills
-	stats_label.text = "마법 %d  ·  초당 %.1f발  ·  정화당 별빛 %d" % [round(attack_damage()), 1.0 / shot_interval(), reward_amount()]
+	if phase == Phase.WON:
+		status_label.text = "숲 정화 완료"
+		timer_label.text = "완료"
+	elif phase == Phase.LOST:
+		timer_label.text = "종료"
+	var fill: StyleBoxFlat = bar.get_theme_stylebox("fill")
+	fill.bg_color = Color("ed9e7e") if phase == Phase.BOSS else Color("a9dd7c")
+	stats_label.text = ""
 	for kind in upgrades:
-		var names := {"attack": "공격력", "speed": "사격 속도", "yield": "획득량"}
-		upgrades[kind].text = "%s +%d\n✦ %d  강화" % [names[kind], levels[kind], upgrade_cost(kind)]
-		upgrades[kind].disabled = coins < upgrade_cost(kind) or levels[kind] >= 20
-		if levels[kind] >= 20:
-			upgrades[kind].text = names[kind] + " 최대"
-	hint_label.text = notice if notice_time > 0.0 else "자동 사격 → 강화 · 장비 합성 → 거대 마법포!"
-	footer_label.text = "%s · 가격/확률/배율은 가설" % save_status
+		var names := {"attack": "마법 위력", "speed": "사격 속도", "yield": "별빛 보상"}
+		var values := {"attack": UiSkin.compact(attack_damage()), "speed": "%.1f/초" % (1.0 / shot_interval()), "yield": str(reward_amount())}
+		var button: Button = upgrades[kind]
+		button.set("heading", names[kind])
+		button.set("value", values[kind])
+		button.set("price", UiSkin.compact(upgrade_cost(kind)) if levels[kind] < 20 else "최대")
+		var next := UiSkin.compact(attack_damage()*1.5) if kind == "attack" else str(reward_amount()+3)
+		if kind == "speed":
+			var rate := 1.0/maxf(.18,1.05/pow(1.22,levels.speed+1)) - 1.0/shot_interval()
+			next = "%.1f/초" % (1.0/maxf(.18,1.05/pow(1.22,levels.speed+1))) if rate > .0001 else "속도 상한"
+		button.set("detail", "Lv.%d · %s" % [levels[kind],next if next == "속도 상한" else "다음 " + next] if levels[kind] < 20 else "Lv.20 · 최대 강화")
+		button.set("state", "max" if levels[kind] >= 20 else "need" if coins < upgrade_cost(kind) else "ready")
+		button.tooltip_text = "%s +%d · 현재 %s · 가격 %d" % [names[kind], levels[kind], values[kind], upgrade_cost(kind)]
+		button.disabled = coins < upgrade_cost(kind) or levels[kind] >= 20
+		button.queue_redraw()
+	hint_label.text = "숲 정화 완료 · 다음 탐험을 준비해요" if phase == Phase.WON else "전투 종료 · 강화하고 다시 도전해요" if phase == Phase.LOST else notice if notice_time > 0.0 else "자동 사격 중 · 드래그로 위치 조정"
+	footer_label.text = save_status
 	_refresh_workshop()
-	skill_button.disabled = phase != Phase.BOSS or cooldown > 0.0
-	skill_button.text = "별비 · 보스에서 사용"
+	skill_button.disabled = phase != Phase.BOSS or cooldown > 0.0 or workshop.visible
+	skill_button.set("cooldown_ratio", cooldown / SKILL_COOLDOWN if phase == Phase.BOSS else 0.0)
+	skill_button.queue_redraw()
+	skill_button.text = "\n보스 별비"
 	if phase == Phase.BOSS:
-		skill_button.text = "별비 · %.1f초" % cooldown if cooldown > 0.0 else "별비 내리기 · 준비!"
-	result_panel.visible = phase == Phase.LOST or phase == Phase.WON
+		skill_button.text = "\n%.1f초" % cooldown if cooldown > 0.0 else "\n별비 준비"
+	if workshop.visible:
+		skill_button.text = "\n공방 정지"
+	elif phase in [Phase.WON,Phase.LOST]:
+		skill_button.text = "\n전투 종료"
+	result_panel.visible = (phase == Phase.LOST or phase == Phase.WON) and elapsed >= result_at and not workshop.visible
 	if result_panel.visible:
+		_layout_result()
 		result_title.text = "숲이 깨어났어요!" if phase == Phase.WON else "시간이 다 됐어요"
-		result_title.add_theme_color_override("font_color", MINT if phase == Phase.WON else GOLD)
+		result_title.add_theme_color_override("font_color", Color("488159") if phase == Phase.WON else INK)
 		rebirth_button.visible = boss_cleared
-		result_text.text = "가시왕 정화! 다시 전투하거나 환생해요.\n환생 초기화: 별빛·잎·강화·장비·보상\n보존: 정령·소유자·환생 수 / 영구 마법 +25%" if phase == Phase.WON else "재화·장비·강화는 그대로 남아요.\n아래 강화 / 장비·정령을 누른 뒤 재도전!"
+		rebirth_button.disabled = rebirths >= 1000
+		result_text.text = "숲을 정화했어요. 다음 탐험을 준비해요." if phase == Phase.WON else "재도전 시 재화·장비·강화를 보존해요."
+		if boss_cleared:
+			result_text.text += "\n환생 초기화: 별빛·잎·강화·장비·미수령 보상\n보존: 정령·소유자·기존 환생 수\n환생 후 영구 마법 +25%"
+		if rebirths >= 1000:
+			result_text.text += "\n환생 최대 1,000회"
+
 		result_button.text = "다시 숲으로" if phase == Phase.WON else "강화 유지 · 재도전"
 
 func _draw() -> void:
 	if not is_instance_valid(font):
 		return
-	draw_rect(Rect2(Vector2.ZERO, size), Color("0b1923"))
-	draw_rect(Rect2(content_left, 195, content_width, field_bottom - 195), Color("102d32"))
-	# 멀리 있는 나무와 이끼 길. 원본 도형을 조합해 새로 그린다.
-	for i in range(10):
-		var x := float(i) * 63.0 - 14.0
-		var y := 243.0 + sin(i * 2.0) * 15.0
-		_tree(Vector2(x, y), 0.8, Color("173d43"))
-	draw_colored_polygon(PackedVector2Array([_world(Vector2(210, 230)), _world(Vector2(330, 230)), _world(Vector2(455, 710)), _world(Vector2(85, 710))]), Color("193d3c"))
-	for i in range(24):
-		var p := Vector2(fmod(i * 91.0 + 17, 510) + 15, 280 + fmod(i * 73.0 + elapsed * 15.0, 390))
-		draw_circle(_world(p), 1.5 + sin(elapsed + i) * 0.5, Color(0.56, 0.85, 0.66, 0.25))
-	for side in [-1, 1]:
-		for i in range(4):
-			_tree(Vector2(20 if side == -1 else 520, 310 + i * 108), 0.95 + i * 0.06, Color("205052"))
-	for i in range(9):
-		var x := 50.0 + fmod(i * 137.0, 440.0)
-		var y := 385.0 + fmod(i * 71.0, 270.0)
-		var p := _world(Vector2(x, y))
-		draw_line(p, p + Vector2(0, -9), Color("709b80"), 2, true)
-		draw_circle(p + Vector2(0, -12), 4, Color("b79ccb"))
-	if phase == Phase.BOSS:
-		draw_arc(_world(Vector2(270, 340)), 98, 0, TAU, 48, Color(0.8, 0.5, 0.8, 0.18), 3, true)
-	for enemy in enemies:
-		_draw_enemy(enemy)
-	for bullet in bullets:
-		var p := _world(bullet.pos)
-		var radius := projectile_radius(bullet.tier)
-		draw_circle(p, radius * 2.4, Color(0.5, 1.0, 0.8, 0.12))
-		draw_line(p + Vector2(0, 20 + bullet.tier * 7), p, MINT, radius, true)
-		draw_circle(p, radius, INK)
-	_draw_witch()
-	for p in particles:
-		var color: Color = p.color
-		color.a = minf(p.life * 3.0, 1.0)
-		draw_circle(_world(p.pos), 2.8, color)
-	for f in floats:
-		var color: Color = f.color
-		color.a = minf(f.life * 2.0, 1.0)
-		var p := _world(f.pos)
-		var text_width := font.get_string_size(f.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 19).x
-		draw_string(font, p - Vector2(text_width * 0.5, 0) + Vector2(1, 2), f.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 19, Color("11212c"))
-		draw_string(font, p - Vector2(text_width * 0.5, 0), f.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 19, color)
-	if skill_flash > 0:
-		for i in range(8):
-			var start := _world(Vector2(80 + i * 54, 210))
-			var end := _world(Vector2(60 + i * 54, 455))
-			draw_line(start, end, Color(0.85, 0.8, 1.0, skill_flash * 0.8), 5, true)
-	draw_rect(Rect2(content_left, field_bottom, content_width, size.y - field_bottom), Color("10232e"))
-	draw_line(Vector2(content_left + 24, field_bottom), Vector2(content_left + content_width - 24, field_bottom), Color("3c625d"), 1, true)
-	draw_string(font, Vector2(content_left + 24, field_bottom + 31), "마녀의 작업대", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, INK)
-	draw_string(font, Vector2(content_left + 24, field_bottom + 52), "별빛으로 더 강하게", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, MUTED)
-
-func _tree(pos: Vector2, tree_scale: float, color: Color) -> void:
-	var p := _world(pos)
-	draw_line(p, p + Vector2(0, 72 * tree_scale), color.darkened(0.15), 12 * tree_scale, true)
-	for j in range(3):
-		draw_circle(p + Vector2((j - 1) * 19, -j * 13) * tree_scale, (33 - j * 3) * tree_scale, color)
-
-func _draw_enemy(enemy: Dictionary) -> void:
-	var p := _world(enemy.pos)
-	var r: float = enemy.radius
-	var color := Color("9675b3") if enemy.boss else Color("8a83ba")
-	if enemy.flash > 0:
-		color = color.lerp(INK, enemy.flash)
-	draw_set_transform(p + Vector2(0, r * 0.8), 0, Vector2(1.0, 0.26))
-	draw_circle(Vector2.ZERO, r, Color(0, 0, 0, 0.22))
-	draw_set_transform(p)
-	if enemy.boss:
-		for i in range(9):
-			var a := -PI + i * PI / 8.0
-			var v := Vector2.from_angle(a)
-			draw_colored_polygon(PackedVector2Array([v * r * 0.72 + v.orthogonal() * 12, v * (r + 23), v * r * 0.72 - v.orthogonal() * 12]), Color("d4b791"))
-		draw_line(Vector2(-r + 4, 15), Vector2(-r - 18, -6 + sin(elapsed * 3) * 8), color, 13, true)
-		draw_line(Vector2(r - 4, 15), Vector2(r + 18, -6 + sin(elapsed * 3) * 8), color, 13, true)
-	else:
-		draw_colored_polygon(PackedVector2Array([Vector2(-12, -15), Vector2(-17, -37), Vector2(0, -22)]), color)
-		draw_colored_polygon(PackedVector2Array([Vector2(10, -15), Vector2(23, -32), Vector2(24, -5)]), color)
-	draw_circle(Vector2.ZERO, r, color)
-	draw_circle(Vector2(0, r * 0.35), r * 0.6, color.lightened(0.1))
-	for side in [-1, 1]:
-		draw_circle(Vector2(side * r * 0.32, -r * 0.08), 4 if not enemy.boss else 7, Color("292940"))
-		draw_circle(Vector2(side * r * 0.32 - 1, -r * 0.08 - 2), 1.5, INK)
-		draw_circle(Vector2(side * r * 0.62, r * 0.14), r * 0.13, Color("d79dc4"))
-	draw_arc(Vector2(0, r * 0.12), 5 if not enemy.boss else 10, 0.2, PI - 0.2, 12, Color("423752"), 2, true)
-	var width := r * 1.7
-	draw_rect(Rect2(-width / 2, -r - 16, width, 4), Color("34414c"))
-	draw_rect(Rect2(-width / 2, -r - 16, width * enemy.hp / enemy.max_hp, 4), LAVENDER)
-	draw_set_transform(Vector2.ZERO)
-
-func _draw_witch() -> void:
-	var p := _world(witch)
-	var bob := sin(elapsed * 4.0) * 3.0
-	draw_set_transform(p + Vector2(0, 31), 0, Vector2(1, 0.25))
-	draw_circle(Vector2.ZERO, 36, Color(0, 0, 0, 0.28))
-	draw_set_transform(p + Vector2(-recoil * 3, bob))
-	# 장화, 망토, 머리, 큰 모자: 작은 실루엣에서도 마녀임을 읽게 한다.
-	draw_line(Vector2(-10, 19), Vector2(-13, 30), Color("503d66"), 9, true)
-	draw_line(Vector2(9, 19), Vector2(13, 30), Color("503d66"), 9, true)
-	draw_colored_polygon(PackedVector2Array([Vector2(-17, -9), Vector2(16, -9), Vector2(29, 22), Vector2(-29, 22)]), Color("9b82da"))
-	draw_line(Vector2(-19, 20), Vector2(18, 20), LAVENDER, 3, true)
-	draw_circle(Vector2(0, -20), 24, Color("eab993"))
-	draw_circle(Vector2(0, -20), 20, Color("ffe0bd"))
-	draw_arc(Vector2(0, -23), 23, PI, TAU, 24, Color("dba082"), 8, true)
-	for side in [-1, 1]:
-		draw_circle(Vector2(side * 8, -19), 2.8, Color("43354c"))
-		draw_circle(Vector2(side * 15, -12), 4, Color("f4adad"))
-	draw_arc(Vector2(0, -13), 4, 0, PI, 12, Color("996878"), 1.6, true)
-	draw_colored_polygon(PackedVector2Array([Vector2(-27, -38), Vector2(-7, -83), Vector2(19, -67), Vector2(24, -38)]), Color("7964ac"))
-	draw_line(Vector2(-37, -37), Vector2(34, -37), Color("a48bd7"), 11, true)
-	draw_line(Vector2(-20, -47), Vector2(19, -47), GOLD, 5, true)
-	_star(Vector2(2, -62), 7, GOLD)
-	var tier := power_tier()
-	if tier == 0:
-		draw_line(Vector2(21, 6), Vector2(29, -30), Color("b5c1a0"), 5, true)
-		_star(Vector2(30, -33), 7 + recoil * 3, MINT)
-	else:
-		var cannon_width := 18.0 if tier == 1 else 30.0
-		draw_line(Vector2(26, 13), Vector2(26, -33 - tier * 10), Color("435875"), cannon_width + 7, true)
-		draw_line(Vector2(26, 10), Vector2(26, -33 - tier * 10), LAVENDER, cannon_width, true)
-		draw_line(Vector2(26, -4), Vector2(26, -20), GOLD, cannon_width + 6, true)
-		draw_circle(Vector2(26, -33 - tier * 10), cannon_width * 0.52, Color("275661"))
-		draw_circle(Vector2(26, -33 - tier * 10), cannon_width * 0.3 + recoil * 3, MINT)
-		if tier >= 2:
-			for side in [-1, 1]:
-				_star(Vector2(26 + side * 27, -13), 8, GOLD)
-	draw_set_transform(Vector2.ZERO)
-	for i in range(2 if spirit else 0):
-		var spirit := p + Vector2(-58 - i * 24, -18 + sin(elapsed * 3.0 + i) * 10)
-		draw_circle(spirit, 19, Color(0.52, 0.94, 0.8, 0.12))
-		draw_circle(spirit, 11, MINT)
-		draw_colored_polygon(PackedVector2Array([spirit + Vector2(-7, 4), spirit + Vector2(-14, 17), spirit + Vector2(7, 8)]), MINT)
-		draw_circle(spirit + Vector2(-4, -1), 1.8, Color("285461"))
-		draw_circle(spirit + Vector2(4, -1), 1.8, Color("285461"))
-	if dragging:
-		draw_arc(p, 44, 0, TAU, 32, Color(0.65, 1, 0.8, 0.6), 2, true)
-
-func _star(pos: Vector2, radius: float, color: Color) -> void:
-	var points := PackedVector2Array()
-	for i in range(8):
-		points.append(pos + Vector2.from_angle(-PI / 2 + i * TAU / 8) * (radius if i % 2 == 0 else radius * 0.4))
-	draw_colored_polygon(points, color)
+	var left := content_left + 18.0
+	var width := content_width - 36.0
+	# 원작처럼 지역 표시는 필드 위의 간결한 글자로 둔다.
+	var time_plate := _panel_style(INK,Color("ceb783"),12)
+	time_plate.shadow_size = 0
+	time_plate.set_border_width_all(1)
+	draw_style_box(time_plate,Rect2(left+width-84,60,82,27))
+	for spec in [[Rect2(left+width-267,8,120,38),"coin"],[Rect2(left+width-143,8,94,38),"material"]]:
+		draw_style_box(_panel_style(Color("fff3d4"), Color("a58a5c"), 16), spec[0])
+		draw_texture_rect(UiSkin.icon(spec[1]),Rect2(spec[0].position+Vector2(8,7),Vector2(24,24)),false)
+	draw_style_box(UiSkin.panel(0), Rect2(content_left - 4, field_bottom, content_width + 8, size.y - field_bottom + 10))
 
 func _now() -> int:
 	return int(Time.get_unix_time_from_system())
@@ -775,6 +846,8 @@ func _load_progress(now: int = -1) -> void:
 		save_status = "저장 실패 · 경로 확인"
 
 func save_progress(now: int = -1) -> bool:
+	if is_suspended():
+		return false
 	if local_owner_id.is_empty():
 		return false
 	var data := progress_data()
@@ -802,6 +875,8 @@ func _acquire(tier: int) -> void:
 		equipped = tier
 
 func draw_tool() -> int:
+	if is_suspended():
+		return -1
 	if coins < DRAW_COST or inventory.any(func(count: Variant) -> bool: return count >= 9998):
 		return -1
 	var before := progress_data()
@@ -817,6 +892,8 @@ func draw_tool() -> int:
 	return tier
 
 func craft_tool() -> bool:
+	if is_suspended():
+		return false
 	if materials < CRAFT_COST or inventory[0] >= 9998:
 		return false
 	var before := progress_data()
@@ -830,6 +907,8 @@ func craft_tool() -> bool:
 	return true
 
 func merge_tool(tier: int) -> bool:
+	if is_suspended():
+		return false
 	if tier < 0 or tier >= 2 or inventory[tier] < 2 or inventory[tier + 1] >= 9998:
 		return false
 	var before := progress_data()
@@ -844,6 +923,8 @@ func merge_tool(tier: int) -> bool:
 	return true
 
 func equip_tool(tier: int) -> bool:
+	if is_suspended():
+		return false
 	if tier < -1 or tier > 2 or (tier >= 0 and inventory[tier] < 1):
 		return false
 	var before := progress_data()
@@ -854,6 +935,8 @@ func equip_tool(tier: int) -> bool:
 	return true
 
 func unlock_spirit() -> bool:
+	if is_suspended():
+		return false
 	if spirit or materials < SPIRIT_COST:
 		return false
 	var before := progress_data()
@@ -867,6 +950,8 @@ func unlock_spirit() -> bool:
 	return true
 
 func claim_offline() -> bool:
+	if is_suspended():
+		return false
 	if pending_coins <= 0 or coins + pending_coins > 1000000000:
 		return false
 	var before := progress_data()
@@ -880,6 +965,8 @@ func claim_offline() -> bool:
 	return true
 
 func rebirth() -> bool:
+	if is_suspended():
+		return false
 	if not boss_cleared or rebirths >= 1000:
 		return false
 	var before := progress_data()
@@ -903,6 +990,8 @@ func tool_name(tier: int) -> String:
 	return ["새싹", "달빛포", "거대 성운포"][tier] if tier >= 0 else "별 지팡이"
 
 func toggle_workshop() -> void:
+	if is_suspended():
+		return
 	workshop.visible = not workshop.visible
 	dragging = false
 	active_touch = -1
@@ -916,26 +1005,39 @@ func _merge_available() -> void:
 
 func _build_workshop() -> void:
 	workshop = Panel.new()
-	workshop.add_theme_stylebox_override("panel", _panel_style(Color("152d3b"), MINT))
+	workshop.add_theme_stylebox_override("panel", UiSkin.panel(0))
 	workshop.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(workshop)
-	workshop_text = _label("", 16)
+	var workshop_title := _label("✦ 별빛 마도 공방", 24)
+	workshop_title.name = "공방제목"
+	remove_child(workshop_title)
+	workshop.add_child(workshop_title)
+	var preview := TextureRect.new()
+	preview.name = "공방그림"
+	preview.texture = UiSkin.icon("book")
+	preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	workshop.add_child(preview)
+	workshop_text = _label("", 13)
 	remove_child(workshop_text)
 	workshop.add_child(workshop_text)
-	draw_button = _button("뽑기 ✦12", Color("395569"))
-	craft_button = _button("제작 잎3", Color("395569"))
-	merge_button = _button("동급 2개 합성", Color("395569"))
-	spirit_button = _button("정령 해금 잎4", Color("395569"))
-	claim_button = _button("", Color("395569"))
-	var close := _button("닫기", Color("584966"))
+	draw_button = _button("뽑기 ✦12", Color("acdfc5"))
+	craft_button = _button("제작 잎3", Color("acdfc5"))
+	merge_button = _button("동급 2개 합성", Color("acdfc5"))
+	spirit_button = _button("정령 해금 잎4", Color("acdfc5"))
+	claim_button = _button("", Color("acdfc5"))
+	var close := _button("닫기", Color("f3c29d"))
 	close.name = "닫기"
 	for button in [draw_button, craft_button, merge_button, spirit_button, claim_button, close]:
 		remove_child(button)
 		workshop.add_child(button)
 	for tier in range(3):
-		var button := _button("", Color("395569"))
+		var button := _button("", Color("acdfc5"))
 		remove_child(button)
 		workshop.add_child(button)
+		button.set("slot", true)
+		button.set("symbol", "tool%d" % tier)
 		equip_buttons.append(button)
 		button.pressed.connect(equip_tool.bind(tier))
 	draw_button.pressed.connect(draw_tool)
@@ -947,14 +1049,25 @@ func _build_workshop() -> void:
 	workshop.visible = false
 
 func _refresh_workshop() -> void:
-	workshop_text.text = "장비 · 정령  /  메뉴 중 전투 잠시 멈춤\n✦ %d · 잎 %d / 장착: %s\n새싹 %d · 달빛포 %d · 성운포 %d\n가설: 뽑기 새싹80%% / 달빛18%% / 성운2%%\n제작: 새싹 1개 / 합성: 동급 2 → 상위 1\n환생 %d회 · 영구 마법 +%d%%\n정령: %s" % [coins, materials, tool_name(equipped), inventory[0], inventory[1], inventory[2], rebirths, rebirths * 25, "매 3발 연계탄 65%" if spirit else "잎 4개로 해금"]
-	draw_button.disabled = coins < DRAW_COST
-	craft_button.disabled = materials < CRAFT_COST
-	merge_button.disabled = inventory[0] < 2 and inventory[1] < 2
+	workshop_text.text = "장착: %s · 전투 일시정지\n뽑기 80/18/2%% · 제작 잎3 · 수치 가설\n환생 %d회(+%d%%) · 정령 %s" % [tool_name(equipped),rebirths,rebirths*25,"연계 65%" if spirit else "미해금"]
+	draw_button.disabled = coins < DRAW_COST or inventory.any(func(count: Variant) -> bool: return count >= 9998)
+	draw_button.text = "장비 보유 한도" if inventory.any(func(count: Variant) -> bool: return count >= 9998) else "뽑기 · 별빛 12"
+	craft_button.disabled = materials < CRAFT_COST or inventory[0] >= 9998
+	craft_button.text = "새싹 보유 한도" if inventory[0] >= 9998 else "제작 · 잎 3"
+	var tier := 0 if inventory[0] >= 2 else 1 if inventory[1] >= 2 else -1
+	merge_button.disabled = tier < 0 or inventory[tier+1] >= 9998
+	merge_button.text = "동급 2개 필요" if tier < 0 else "상위 장비 한도" if inventory[tier+1] >= 9998 else "%s 2 → %s" % [tool_name(tier),tool_name(tier+1)]
+	merge_button.add_theme_font_size_override("font_size",13)
 	spirit_button.disabled = spirit or materials < SPIRIT_COST
-	spirit_button.text = "정령 연계 중" if spirit else "정령 해금 잎4"
-	for tier in range(3):
-		equip_buttons[tier].text = ("장착 중" if equipped == tier else "장착") + " · " + ["새싹", "달빛", "성운"][tier]
-		equip_buttons[tier].disabled = inventory[tier] < 1 or equipped == tier
-	claim_button.text = "접속 보상 ✦%d 수령" % pending_coins
-	claim_button.disabled = pending_coins <= 0
+	spirit_button.text = "정령 · 연계 중" if spirit else "정령 해금 · 잎4"
+	for i in range(3):
+		var button: Button = equip_buttons[i]
+		button.text = ""
+		button.set("heading", ["새싹","달빛포","성운포"][i])
+		button.set("value", "×%s" % UiSkin.compact(inventory[i]))
+		button.set("detail", "장착 중" if equipped == i else "장착하기" if inventory[i] > 0 else "미보유")
+		button.set("state", "equipped" if equipped == i else "ready" if inventory[i] > 0 else "missing")
+		button.disabled = inventory[i] < 1 or equipped == i
+		button.queue_redraw()
+	claim_button.text = "보유 별빛 한도" if coins + pending_coins > 1000000000 else "접속 보상 %s 수령" % UiSkin.compact(pending_coins) if pending_coins > 0 else "받을 보상 없음"
+	claim_button.disabled = pending_coins <= 0 or coins + pending_coins > 1000000000

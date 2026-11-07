@@ -18,7 +18,15 @@
     "game/progress_store.gd",
     "game/sound.gd",
     "game/main.tscn",
-    "game/project.godot"
+    "game/project.godot",
+    "game/storybook.gd",
+    "game/story_button.gd",
+    "game/shaders/hit_flash.gdshader",
+    "game/shaders/magic_pulse.gdshader",
+    "game/assets/art/witch-starter.png",
+    "game/assets/art/witch-cannon.png",
+    "game/assets/art/sunlit-meadow.png",
+    "game/assets/art/forest-creatures.png"
   ],
   "observations": [
     "rendered_states",

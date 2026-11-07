@@ -52,12 +52,15 @@ def main():
         settings_file.write_text(settings, encoding="utf-8")
         checks = [("import", ["--headless", "--import", "--quit"]),
                   ("smoke", ["--headless", "--script", "res://tests/smoke.gd"]),
+                  ("motion", ["--headless", "--script", "res://tests/motion_checks.gd"]),
+                  ("ui", ["--headless", "--script", "res://tests/ui_checks.gd"]),
+                  ("actions", ["--headless", "--script", "res://tests/action_checks.gd"]),
                   ("capture-stages", ["--headless", "--script", "res://tests/capture.gd", "--", "--verify-stages"])]
         if args.capture:
             checks.append(("capture", ["--audio-driver", "Dummy", "--script", "res://tests/capture.gd"]))
         try:
             for name, options in checks:
-                if name == "capture" and failed:
+                if failed:
                     break
                 command = [engine, "--path", str(project), "--log-file", str(artifacts / f"{name}-engine.log"), *options]
                 try:

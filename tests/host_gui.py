@@ -3,6 +3,7 @@
 import ctypes
 import hashlib
 import json
+import math
 from pathlib import Path
 import platform
 import shutil
@@ -11,7 +12,11 @@ import subprocess
 import sys
 
 
-STATES = ("01-first", "02-grown", "03-boss", "04-skill", "05-won", "06-lost", "07-workshop", "08-rebirth")
+STATES = ("01-first", "02-grown", "03-boss", "04-skill", "05-won", "06-lost", "07-workshop", "08-rebirth", "09-merge",
+          "10-first-shot", "11-grown-shot", "12-first-flight", "13-grown-flight", "14-boss-shot", "15-boss-flight")
+PARTY_CASES = ("default", "top-left", "top-right", "bottom-left", "bottom-right", "edge-top", "edge-right",
+               "edge-bottom", "edge-left", "counterexample", "enter", "exit", "moving", "return")
+STATES += tuple(f"party-{weapon}-{case}" for weapon in ("starter", "cannon") for case in PARTY_CASES)
 SIZES = ((540, 960), (540, 1200), (720, 960))
 
 
@@ -67,6 +72,57 @@ def verify_captures(directory):
         key = (item["stage"], *size)
         if key not in expected or key in found or list(size) != item["size"]:
             raise ValueError("캡처 상태·치수 행렬 불일치")
+        launch = item["stage"] in ("10-first-shot", "11-grown-shot", "14-boss-shot")
+        flight = item["stage"] in ("12-first-flight", "13-grown-flight", "15-boss-flight")
+        if launch or flight:
+            shot = item.get("shot_alignment", {})
+            names = ("sprite_muzzle", "projectile", "emitter", "tail", "sprite_breech", "initial_projectile")
+            points = [shot.get(name, []) for name in names]
+            if (shot.get("kick") != 1.0 or shot.get("breath") != 1.0
+                    or any(len(point) != 2 or not all(math.isfinite(n) for n in point) for point in points)
+                    or math.dist(points[0], points[2]) >= 0.01
+                    or (launch and any(math.dist(points[0], points[i]) >= 0.01 for i in (1, 3)))):
+                raise ValueError("발사 직후 최대 반동·호흡 포구 정렬 불일치")
+            axis = [points[0][i] - points[4][i] for i in (0, 1)]
+            initial = [points[5][i] - points[0][i] for i in (0, 1)]
+            axis_length, initial_length = math.hypot(*axis), math.hypot(*initial)
+            unit = min(size[0], 600) / 540
+            if (axis_length < 1 or abs(initial_length - 8 * unit) > 0.01
+                    or sum(a * b for a, b in zip(axis, initial)) / max(axis_length * initial_length, 1e-9) < 0.9999):
+                raise ValueError("포신과 초기 탄도 방향 불일치")
+            if (shot.get("travel") != (80.0 if flight else 0.0)
+                    or (flight and (math.dist(points[0], points[1]) < 1
+                                    or math.dist(points[1], points[3]) > 48 * unit + 0.01))):
+                raise ValueError("비행 프레임·꼬리 불일치")
+        if item["stage"].startswith("party-"):
+            party = item.get("party", {})
+            low, high = party.get("min_diagonal", 0), party.get("max_diagonal", 1500)
+            if (not all(math.isfinite(n) for n in (low, high))
+                    or not 650 < low <= high < 1480 or party.get("samples", 0) <= 100):
+                raise ValueError("드래그 발·그림자 풀밭 기록 불일치")
+            shot = item.get("party_shot", {})
+            points = [shot.get(name, []) for name in
+                      ("muzzle", "launch", "emitter", "spirit_tip", "spirit_launch", "initial", "breech")]
+            if (shot.get("kick") != 1.0
+                    or any(len(point) != 2 or not all(math.isfinite(n) for n in point) for point in points)
+                    or any(math.dist(points[0], points[i]) >= 0.01 for i in (1, 2))
+                    or math.dist(points[3], points[4]) >= 0.01):
+                raise ValueError("드래그 주탄·정령탄 포구 불일치")
+            axis = [points[0][i] - points[6][i] for i in (0, 1)]
+            initial = [points[5][i] - points[0][i] for i in (0, 1)]
+            lengths = math.hypot(*axis) * math.hypot(*initial)
+            if lengths <= 0 or sum(a * b for a, b in zip(axis, initial)) / lengths < 0.9999:
+                raise ValueError("드래그 포신 초기 탄도 불일치")
+        terrain = item.get("terrain")
+        if not isinstance(terrain, list) or (item["stage"] in ("01-first", "08-rebirth") and not terrain):
+            raise ValueError("풀밭 배치 기록 누락")
+        for ground in terrain:
+            foot, radius = ground.get("foot", []), ground.get("shadow_half_width", -1)
+            if (len(foot) != 2 or not all(math.isfinite(n) for n in (*foot, radius)) or radius <= 0
+                    or not 0 <= foot[0] <= 1052 or not 0 <= foot[1] <= 1495
+                    or foot[1] <= 650 - (foot[0] - radius) * 0.5
+                    or foot[1] >= 1480 - (foot[0] + radius) * 0.5):
+                raise ValueError("발·그림자가 풀밭 경계를 벗어남")
         found.add(key)
         captures.append({"path": path.name, "sha256": hashlib.sha256(data).hexdigest()})
     if found != expected:
