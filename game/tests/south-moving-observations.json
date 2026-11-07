@@ -1,0 +1,558 @@
+{
+  "png_sha256": "7bf80dce7451e5e7c83f4a3f07d9c33f5cb687164f81e347ade56004d12247f7",
+  "observer": "Worker4 원본관측은 previous_worker_records_0_to_6와 Git912e1에 보존. 현재 포구/뒤점은 Root 공급 독립 Art의 실제 source_png_xy; Worker5가 trim/canvas 좌표변환. 발 기준은 Worker 통합값이며 수용아님",
+  "records": [
+    {
+      "index": 0,
+      "source_cell": [
+        0,
+        0,
+        443,
+        443
+      ],
+      "region": [
+        83,
+        8,
+        285,
+        397
+      ],
+      "front": [
+        244,
+        263
+      ],
+      "back": [
+        242,
+        210
+      ],
+      "sole": [
+        224,
+        400
+      ]
+    },
+    {
+      "index": 1,
+      "source_cell": [
+        443,
+        0,
+        444,
+        443
+      ],
+      "region": [
+        528,
+        8,
+        283,
+        397
+      ],
+      "front": [
+        242,
+        254
+      ],
+      "back": [
+        241,
+        204
+      ],
+      "sole": [
+        224,
+        400
+      ]
+    },
+    {
+      "index": 2,
+      "source_cell": [
+        887,
+        0,
+        443,
+        443
+      ],
+      "region": [
+        971,
+        10,
+        283,
+        397
+      ],
+      "front": [
+        241,
+        258
+      ],
+      "back": [
+        242,
+        208
+      ],
+      "sole": [
+        224,
+        402
+      ]
+    },
+    {
+      "index": 3,
+      "source_cell": [
+        1330,
+        0,
+        444,
+        443
+      ],
+      "region": [
+        1414,
+        11,
+        284,
+        394
+      ],
+      "front": [
+        243,
+        252
+      ],
+      "back": [
+        242,
+        204
+      ],
+      "sole": [
+        224,
+        400
+      ]
+    },
+    {
+      "index": 4,
+      "source_cell": [
+        0,
+        443,
+        443,
+        444
+      ],
+      "region": [
+        81,
+        454,
+        288,
+        399
+      ],
+      "front": [
+        240,
+        316
+      ],
+      "back": [
+        240,
+        263
+      ],
+      "sole": [
+        224,
+        405
+      ]
+    },
+    {
+      "index": 5,
+      "source_cell": [
+        443,
+        443,
+        444,
+        444
+      ],
+      "region": [
+        524,
+        454,
+        290,
+        397
+      ],
+      "front": [
+        241,
+        316
+      ],
+      "back": [
+        241,
+        264
+      ],
+      "sole": [
+        224,
+        403
+      ]
+    },
+    {
+      "index": 6,
+      "source_cell": [
+        887,
+        443,
+        443,
+        444
+      ],
+      "region": [
+        972,
+        454,
+        287,
+        403
+      ],
+      "front": [
+        241,
+        331
+      ],
+      "back": [
+        241,
+        275
+      ],
+      "sole": [
+        224,
+        409
+      ]
+    },
+    {
+      "index": 7,
+      "source_cell": [
+        0,
+        0,
+        1199,
+        1312
+      ],
+      "region": [
+        235,
+        70,
+        714,
+        1098
+      ],
+      "front": [
+        631,
+        859
+      ],
+      "back": [
+        625,
+        708
+      ],
+      "sole": [
+        626.5,
+        1159
+      ],
+      "file": "cannon-south-release-right-step.png"
+    }
+  ],
+  "frames": {
+    "witch-cannon-south-skills": {
+      "0": {
+        "muzzle_canvas_uv": [
+          0.5507900677200903,
+          0.5936794582392777
+        ],
+        "rear_canvas_uv": [
+          0.54627539503386,
+          0.47404063205417607
+        ],
+        "status": "OBSERVED_SOUTH_RAW_ONLY_NOT_INTEGRATION_ACCEPTANCE",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ]
+      },
+      "1": {
+        "muzzle_canvas_uv": [
+          0.545045045045045,
+          0.5733634311512416
+        ],
+        "rear_canvas_uv": [
+          0.5427927927927928,
+          0.4604966139954853
+        ],
+        "status": "OBSERVED_SOUTH_RAW_ONLY_NOT_INTEGRATION_ACCEPTANCE",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ]
+      },
+      "2": {
+        "muzzle_canvas_uv": [
+          0.5440180586907449,
+          0.582392776523702
+        ],
+        "rear_canvas_uv": [
+          0.54627539503386,
+          0.46952595936794583
+        ],
+        "status": "OBSERVED_SOUTH_RAW_ONLY_NOT_INTEGRATION_ACCEPTANCE",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ]
+      },
+      "3": {
+        "muzzle_canvas_uv": [
+          0.5472972972972973,
+          0.5688487584650113
+        ],
+        "rear_canvas_uv": [
+          0.545045045045045,
+          0.4604966139954853
+        ],
+        "status": "OBSERVED_SOUTH_RAW_ONLY_NOT_INTEGRATION_ACCEPTANCE",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ]
+      },
+      "4": {
+        "muzzle_canvas_uv": [
+          0.5417607223476298,
+          0.7117117117117117
+        ],
+        "rear_canvas_uv": [
+          0.5417607223476298,
+          0.5923423423423423
+        ],
+        "status": "OBSERVED_SOUTH_RAW_ONLY_NOT_INTEGRATION_ACCEPTANCE",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ]
+      },
+      "5": {
+        "muzzle_canvas_uv": [
+          0.5427927927927928,
+          0.7117117117117117
+        ],
+        "rear_canvas_uv": [
+          0.5427927927927928,
+          0.5945945945945946
+        ],
+        "status": "OBSERVED_SOUTH_RAW_ONLY_NOT_INTEGRATION_ACCEPTANCE",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ]
+      },
+      "6": {
+        "muzzle_canvas_uv": [
+          0.5440180586907449,
+          0.7454954954954955
+        ],
+        "rear_canvas_uv": [
+          0.5440180586907449,
+          0.6193693693693694
+        ],
+        "status": "OBSERVED_SOUTH_RAW_ONLY_NOT_INTEGRATION_ACCEPTANCE",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ]
+      },
+      "7": {
+        "muzzle_canvas_uv": [
+          0.5262718932443703,
+          0.6547256097560976
+        ],
+        "rear_canvas_uv": [
+          0.5212677231025855,
+          0.5396341463414634
+        ],
+        "status": "OBSERVED_SOUTH_RIGHT_RAW_ONLY_NOT_INTEGRATION_ACCEPTANCE",
+        "uncertainty_canvas_px": [
+          5,
+          5
+        ]
+      }
+    }
+  },
+  "independent_review": "PENDING_CONTROLLER",
+  "sole_method": "원PNG alpha>45 외곽의 하단-2px. 거의투명한배경잔여를접지에사용하지않음. 가로피벗은고정224",
+  "additional_png_sha256": {
+    "cannon-south-release-right-step.png": "64a622a039522fdcdce45417011c81519ededf16ed29cdd7c0bdfe72db2c33e6"
+  },
+  "right_step_source": "runtime/task-recovery-20261107/art-inputs/cannon-south-right-step-independent.json: 실제원본관측; 통합시각수용아님",
+  "previous_worker_records_0_to_6": [
+    {
+      "index": 0,
+      "source_cell": [
+        0,
+        0,
+        443,
+        443
+      ],
+      "region": [
+        83,
+        8,
+        285,
+        397
+      ],
+      "front": [
+        244,
+        263
+      ],
+      "back": [
+        244,
+        213
+      ],
+      "sole": [
+        224,
+        400
+      ]
+    },
+    {
+      "index": 1,
+      "source_cell": [
+        443,
+        0,
+        444,
+        443
+      ],
+      "region": [
+        528,
+        8,
+        283,
+        397
+      ],
+      "front": [
+        243,
+        251
+      ],
+      "back": [
+        243,
+        206
+      ],
+      "sole": [
+        224,
+        400
+      ]
+    },
+    {
+      "index": 2,
+      "source_cell": [
+        887,
+        0,
+        443,
+        443
+      ],
+      "region": [
+        971,
+        10,
+        283,
+        397
+      ],
+      "front": [
+        240,
+        255
+      ],
+      "back": [
+        244,
+        208
+      ],
+      "sole": [
+        224,
+        402
+      ]
+    },
+    {
+      "index": 3,
+      "source_cell": [
+        1330,
+        0,
+        444,
+        443
+      ],
+      "region": [
+        1414,
+        11,
+        284,
+        394
+      ],
+      "front": [
+        242,
+        256
+      ],
+      "back": [
+        246,
+        210
+      ],
+      "sole": [
+        224,
+        400
+      ]
+    },
+    {
+      "index": 4,
+      "source_cell": [
+        0,
+        443,
+        443,
+        444
+      ],
+      "region": [
+        81,
+        454,
+        288,
+        399
+      ],
+      "front": [
+        241,
+        313
+      ],
+      "back": [
+        244,
+        269
+      ],
+      "sole": [
+        224,
+        405
+      ]
+    },
+    {
+      "index": 5,
+      "source_cell": [
+        443,
+        443,
+        444,
+        444
+      ],
+      "region": [
+        524,
+        454,
+        290,
+        397
+      ],
+      "front": [
+        244,
+        311
+      ],
+      "back": [
+        246,
+        263
+      ],
+      "sole": [
+        224,
+        403
+      ]
+    },
+    {
+      "index": 6,
+      "source_cell": [
+        887,
+        443,
+        443,
+        444
+      ],
+      "region": [
+        972,
+        454,
+        287,
+        403
+      ],
+      "front": [
+        240,
+        328
+      ],
+      "back": [
+        242,
+        273
+      ],
+      "sole": [
+        224,
+        409
+      ]
+    }
+  ],
+  "independent_raw_reports": {
+    "cannon-south-independent.json": {
+      "path": "runtime/task-recovery-20261107/art-inputs/cannon-south-independent.json",
+      "sha256": "446fc0a6e6f0ebdfb3f8ddaf87ee5ab7fa83f5ccd2647175f045a97464f665cc",
+      "reviewer": "/root/experience_art_review",
+      "scope": "실제 raw PNG만; 게임통합/연속모션 미수용"
+    },
+    "cannon-south-right-step-independent.json": {
+      "path": "runtime/task-recovery-20261107/art-inputs/cannon-south-right-step-independent.json",
+      "sha256": "71bb9027fff78ba512ecba812dc7023e1847a4e0520aca887a3252604a5d48c8",
+      "reviewer": "/root/experience_art_review",
+      "scope": "실제 raw PNG만; 게임통합/연속모션 미수용"
+    }
+  }
+}

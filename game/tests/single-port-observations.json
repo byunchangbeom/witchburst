@@ -1,0 +1,258 @@
+{
+  "reviewer": "/root/experience_art_review",
+  "source": "/Users/nhn/.local/state/harness-v/witchburst/task-recovery-20261107/art-inputs/independent-candidate-landmarks.json",
+  "source_sha256": "acee4320ba7657ed3dc9ca247e2564000a5b9262c5e099bb983ec6ee894738a0",
+  "png_sha256": "052c668e7afa34b16578cb0cd7b4151aca150ebaafe3e254868574d2311ed5f7",
+  "scope": "POSITIVE_SCOPED_RAW_SINGLE_PORT_AND_VISIBLE_DIRECTION_CANDIDATE",
+  "runtime_acceptance": "PENDING",
+  "records": [
+    {
+      "index": 4,
+      "source_cell": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "region": [
+        97,
+        24,
+        257,
+        388
+      ],
+      "front": [
+        243,
+        44
+      ],
+      "back": [
+        247,
+        84
+      ],
+      "sole": [
+        224.0,
+        410
+      ],
+      "uncertainty_raw_px": [
+        4,
+        4
+      ]
+    },
+    {
+      "index": 5,
+      "source_cell": [
+        444,
+        0,
+        443,
+        444
+      ],
+      "region": [
+        534,
+        22,
+        254,
+        387
+      ],
+      "front": [
+        235,
+        43
+      ],
+      "back": [
+        240,
+        83
+      ],
+      "sole": [
+        227.95,
+        408
+      ],
+      "uncertainty_raw_px": [
+        4,
+        4
+      ]
+    },
+    {
+      "index": 6,
+      "source_cell": [
+        887,
+        0,
+        443,
+        444
+      ],
+      "region": [
+        966,
+        24,
+        256,
+        385
+      ],
+      "front": [
+        257,
+        43
+      ],
+      "back": [
+        261,
+        83
+      ],
+      "sole": [
+        235.7,
+        407
+      ],
+      "uncertainty_raw_px": [
+        4,
+        4
+      ]
+    },
+    {
+      "index": 7,
+      "source_cell": [
+        1330,
+        0,
+        444,
+        444
+      ],
+      "region": [
+        1419,
+        24,
+        252,
+        387
+      ],
+      "front": [
+        227,
+        43
+      ],
+      "back": [
+        232,
+        82
+      ],
+      "sole": [
+        217.0,
+        410
+      ],
+      "uncertainty_raw_px": [
+        4,
+        4
+      ]
+    },
+    {
+      "index": 12,
+      "source_cell": [
+        0,
+        444,
+        444,
+        443
+      ],
+      "region": [
+        87,
+        510,
+        289,
+        334
+      ],
+      "front": [
+        346,
+        110
+      ],
+      "back": [
+        327,
+        145
+      ],
+      "sole": [
+        228.3,
+        398
+      ],
+      "uncertainty_raw_px": [
+        4,
+        4
+      ]
+    },
+    {
+      "index": 13,
+      "source_cell": [
+        444,
+        444,
+        443,
+        443
+      ],
+      "region": [
+        528,
+        510,
+        298,
+        332
+      ],
+      "front": [
+        352,
+        112
+      ],
+      "back": [
+        330,
+        148
+      ],
+      "sole": [
+        225.9,
+        396
+      ],
+      "uncertainty_raw_px": [
+        4,
+        4
+      ]
+    },
+    {
+      "index": 14,
+      "source_cell": [
+        887,
+        444,
+        443,
+        443
+      ],
+      "region": [
+        946,
+        518,
+        314,
+        324
+      ],
+      "front": [
+        342,
+        100
+      ],
+      "back": [
+        324,
+        136
+      ],
+      "sole": [
+        219.25,
+        396
+      ],
+      "uncertainty_raw_px": [
+        4,
+        4
+      ]
+    },
+    {
+      "index": 15,
+      "source_cell": [
+        1330,
+        444,
+        444,
+        443
+      ],
+      "region": [
+        1406,
+        510,
+        300,
+        333
+      ],
+      "front": [
+        347,
+        106
+      ],
+      "back": [
+        327,
+        140
+      ],
+      "sole": [
+        209.6,
+        398
+      ],
+      "uncertainty_raw_px": [
+        4,
+        4
+      ]
+    }
+  ]
+}

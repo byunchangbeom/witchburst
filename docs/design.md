@@ -1,5 +1,12 @@
 # Witchburst 현재 설계와 제작
 
+## 2026-11-07 reference-motion-followup · 현재 우선 기록
+
+현재 작업은 선행 storybook-visuals의 CLOSED 이후 같은 개선 OPEN/revision2의 좁은 표현 보완이다. attempt3의 기반은a517e2e이며 이전a724565 기록을 보존한다. 작은 사수·단순 배경·3강화/장비 UI를 재사용하고, 실제 성장탄/정령의 광류·수확 잔상, 공급된 단일 관구8셀·S 이동 하체 겹침 후보를 통합한다. 규칙·물리·입력·발동·저장/복귀/환생 계약은 유지한다. 다음 완결 플레이의 공방→성장→보스 스킬→승패/재시작·환생→저장/복귀 흐름과 플랫폼/IdP 후속 요구는 아래 기존 설계를 따른다.
+
+이번 제품/최고속 회귀의 개별 실행 결과와 sandbox 환경 오류·수정 후 화면 미확보·독립 검토 대기는 [아트 현행 반환](art-direction.md#2026-11-07-reference-motion-followup--attempt3-회수와-현행-반환)을 우선한다. 현재 공식 완료1/OPEN1이며 아래 완료0/OPEN2/관리경로 부재는 당시 이력이다. 사용자 디자인 반려/EA-006은 OPEN이다. 이번 task로 개선 사이클 완료를 올리거나 출시·사람 재미를 수용하지 않는다.
+
+
 현재53입력의모션접합·성장실제획득봇·공방/결과와실제OS입력보완은 [현행 후보](art-direction.md#aa96f24-채택-후-실제-보완--현행53입력-후보)에 연결한다. 현재대표품질보완을이어갔지만공식Controller인수/legacy완료근거가막혀정식통합·순차다음사이클은보류다.
 
 2026-11-07 문서 운영 기준은 aa96f24로 선택 채택했다. [완결 결과별 연속 사이클 계획](production-cycles.md#2026-11-07-aa96f24-선택-채택과-연속-사이클-계획)을 착수 전 전달했고 순차 close·현재 승인 범위의 전체 연속 진행을 따른다. 현재 대표 품질/다음 완결 플레이·표현 목표·완료 조건은 아래 기존 내용을 유지하며, 큰 외부 근거는 [자료 원장](storage-ledger.json)에 연결한다. 실행기7304344는 변경하지 않았다.
@@ -238,3 +245,49 @@ Root가 실제 도구로 UI그림/9patch를 공급하고 같은 후속 브랜치
 원본 호스트 living-motion의 game53 입력은 review-source-final.json(SHA256 2d7f28ef9d6b5d99a01dd9828f5a834861c5185b964428c8d9dfbd1469cca950)과 같다. 참고 영상/보드/Art 보고서는 cycle-continuation-20261107에 있고 부분 판독은 관리 검사를 대체하지 않는다. 기존 allowed 밖의 docs/improvement-queue.md·storage-ledger.json·production-cycles.md·executor-adoptions.json 및 AGENTS/tools는 원본에 보존해 docs를 소유한 정상 후속 Writer가 현재 실제 상태와 대조해 발행한다. 전체 아트·EA006 원작 이탈·사용자 디자인 반려는 OPEN이며 기술 PASS로 닫지 않는다.
 
 현재 복구 후 추가 검토: BLOCKED11의 두 실제 P2를 별도 호스트에서 보완 중이다. 실제 보행/분리하체를 거치는 지형/포구 검증과 독립 Art90셀 뒤점을 연결하며 기존 입력·물리·저장을 보존한다. 세부 source SHA/동일 소스 캡처/잔여WLM003/004 및 전체아트 OPEN은 art-direction.md를 따른다. 기술 수용 뒤 docs를 소유한 정상 후속에서 WB-IMP-010/012 기록을 발행하며 기존 living-motion 원본73파일은 계속 보존한다.
+
+
+## 2026-11-08 · 정상 WORK4 호스트 인계와 미해결 검토
+
+별도 Root 단일 Writer의 두 제품 수정 후보를 기존 reference-motion-followup의 REVIEW3 반려 후 정상 WORK4/attempt4 경계에서 인계했다. task 입력·ID·시도·원review·DB는 바꾸지 않았다. 실제 Worker4가 이어서 구현·새 검사·독립 리뷰를 받고 Controller가 commit/통합/push한다.
+
+- 원문: runtime task-recovery-20261107/mask-vfx-final-source-archive/manifest.json 및 reference-work4-host-handoff.json. cb822 기준 제품 차이는 storybook.gd와 motion-overrides.json 두 파일이다. 원본 living-motion73은 보존했고 임시 probe는 raw11파일/patch/base/58입력 보호 후 정상 정리했다.
+- 보조 제품 검사: 8017+749+44+74+1040 실패0. 같은 후보58입력의 실제1746 PNG는 mask-vfx-final-host/source-manifest.json, 실제 실행사본 대조는 mask-vfx-final-actual-copy-audit.json. 기존 관리4call이 이 전체자료를 실행했다고 표시하지 않는다.
+- 마스크: N/NE 상체 발 외곽과 하체에 잡힌 무기 조각 제거, S 상체 제거경계3px 보완은 후보다. 실제 Art 수용 전 미확정. mask-vfx-final-art-review.md가 존재하면 실제 남은 finding을 확인한다.
+- 효과: 넓은 잔광 망을 캐릭터 뒤쪽의 짧은 실제 궤적으로 좁히고 실제 적중에만 섬광을 더했다. 판정/재화/난수/물리는 변경하지 않는다. EA006 전체 표현·사용자 디자인 반려 OPEN.
+- 실제 REVIEW3 추가 반려: capture.gd until_phase가 규칙시간만 진행하여 motion.clock 기반 잔광이 누적된다. 기존 03-boss 등은 화력 비교 수용 근거에서 제외한다. Worker4는 규칙·표현 시간을 함께 진행하도록 수정하고 같은 소스 장면·방향/최고속/자연 자료를 다시 검증해야 한다. natural_growth_preview의600초 가속도 sync(0)이므로 첫 성장 표본48~101은 비교에서 제외하며 가속 중 표현시간도 함께 진행하도록 검토한다. 규칙을 바꾸거나 효과 밀도를 위해 캡처를 조작하지 않는다.
+- 전면 Art·OS 입력·전체 실시간 재생·청취·사람 재미·실기기는 호스트 검사로 수용하지 않는다. 남은 반려와 원시 실패를 보존한다.
+
+
+### WORK4 S 이동 시전 · 실제8프레임 신규자산 인계
+
+독립 Art는 새 padding 후보에서도 S prep1/3 긴 수평 절단선이 남아 CHANGES_REQUIRED라고 판독했다. 재차 마스크 확대만으로 완료 처리하지 않는다. Root host가 실제 image_gen으로 의상·허벅지·부츠가 이어진 S full-body 이동 준비4/이동 발동4프레임을 제작해 game/assets/art/cannon-south-moving-skills.png로 공급했다. 원PNG/계약은 runtime task-recovery-20261107/art-inputs/cannon-south-moving-contract.json이며 독립 원본 판독이 이어진다. 해당 S 이동 시전에는 새 실제 전신프레임을 stride와 연결하여 기존 split seam을 대신한다. 준비·발동·회복/취소 전환, foot접지와 muzzle/breech/효과방향을 실제 자산에 맞추고 기존 물리/입력/판정을 보존한다. 단일그림변형/다리합성만으로 완료 처리하지 않는다. 기존수용다른방향/행동은재사용한다. Root58입력1746은 이 PNG통합 전 보조후보여서 새 완료 근거가 아니며 Worker4 최종같은소스 전체보드/방향480/최고속480/자연성장과 새독립검토가 필요하다.
+
+
+WORK4 Worker 반환: S 이동 시전은 공급된 실제 전신8프레임을 stride에 연결하고, 준비/발동/회복/취소의 기존 절단 합성을 대신한다. capture의 상태 대기와 자연 성장600초 가속은 규칙·표현 시간을 함께 진행하도록 수정했다. 자산 계약·작은 재현·검사 결과와 한계는 [아트 기록](art-direction.md#2026-11-08--reference-motion-followup-work4-구현-반환)에 연결한다. Python 계약6개 PASS, Godot 제품 검사는 sandbox import 환경 오류로 미실행이며 새1x보드/연속자료·독립Art·사용자 수용은 대기다. 기존 EA003/005·R3-001의 실제 해소와 EA006 원작 반려를 완료로 바꾸지 않는다.
+
+
+## 2026-11-08 · 정상 WORK5 실제 실패 진단과 아트 후속 인계
+
+실제 CHECK4는 8017/749/44/74 실패0 뒤 experience1101 중2실패로 정상 WORK5가 됐다. 기존 task/attempt/입력/실패를 보존하며 새 task로 우회하지 않는다. Controller/Worker4/Root 보조 렌더가 모두 반환된 단일 Writer 경계에서 Root가 이 사실과 신규1프레임을 인계하고 반환한다.
+
+- 진단: task-recovery-20261107/south-test-diagnostic/{receipt.json,south.log}. 원제품 불변·개인 임시 fixture에 print만 넣었다. STEP은1/120이므로 준비18번=.15초에는 stride2.4, 자세0/1/2만 도달한다(HP720/사용0/cooldown0 모두 보존). 발동뒤10번=.0833초는 아직 skill_release다. 규칙/입력을 바꾸거나 assertion을 삭제/완화하지 말고 실제시간으로4보행과 .14~.30초 회복에 충분히 도달하게 재현을 수정한 뒤 전체 제품 검사를 재실행한다.
+- 새 독립 source 판독: art-inputs/cannon-south-independent.json의 SRAW002는 prepare3 오른발앞→release7 왼발앞 위상 불일치를 지적한다. 기존PNG0..6을 재사용하고 Root가 공급한 cannon-south-release-right-step.png를 실제release7 후보로 통합한다. 원본/계약은 art-inputs/cannon-south-right-step-contract.json, 독립새1프레임판독은 cannon-south-right-step-independent.json이 생성되면 반드시 읽는다. 상체/무기 전체 미러나 정지그림 squash로 대신하지 않는다. 다른 raw해상도이므로 불투명 본체·실제 부츠 접지·머리 크기를 대응하고 실제 포구/가시 rear점을 관측해 metadata/pose_probe를 연결한다.
+- 정지S 방향 반례: 독립 Art가 원raw actions37/38과 실제912e1의 1x S 보드 첫행을 열어 정면 몸인데 포구/시선은 우상향임을 확인했다. 현재 새전신은 moving만 선택하므로 정지 시전에는 이 문제가 남는다. 같은 새S 전신 자산을 정지 준비/발동/회복/취소에도 적절한 중립 보행위상으로 재사용해 방향/발원축을 맞추고 실제 정지S도 캡처/검사한다. 기존 입력 반응·규칙/쿨다운/판정 불변. 정지시다리보행은진행하지않는다.
+- Root912e1 전체렌더는 성공이 아니다. reference-attempt4-host의 stages129/boards17만 성공했고 actions178/400에서180초 frame_post_draw 대기 timeout으로 FAIL이다. 원문/부분화면/관리CHECK실패를 보존한다. capture/skill_direction은 이미 RenderingServer.force_draw(false)로 실제 GPU동기렌더하고 있으나 action_preview/frame_board/natural_growth에는 await frame_post_draw가 남았다. 같은 실제 렌더 방식으로 대기 교착을 고치고 시간제한/실패전파를 완화하지 않는다. 제품모션시간과규칙시간assert도 유지한다.
+- tests/render_reference_motion.py와 skill_direction_preview에 정지 시전 검토를 추가해 같은 source의 normal480/max480뿐 아니라 stationary 양무기×8방향도 실제 자료로 남긴다. 정지속도0/좌표보존, 준비·발동·회복·취소와 실제정지다리/pose·효과축을 관측한다. 원래 moving/max 커버리지를 줄이거나 기존검사를 skip하지 않는다. 새고정commit 전체 생성/독립Art 전에는 수용하지 않는다.
+- 전체 아트/EA006/사용자 반려 OPEN, 원문13미가용·보호사본46과 WB013도 그대로 유지한다. 새 정상 Worker5가 실제수정/검사하고 Controller commit/신규관리check/독립review/통합/push한다.
+
+WORK5 실제 반환: 시간 관측 반례부터 재현·수정하고 공급 오른발7번/정지S중립 전신/독립raw축·동기렌더·정지480상태 회귀를 연결했다. 개별 제품실패0과 공식 import환경 FAIL, 실제GPU·독립Art/사용자 수용 대기는 [아트 반환](art-direction.md#2026-11-08--reference-motion-followup-work5-반환)에 구분한다. 위 Root 인계와 이전 실패/집계는 보존한다.
+
+## 2026-11-08 · BLOCKED6 공식 인수 전 호스트 보완
+
+관리 REVIEW5는 원작 후기 밀도/비율, 시전 중 자동사격의 위쪽 발사축, 공방 행동 위계를 반려했다. 기존 source b58383f·attempt6·모든 검사/반려/원 입력을 보존하고 Root 별도 `work/reference-density-host`에서 보완했다. 아래는 미수용 호스트 후보이며 정상 host-plan/recover-blocked 이후 새 관리 검사·독립 리뷰·통합·push 전 완료가 아니다.
+
+- 자동탄은 별비의 간접 제스처와 분리해 실제 발사 순간55ms에 해당 방향의 수용된 직접 사격 프레임을 선택한다. 별비 준비·발동·회복·취소의 시간/사용 횟수/쿨다운은 유지한다. 원래 별비 포즈·독립 두 점 관측도 계속 검사하며, 실제 자동탄은 독립 그림점의 초기축과 표적 방향 반평면을 검사한다. 관측에 direct_firing을 추가해 상태 라벨과 실제 포즈의 역할을 구분한다.
+- 실제배율의 작은 사수: wand50/cannon76, 정령34·일반적40·보스120. PNG와 수용된 방향/행동 프레임은 재사용한다. 배경 대비를 낮추고 실탄·정령탄이 실제 지난 광류만 두껍게 해 초기 단발과 후기 화력의 대비를 만든다. 최대16광류/실제 지급 아이콘 예산48은 유지하며 새 탄/피해/재화를 꾸미지 않는다.
+- 초기 등장 간격1.8초는 유지한다. 성장tier2/3에서는 실제 적을 .9/.55초 간격으로 최대2기씩 공급하되 동시4기·정화12기·HP·이동·탄속·충돌·피해·보상액·저장계약은 같다. 후기 탐험의 대기와 라운드 진행 속도는 바뀌는 밸런스 수정이며 종전 속도와 동일하다고 주장하지 않는다. 실제 획득 봇의 시점/장착/속도와 적·탄·광류·획득물 수를 관측해 비교한다.
+- 공방의 사용 불가/완료 상태는 옅은 회색 면과 낮은 테두리, 실행 가능 행동은 녹색, 우선 성장 행동은 금색으로 구분한다. 합성→제작→뽑기→정령→보상 순으로 현재 가능한 첫 행동을 강조한다. 실제 비용/콜백·비활성 동작·공방 일시정지는 보존한다.
+- 호스트 product-3: 8017+1005+44+74+1294 실패0, 정지 시전480상태 검사와 캡처 상태 검사 통과. 현재 62입력·실제2226 화면은 runtime task-recovery-20261107/density-host-frozen.json, density-host-render/source-manifest.json과 독립 density-host-art-review.md로 대조한다. 기술 통과와 전체 Art·사용자 반려 OPEN은 별개다.
+
+자료 관리 요청도 같은 개선 사이클의 운영 작업으로 받았다. 2835e73 고정61blob·전체166개와 독립자원39개 시험은 확인했지만, 기존 미착수 기록 발행 작업이 bbf를 고정 검사하므로 입력을 바꾸지 않고 기존 정상 수용/발행 뒤 별도2835 운영 채택과 보호 import/선별보존/공식 회수를 진행한다. 원 lock과 이전 채택은 보존한다. 새 원장 사용 이후 oldbbf 운영은 금지한다. 정리 자체를 게임 완료 사이클로 집계하지 않는다.

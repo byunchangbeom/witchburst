@@ -1,0 +1,33 @@
+{
+  "current": {
+    "schema_version": 1,
+    "adopted_at": "2026-11-07T12:38:30.389113+00:00",
+    "commit": "bbf9f9c341f55a3b21e0d44850f5e6c288037cc6",
+    "executor": "/Users/nhn/.local/state/harness-v/witchburst/task-recovery-20261107/executor-bbf9f9c/hv.py",
+    "state": "/Users/nhn/.local/state/harness-v/witchburst",
+    "authorization": "2026-11-07 마스터의 공식 복구 실행기 검증·별도 채택 명시 지시",
+    "source_manifest": "/Users/nhn/.local/state/harness-v/witchburst/task-recovery-20261107/executor-bbf9f9c/SOURCE.json",
+    "verified_git_blobs": 59,
+    "regression": {
+      "tests": 127,
+      "result": "PASS",
+      "log": "/Users/nhn/.local/state/harness-v/witchburst/task-recovery-20261107/executor-tests.log"
+    },
+    "preserved_locks": {
+      "harness.lock": "b1388732a55ea4917e627c18b74ac84ab0e365a723ba8143f43504a608be9fec",
+      "harness-cycles.lock": "b0d14a25b7a2bb0a048f6f017072445b3606286fe42be7d8b2f2b44815499dfd"
+    },
+    "precedence": "현재 복구/run/discuss/cycle close는 이 명시 채택을 사용. 기존 두 lock은 역사적 pin 보존이며7304344 운영 호출 금지. tools/hv-cycle은 이 실행기만 호출.",
+    "document_paths": [
+      "docs/handoffs/task-recovery-2026-11-07.md",
+      "docs/task-recovery.md"
+    ],
+    "independent_review": "/Users/nhn/.local/state/harness-v/witchburst/task-recovery-20261107/independent-adoption-recovery-review.md",
+    "legacy_accounting": "이미 cycles이므로 재adopt/reinit 없음; 기존59calls/실패/attempt9 보존",
+    "status": "ADOPTED_LOCAL_RECORD_PENDING_CONTROLLER_PUBLICATION"
+  },
+  "historical_pin_files": [
+    "harness.lock",
+    "harness-cycles.lock"
+  ]
+}

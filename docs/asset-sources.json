@@ -291,6 +291,106 @@
       },
       "method": "가시 shaft/neck 뒤점90셀 및 cannon-actions6/14의 실제 front 제안2셀; 표적 역산 없음. 기존88 front는 이번 신규독립수용이 아님. 뒤점2개 재판독 수정 이력 원문 보존. 수동 오차±3 canvas px",
       "acceptance": "좌표 관측/로컬 적용 범위. 전체아트/관구의미/사용자수용 OPEN, 새 관리 검증·실제 렌더 판독 별도"
+    },
+    {
+      "id": "reference-motion-followup-ribbon",
+      "files": [
+        "game/storybook.gd"
+      ],
+      "creator": "reference-motion-followup experience Worker",
+      "source": "기존 신규 Godot 탄도/중심 꼬리의 실제 지나온 경로를 13표본으로 재사용한 마력 리본; 원작 자산 복사 및 새 이미지 생성 없음",
+      "reference_inputs": [
+        "reference-review/reference-85.png",
+        "reference-review/reference-89.png",
+        "reference-review/reference-2.png",
+        "reference-review/reference-8.png"
+      ],
+      "behavior": "초기 단발에는 적용하지 않음. 성장 tier1~3은 비행거리와 80/120/160 논리단위 중 작은 길이. 민트 주탄/금색 정령탄. 규칙·피해·발동·저장은 변경하지 않음.",
+      "reused_frames": "기반 a724565의 실제 directions/moving/actions 및 연결영역/포신 랜드마크 그대로 사용; 새 프레임을 공급받거나 제작했다고 주장하지 않음",
+      "external_asset_copied": false,
+      "gpu_and_visual_verification": "PENDING_CONTROLLER_HOST_CHECK_AND_INDEPENDENT_REVIEW",
+      "listening_verification": "NOT_HEARD",
+      "user_design_reacceptance": "OPEN"
+    },
+    {
+      "id": "reference-motion-followup-single-port-and-overlap",
+      "files": [
+        "game/assets/art/cannon-single-port-skills.png",
+        "game/assets/art/motion-overrides.json",
+        "game/tests/single-port-observations.json",
+        "game/tests/weapon-axis-landmarks.json"
+      ],
+      "creator": "Root host Art 실제 image_gen 공급; experience Worker가 원본 바이트 보존·8셀/피벗/관측 좌표 통합",
+      "source": "/Users/nhn/.local/state/harness-v/witchburst/task-recovery-20261107/art-inputs/asset-contract.json",
+      "source_sha256": "ea9c52f6a61ea38b2fae360c4f883887504a91fb0cfa903edb6de3b2163ba7ba",
+      "original_generated_image": "/Users/nhn/.codex1/generated_images/01a1afba-1f82-7af2-b09b-615779173642/exec-f1b11e18-06bf-4017-875d-9683b57473a2.png",
+      "png_sha256": "052c668e7afa34b16578cb0cd7b4151aca150ebaafe3e254868574d2311ed5f7",
+      "format": "RGBA 1774x887; N/NE 각 정리·준비·발동·회복4셀. 기존 자체 witch-cannon-actions.png 참조 편집; 원작 자산 복사 없음",
+      "integration": "원본 픽셀 변경0; file_override로 cannon-actions4~7/12~15 선택. region/trim/밑창 foot/앞뒤 UV/410 표시기준은 motion-overrides.json. 이전 프레임/관측은 보존",
+      "independent_raw_observation": "/Users/nhn/.local/state/harness-v/witchburst/task-recovery-20261107/art-inputs/independent-candidate-landmarks.json",
+      "independent_raw_observation_sha256": "acee4320ba7657ed3dc9ca247e2564000a5b9262c5e099bb983ec6ee894738a0",
+      "raw_review_scope": "POSITIVE_SCOPED_RAW_SINGLE_PORT_AND_VISIBLE_DIRECTION_CANDIDATE; 실제 게임 통합/연속 실행 수용 아님",
+      "overlap_reuse": "기존 자체 wand/cannon-moving의 S4보행 하체만 의상 뒤10원본px 겹침. 원본PNG 불변·상체 제거 범위 불변. EA-003/005 새 독립 판독 전 PENDING",
+      "runtime_visual_acceptance": "PENDING_CONTROLLER_GPU_AND_INDEPENDENT_REVIEW",
+      "user_design_reacceptance": "OPEN"
+    },
+    {
+      "id": "reference-motion-followup-salvo-and-harvest",
+      "files": [
+        "game/storybook.gd",
+        "game/battle.gd"
+      ],
+      "creator": "reference-motion-followup experience Worker",
+      "source": "기존 실제 탄/적중/지급 통지와 자체 UiSkin 재화 아이콘 재사용. 신규 외부 그림·소리 없음",
+      "behavior": "tier2/3 실제 탄의 지난 위치 최대64점/16광류; 실제 적중 뒤0.72초 잔광. 실제 지급 뒤 최대2.05초 재화4묶음/48아이콘. 규칙상 탄/피해/재화/저장 변화 없음",
+      "reference_inputs": [
+        "reference-review/reference-85.png",
+        "reference-review/reference-89.png",
+        "reference-review/reference-2.png",
+        "reference-review/reference-8.png"
+      ],
+      "verification": "개별 headless 표현1040·기존 제품/모션/UI/행동 실패0; 환경오류 존재로 전체검사PASS 아님. 수정후 GPU/독립 시각 판독 PENDING_HOST",
+      "audio": "NOT_HEARD",
+      "human_fun": "NOT_MEASURED",
+      "user_design_reacceptance": "OPEN"
+    },
+    {
+      "id": "cannon-south-moving-skills-work4",
+      "files": [
+        "game/assets/art/cannon-south-moving-skills.png",
+        "game/assets/art/cannon-south-moving-skills.json",
+        "game/tests/south-moving-observations.json"
+      ],
+      "creator": "Root host image_gen 신규8전신프레임; reference-motion-followup Worker4는원PNG불변통합",
+      "source": "runtime/task-recovery-20261107/art-inputs/cannon-south-moving-contract.json / WB-ART-SOUTH-MOVING-20261108",
+      "original": "/Users/nhn/.codex1/generated_images/01a1afba-1f82-7af2-b09b-615779173642/exec-8a09fc46-1373-4987-8a3d-651e49437837.png",
+      "png_sha256": "7bf80dce7451e5e7c83f4a3f07d9c33f5cb687164f81e347ade56004d12247f7",
+      "method": "기존자체마녀PNG를참고한image_gen편집산출물을호스트에서공급. 원작85/89/2/8배포복사없음. 이Worker의image_gen실행없음",
+      "layout": "1774x887,4열2행. 준비4/발동4; 회복은발동행·취소는준비행. S조준이동에만사용",
+      "playback": "실제이동거리stride의4위상. 102게임단위/410원본px비율. 고정가로pivot224/alpha>45밑창하단-2px. atlas외곽3px여유. 전신마스크없음",
+      "landmarks": "신규8셀포구/뒤점은Worker직접원본판독±4px. 기존90점독립Art와분리,독립재검토PENDING",
+      "visual_acceptance": "PENDING_SAME_SOURCE_HOST_RENDER_AND_INDEPENDENT_ART",
+      "external_asset_copied": false
+    },
+    {
+      "id": "cannon-south-neutral-and-right-step-work5",
+      "files": [
+        "game/assets/art/cannon-south-release-right-step.png",
+        "game/assets/art/cannon-south-moving-skills.json",
+        "game/tests/south-moving-observations.json"
+      ],
+      "creator": "Root host image_gen 공급. Worker5는 PNG 바이트 불변 통합과 metadata/상태 연결만 수행",
+      "source": "runtime/task-recovery-20261107/art-inputs/cannon-south-right-step-contract.json / WB-ART-SOUTH-RIGHT-STEP-20261108",
+      "original": "/Users/nhn/.codex1/generated_images/01a1afba-1f82-7af2-b09b-615779173642/exec-a47f2d18-5e4f-4d8e-a321-0cdc6684f705.png",
+      "png_sha256": "64a622a039522fdcdce45417011c81519ededf16ed29cdd7c0bdfe72db2c33e6",
+      "layout": "1199×1312 단일 오른발앞 방출. 기존 전신0..6 PNG 재사용,7만 별도 파일. 정지 S는 준비/취소0·방출/회복4로 보행 고정",
+      "playback": "cell7 alpha32본체+3px region235,70,714,1098; 발기준626.5,1159; 본체높이1092/표시기준1128로 기존397/410에 대응. 전체 미러/스쿼시 없음",
+      "landmarks": "기존0..6도 공급된 cannon-south-independent.json의 source_png_xy를 canvas/trim 좌표로 변환. 새7 front631,859 / rear625,708은 cannon-south-right-step-independent.json 직접 관측. 보고서 SHA는 south-moving-observations.json. Worker4 관측은 previous_worker_records와 Git912e1 보존",
+      "independent_scope": "원본PNG 한정 긍정/주의. SRAW002·SRAW-RIGHT002의 통합/실제1x/연속수용은 PENDING이며 독립 raw 판독을 제품 수용으로 확대하지 않음",
+      "checks": "headless 개별제품 assertion실패0·정상/최고속/정지 각480상태; sandbox경로/인증서 오류로 공식tests/run.py import FAIL. 실제GPU/독립통합검토 대기",
+      "visual_acceptance": "PENDING_SAME_SOURCE_HOST_RENDER_AND_INDEPENDENT_ART",
+      "user_design_reacceptance": "OPEN",
+      "external_asset_copied": false
     }
   ],
   "verification": {
@@ -546,6 +646,23 @@
     "independent_back_landmarks": "90셀 관측, source PNG6장의 SHA와 직접 alpha 대조",
     "front_status": "2셀 독립 Art 제안 적용; 나머지88 기존 수동표기. 전체 front/중복관구 의미/전체Art 수용 OPEN",
     "user_acceptance": "OPEN",
+    "main_integrated": false,
+    "scope_note": "보존한 이전 호스트 후보54입력. 현재 Worker4 통합 후보는 current_worker_candidate이며 이 호스트 자료를 신규PNG통합 수용 근거로 쓰지 않음"
+  },
+  "current_worker_candidate": {
+    "task": "reference-motion-followup",
+    "attempt": 4,
+    "base_commit": "cb822b4d6847f8ba21f810c3fd026dc10f39a07b",
+    "source_dirty": true,
+    "art_id": "cannon-south-moving-skills-work4",
+    "new_PNGs": true,
+    "image_creation_by_this_worker": false,
+    "runtime_integration": "IMPLEMENTED_NOT_ENGINE_VERIFIED",
+    "host_product_check": "REQUIRED_IMPORT_FAILED_IN_SANDBOX",
+    "same_source_render": "NOT_MEASURED",
+    "independent_art": "PENDING_CONTROLLER",
+    "EA003_EA005_R3_001": "RECHECK_REQUIRED",
+    "EA006_user_acceptance": "OPEN",
     "main_integrated": false
   }
 }

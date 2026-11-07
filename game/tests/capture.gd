@@ -29,11 +29,16 @@ func fresh() -> void:
 	battle.sound.enabled = false
 
 func until_phase(target: int, limit: float) -> void:
+	var started: float = battle.visuals.motion.clock
+	var steps := 0
 	for i in range(int(limit * 60)):
 		if battle.phase == target:
-			return
+			break
 		battle.advance(1.0 / 60.0)
+		battle.visuals.sync(1.0 / 60.0)
+		steps += 1
 	require(battle.phase == target, "캡처할 전투 상태 도달 실패: %d" % target)
+	require(absf(battle.visuals.motion.clock - started - steps / 60.0) < .001, "상태 도달 중 규칙·표현 시간이 함께 진행")
 
 func advance_motion(seconds: float) -> void:
 	# 실제 _process와 같은 순서로 규칙과 표현을 갱신한다.
@@ -60,7 +65,7 @@ func _run() -> void:
 	fresh()
 	for character in "마녀포격단숲정화공격력사속도획득량별빛시간재도전":
 		require(battle.font.has_char(character.unicode_at(0)), "한국어 글리프 fallback: " + character)
-	battle.advance(0.1)
+	advance_motion(0.1)
 	require(battle.total_shots > 0 and not battle.bullets.is_empty(), "첫 사격 표시 준비")
 	await capture_matrix("01-first", battle.Phase.FOREST)
 	await capture_matrix("10-first-shot", battle.Phase.FOREST, true)
@@ -81,7 +86,7 @@ func _run() -> void:
 	for i in range(3):
 		require(battle.buy_upgrade("speed"), "속도 강화 준비")
 	require(battle.buy_upgrade("yield"), "획득 강화 준비")
-	battle.advance(0.2)
+	advance_motion(0.2)
 	require(battle.power_tier() == 3 and battle.bullets.any(func(b: Dictionary) -> bool: return b.tier == 3), "성장한 마도구와 큰 탄 표시 준비")
 	await capture_matrix("02-grown", battle.Phase.FOREST)
 	await capture_matrix("11-grown-shot", battle.Phase.FOREST, true)
@@ -90,13 +95,13 @@ func _run() -> void:
 	await capture_matrix("07-workshop", battle.Phase.FOREST)
 	battle.toggle_workshop()
 	until_phase(battle.Phase.BOSS, 100)
-	battle.advance(0.25)
+	advance_motion(0.25)
 	require(battle.boss_hp > 0 and battle.boss_time < battle.BOSS_LIMIT, "보스 HP·시간 표시 준비")
 	await capture_matrix("03-boss", battle.Phase.BOSS)
 	await capture_matrix("14-boss-shot", battle.Phase.BOSS, true)
 	await capture_matrix("15-boss-flight", battle.Phase.BOSS, false, 80.0)
 	battle.skill_button.pressed.emit()
-	battle.advance(0.1)
+	advance_motion(0.1)
 	require(battle.skill_uses == 1 and battle.cooldown > 0 and battle.skill_flash > 0, "스킬 효과·쿨다운 표시 준비")
 	await capture_matrix("04-skill", battle.Phase.BOSS)
 	until_phase(battle.Phase.WON, 30)
@@ -130,9 +135,7 @@ func _run() -> void:
 
 func capture_matrix(stage: String, phase: int, launch: bool = false, flight: float = 0.0) -> void:
 	if phase in [battle.Phase.WON,battle.Phase.LOST]:
-		battle.advance(.5)
-		for step in range(6):
-			battle.visuals.sync(1.0/12.0)
+		advance_motion(.5)
 	for dimensions in SIZES:
 		root.size = dimensions
 		# 창 크기와 stretch가 적용된 뒤 레이아웃을 읽는다.
@@ -177,6 +180,8 @@ func capture_matrix(stage: String, phase: int, launch: bool = false, flight: flo
 				require(panel_rect.encloses(control.get_rect()), "결과 창 내부 텍스트·버튼 배치")
 		var filename := "%s-%dx%d.png" % [stage, dimensions.x, dimensions.y]
 		var item := {"path": filename, "stage": stage, "size": [dimensions.x, dimensions.y],
+			"motion_clock": battle.visuals.motion.clock,
+			"salvos": battle.visuals.salvos.size(), "reward_bursts": battle.visuals.reward_bursts.size(),
 			"equipped": battle.equipped, "spirit": battle.spirit, "rebirths": battle.rebirths,
 			"phase": phase, "attack_level": battle.levels.attack, "power_tier": battle.power_tier(),
 			"shots": battle.total_shots, "hits": battle.total_hits, "rewards": battle.total_rewards,

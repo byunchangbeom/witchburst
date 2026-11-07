@@ -1360,155 +1360,147 @@
     "witch-cannon-actions": {
       "4": {
         "muzzle_canvas_uv": [
-          0.7172,
-          0.1094
+          0.5472973,
+          0.0990991
         ],
         "rear_canvas_uv": [
-          0.7323232,
-          0.2424242
+          0.5563063,
+          0.1891892
         ],
-        "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+        "status": "OBSERVED_MANUAL_SINGLE_PORT_CANDIDATE",
         "uncertainty_canvas_px": [
-          3,
-          3
+          4,
+          4
         ],
-        "point_kind": "visible_barrel_collar_or_neck_axis_point",
-        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
-        "front_provenance": "NOT_NEWLY_ACCEPTED",
-        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+        "file_override": "cannon-single-port-skills.png",
+        "record_index": 0,
+        "runtime_acceptance": "PENDING"
       },
       "5": {
         "muzzle_canvas_uv": [
-          0.5607,
-          0.1651
+          0.530474,
+          0.0968468
         ],
         "rear_canvas_uv": [
-          0.5678392,
-          0.2979798
+          0.5417607,
+          0.1869369
         ],
-        "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+        "status": "OBSERVED_MANUAL_SINGLE_PORT_CANDIDATE",
         "uncertainty_canvas_px": [
-          3,
-          3
+          4,
+          4
         ],
-        "point_kind": "visible_barrel_collar_or_neck_axis_point",
-        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
-        "front_provenance": "NOT_NEWLY_ACCEPTED",
-        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+        "file_override": "cannon-single-port-skills.png",
+        "record_index": 1,
+        "runtime_acceptance": "PENDING"
       },
       "6": {
         "muzzle_canvas_uv": [
-          0.520202,
-          0.1212121
+          0.5801354,
+          0.0968468
         ],
         "rear_canvas_uv": [
-          0.5555556,
-          0.2272727
+          0.5891648,
+          0.1869369
         ],
-        "status": "FRONT_MARKER_REJECTED_PROPOSED_PHYSICAL_PAIR",
+        "status": "OBSERVED_MANUAL_SINGLE_PORT_CANDIDATE",
         "uncertainty_canvas_px": [
-          3,
-          3
+          4,
+          4
         ],
-        "point_kind": "visible_barrel_collar_or_neck_axis_point",
-        "axis_acceptance": "PROPOSED_VISIBLE_FRONT_BACK_PAIR_ONLY_REQUIRES_PRODUCT_APPLY_AND_INDEPENDENT_RENDER_CHECK",
-        "front_provenance": "OBSERVED_PROPOSED_CENTER_FOR_UPRIGHT_VISIBLE_OPENING",
-        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+        "file_override": "cannon-single-port-skills.png",
+        "record_index": 2,
+        "runtime_acceptance": "PENDING"
       },
       "7": {
         "muzzle_canvas_uv": [
-          0.6961,
-          0.1126
+          0.5112613,
+          0.0968468
         ],
         "rear_canvas_uv": [
-          0.7323232,
-          0.2474747
+          0.5225225,
+          0.1846847
         ],
-        "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+        "status": "OBSERVED_MANUAL_SINGLE_PORT_CANDIDATE",
         "uncertainty_canvas_px": [
-          3,
-          3
+          4,
+          4
         ],
-        "point_kind": "visible_barrel_collar_or_neck_axis_point",
-        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
-        "front_provenance": "NOT_NEWLY_ACCEPTED",
-        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+        "file_override": "cannon-single-port-skills.png",
+        "record_index": 3,
+        "runtime_acceptance": "PENDING"
       },
       "12": {
         "muzzle_canvas_uv": [
-          0.7485,
-          0.1819
+          0.7792793,
+          0.248307
         ],
         "rear_canvas_uv": [
-          0.7424242,
-          0.2562814
+          0.7364865,
+          0.3273138
         ],
-        "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+        "status": "OBSERVED_MANUAL_SINGLE_PORT_CANDIDATE",
         "uncertainty_canvas_px": [
-          3,
-          3
+          4,
+          4
         ],
-        "point_kind": "visible_barrel_collar_or_neck_axis_point",
-        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
-        "front_provenance": "NOT_NEWLY_ACCEPTED",
-        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+        "file_override": "cannon-single-port-skills.png",
+        "record_index": 4,
+        "runtime_acceptance": "PENDING"
       },
       "13": {
         "muzzle_canvas_uv": [
-          0.5441,
-          0.1914
+          0.7945824,
+          0.2528217
         ],
         "rear_canvas_uv": [
-          0.5628141,
-          0.3266332
+          0.744921,
+          0.3340858
         ],
-        "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+        "status": "OBSERVED_MANUAL_SINGLE_PORT_CANDIDATE",
         "uncertainty_canvas_px": [
-          3,
-          3
+          4,
+          4
         ],
-        "point_kind": "visible_barrel_collar_or_neck_axis_point",
-        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
-        "front_provenance": "NOT_NEWLY_ACCEPTED",
-        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+        "file_override": "cannon-single-port-skills.png",
+        "record_index": 5,
+        "runtime_acceptance": "PENDING"
       },
       "14": {
         "muzzle_canvas_uv": [
-          0.469697,
-          0.1407035
+          0.772009,
+          0.2257336
         ],
         "rear_canvas_uv": [
-          0.510101,
-          0.2512563
+          0.731377,
+          0.3069977
         ],
-        "status": "FRONT_MARKER_REJECTED_PROPOSED_PHYSICAL_PAIR",
+        "status": "OBSERVED_MANUAL_SINGLE_PORT_CANDIDATE",
         "uncertainty_canvas_px": [
-          3,
-          3
+          4,
+          4
         ],
-        "point_kind": "visible_barrel_collar_or_neck_axis_point",
-        "axis_acceptance": "PROPOSED_VISIBLE_FRONT_BACK_PAIR_ONLY_REQUIRES_PRODUCT_APPLY_AND_INDEPENDENT_RENDER_CHECK",
-        "front_provenance": "OBSERVED_PROPOSED_CENTER_FOR_UPRIGHT_VISIBLE_OPENING",
-        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+        "file_override": "cannon-single-port-skills.png",
+        "record_index": 6,
+        "runtime_acceptance": "PENDING"
       },
       "15": {
         "muzzle_canvas_uv": [
-          0.7236,
-          0.1723
+          0.7815315,
+          0.2392777
         ],
         "rear_canvas_uv": [
-          0.7323232,
-          0.2512563
+          0.7364865,
+          0.3160271
         ],
-        "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+        "status": "OBSERVED_MANUAL_SINGLE_PORT_CANDIDATE",
         "uncertainty_canvas_px": [
-          3,
-          3
+          4,
+          4
         ],
-        "point_kind": "visible_barrel_collar_or_neck_axis_point",
-        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
-        "front_provenance": "NOT_NEWLY_ACCEPTED",
-        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+        "file_override": "cannon-single-port-skills.png",
+        "record_index": 7,
+        "runtime_acceptance": "PENDING"
       },
       "20": {
         "muzzle_canvas_uv": [
@@ -1738,6 +1730,169 @@
         "front_provenance": "NOT_NEWLY_ACCEPTED",
         "art_ambiguity_open": null
       }
+    }
+  },
+  "override_provenance": {
+    "review": "/Users/nhn/.local/state/harness-v/witchburst/task-recovery-20261107/art-inputs/independent-candidate-landmarks.json",
+    "review_sha256": "acee4320ba7657ed3dc9ca247e2564000a5b9262c5e099bb983ec6ee894738a0",
+    "scope": "POSITIVE_SCOPED_RAW_SINGLE_PORT_AND_VISIBLE_DIRECTION_CANDIDATE",
+    "runtime_visual_acceptance": "PENDING"
+  },
+  "override_sources": {
+    "cannon-single-port-skills.png": "052c668e7afa34b16578cb0cd7b4151aca150ebaafe3e254868574d2311ed5f7"
+  },
+  "superseded_single_port_frames": {
+    "4": {
+      "muzzle_canvas_uv": [
+        0.7172,
+        0.1094
+      ],
+      "rear_canvas_uv": [
+        0.7323232,
+        0.2424242
+      ],
+      "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+      "uncertainty_canvas_px": [
+        3,
+        3
+      ],
+      "point_kind": "visible_barrel_collar_or_neck_axis_point",
+      "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+      "front_provenance": "NOT_NEWLY_ACCEPTED",
+      "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+    },
+    "5": {
+      "muzzle_canvas_uv": [
+        0.5607,
+        0.1651
+      ],
+      "rear_canvas_uv": [
+        0.5678392,
+        0.2979798
+      ],
+      "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+      "uncertainty_canvas_px": [
+        3,
+        3
+      ],
+      "point_kind": "visible_barrel_collar_or_neck_axis_point",
+      "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+      "front_provenance": "NOT_NEWLY_ACCEPTED",
+      "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+    },
+    "6": {
+      "muzzle_canvas_uv": [
+        0.520202,
+        0.1212121
+      ],
+      "rear_canvas_uv": [
+        0.5555556,
+        0.2272727
+      ],
+      "status": "FRONT_MARKER_REJECTED_PROPOSED_PHYSICAL_PAIR",
+      "uncertainty_canvas_px": [
+        3,
+        3
+      ],
+      "point_kind": "visible_barrel_collar_or_neck_axis_point",
+      "axis_acceptance": "PROPOSED_VISIBLE_FRONT_BACK_PAIR_ONLY_REQUIRES_PRODUCT_APPLY_AND_INDEPENDENT_RENDER_CHECK",
+      "front_provenance": "OBSERVED_PROPOSED_CENTER_FOR_UPRIGHT_VISIBLE_OPENING",
+      "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+    },
+    "7": {
+      "muzzle_canvas_uv": [
+        0.6961,
+        0.1126
+      ],
+      "rear_canvas_uv": [
+        0.7323232,
+        0.2474747
+      ],
+      "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+      "uncertainty_canvas_px": [
+        3,
+        3
+      ],
+      "point_kind": "visible_barrel_collar_or_neck_axis_point",
+      "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+      "front_provenance": "NOT_NEWLY_ACCEPTED",
+      "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+    },
+    "12": {
+      "muzzle_canvas_uv": [
+        0.7485,
+        0.1819
+      ],
+      "rear_canvas_uv": [
+        0.7424242,
+        0.2562814
+      ],
+      "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+      "uncertainty_canvas_px": [
+        3,
+        3
+      ],
+      "point_kind": "visible_barrel_collar_or_neck_axis_point",
+      "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+      "front_provenance": "NOT_NEWLY_ACCEPTED",
+      "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+    },
+    "13": {
+      "muzzle_canvas_uv": [
+        0.5441,
+        0.1914
+      ],
+      "rear_canvas_uv": [
+        0.5628141,
+        0.3266332
+      ],
+      "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+      "uncertainty_canvas_px": [
+        3,
+        3
+      ],
+      "point_kind": "visible_barrel_collar_or_neck_axis_point",
+      "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+      "front_provenance": "NOT_NEWLY_ACCEPTED",
+      "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+    },
+    "14": {
+      "muzzle_canvas_uv": [
+        0.469697,
+        0.1407035
+      ],
+      "rear_canvas_uv": [
+        0.510101,
+        0.2512563
+      ],
+      "status": "FRONT_MARKER_REJECTED_PROPOSED_PHYSICAL_PAIR",
+      "uncertainty_canvas_px": [
+        3,
+        3
+      ],
+      "point_kind": "visible_barrel_collar_or_neck_axis_point",
+      "axis_acceptance": "PROPOSED_VISIBLE_FRONT_BACK_PAIR_ONLY_REQUIRES_PRODUCT_APPLY_AND_INDEPENDENT_RENDER_CHECK",
+      "front_provenance": "OBSERVED_PROPOSED_CENTER_FOR_UPRIGHT_VISIBLE_OPENING",
+      "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+    },
+    "15": {
+      "muzzle_canvas_uv": [
+        0.7236,
+        0.1723
+      ],
+      "rear_canvas_uv": [
+        0.7323232,
+        0.2512563
+      ],
+      "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+      "uncertainty_canvas_px": [
+        3,
+        3
+      ],
+      "point_kind": "visible_barrel_collar_or_neck_axis_point",
+      "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+      "front_provenance": "NOT_NEWLY_ACCEPTED",
+      "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
     }
   }
 }

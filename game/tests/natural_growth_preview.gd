@@ -27,17 +27,21 @@ func policy() -> void:
 	if b.buy_upgrade(kind):actions.append({"time":simulated,"action":"upgrade","kind":kind,"level":b.levels[kind]})
 
 func snapshot() -> Dictionary:
-	return {"time":simulated,"phase":b.phase,"round":b.round_number,"coins":b.coins,"materials":b.materials,"levels":b.levels.duplicate(),"inventory":b.inventory.duplicate(),"equipped":b.equipped,"spirit":b.spirit,"shots":b.total_shots,"spirit_shots":b.spirit_shots}
+	return {"time":simulated,"phase":b.phase,"round":b.round_number,"coins":b.coins,"materials":b.materials,"levels":b.levels.duplicate(),"inventory":b.inventory.duplicate(),"equipped":b.equipped,"spirit":b.spirit,"shots":b.total_shots,"spirit_shots":b.spirit_shots,"enemies":b.enemies.size(),"bullets":b.bullets.size(),"salvos":b.visuals.salvos.size(),"reward_bursts":b.visuals.reward_bursts.size(),"motion_time":b.visuals.motion.clock}
 
 func capture(label: String) -> void:
 	b._refresh_ui()
-	b.visuals.sync(1.0/24.0)
+	b.visuals.sync(0.0)
+	assert(absf(b.visuals.motion.clock-simulated)<.001, "자연 성장 봇의 규칙·표현 시간 일치")
 	b.queue_redraw()
 	await process_frame
-	await RenderingServer.frame_post_draw
+	RenderingServer.force_draw(false)
 	assert(root.get_texture().get_image().save_png(directory.path_join("natural-%03d.png"%frames.size()))==OK)
 	var observation:=snapshot()
 	observation["label"]=label
+	observation["motion_clock"]=b.visuals.motion.clock
+	observation["salvos"]=b.visuals.salvos.size()
+	observation["reward_bursts"]=b.visuals.reward_bursts.size()
 	frames.append(observation)
 
 func run() -> void:
@@ -53,19 +57,21 @@ func run() -> void:
 	assert(b.coins==0 and b.materials==0 and b.equipped==-1 and not b.spirit)
 	for i in range(48):
 		b.advance(1.0/24.0)
+		b.visuals.sync(1.0/24.0)
 		simulated+=1.0/24.0
 		await capture("initial")
 	# 10분의 규칙 시간을 가속한다. 이 구간은 실시간 관람/성장 속도 평가가 아니다.
 	for i in range(18000):
 		if i%8==0:policy()
 		b.advance(1.0/30.0)
+		b.visuals.sync(1.0/30.0)
 		simulated+=1.0/30.0
-		if i%8==0:b.visuals.sync(0.0)
 	var reached:=snapshot()
 	assert(b.spirit and b.equipped==2 and b.levels.speed>=7)
 	for i in range(192):
 		if i%6==0:policy()
 		b.advance(1.0/24.0)
+		b.visuals.sync(1.0/24.0)
 		simulated+=1.0/24.0
 		await capture("naturally-grown")
 	var record:={"method":"controlled bot using real earned rewards/actions; no currency/inventory/HP injection; no OS input/audio","fast_forward_seconds":600,"reached":reached,"actions":actions,"frames":frames,"human_tempo_or_fun":"NOT_MEASURED"}

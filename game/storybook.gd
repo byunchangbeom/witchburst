@@ -19,6 +19,12 @@ var background: Sprite2D
 var witch_sprite: Sprite2D
 var witch_muzzle: Marker2D
 var shot_origins: Array[Dictionary] = []
+const MAX_SALVOS := 16
+var salvos: Array[Dictionary] = []
+var reward_bursts: Array[Dictionary] = []
+var impact_pulses: Array[Dictionary] = []
+var salvo_round := -1
+var salvo_layer: Node2D
 var spirit_sprite: Sprite2D
 var enemy_sprites: Dictionary = {}
 var emitters: Array[CPUParticles2D] = []
@@ -42,7 +48,7 @@ var party_shift := Vector2.ZERO
 var motion: Node2D
 
 func actor_height(kind: String) -> float:
-	return {"wand":68.0,"cannon":102.0,"spirit":42.0,"seed":50.0,"boss":136.0}[kind]
+	return {"wand":50.0,"cannon":76.0,"spirit":34.0,"seed":40.0,"boss":120.0}[kind]
 
 func _atlas(region: Rect2) -> AtlasTexture:
 	var texture := AtlasTexture.new()
@@ -76,6 +82,12 @@ func setup(owner_battle: Control) -> void:
 	spirit_texture = _atlas(Rect2(1558, 10, 500, 700))
 	background = _sprite(MEADOW)
 	background.z_index = -10
+	background.modulate = Color(1.0,1.0,1.0,.83)
+	salvo_layer = Node2D.new()
+	salvo_layer.name = "SalvoAfterglow"
+	salvo_layer.z_index = -3
+	add_child(salvo_layer)
+	salvo_layer.draw.connect(_draw_salvos)
 	var shadow := Image.create(64, 24, false, Image.FORMAT_RGBA8)
 	shadow.fill(Color.TRANSPARENT)
 	for y in range(24):
@@ -127,6 +139,7 @@ func setup(owner_battle: Control) -> void:
 	motion.setup(self)
 
 func play_shot(bullet: Dictionary) -> void:
+	_sync_salvos()
 	if is_instance_valid(shot_tween):
 		shot_tween.kill()
 	kick = 1.0
@@ -151,6 +164,15 @@ func play_shot(bullet: Dictionary) -> void:
 			var target: Dictionary = battle._enemy_by_id(linked.target)
 			shot_origins.append({"bullet": linked, "start": linked.pos, "muzzle": battle._from_screen(start),
 				"axis": (_point(target.pos) - start).normalized()})
+	for shot: Dictionary in shot_origins:
+		if shot.bullet.tier >= 2 and not shot.has("salvo"):
+			if salvos.size() >= MAX_SALVOS:
+				salvos.pop_front()
+			var salvo := {"shot": shot, "points": PackedVector2Array([battle._from_screen(projectile_position(shot.bullet))]),
+				"tier": shot.bullet.tier, "linked": shot.bullet.get("spirit",false), "ended": -1.0}
+			# 상호 참조 없이 발사당 한 번만 등록한다.
+			shot.salvo = true
+			salvos.append(salvo)
 	_emit_at(battle._world(muzzle), battle.MINT, 3 + battle.power_tier() * 2)
 	shot_tween = create_tween()
 	shot_tween.tween_property(self, "kick", 0.0, 0.16 + battle.power_tier() * 0.025).set_trans(Tween.TRANS_QUAD)
@@ -158,6 +180,67 @@ func play_shot(bullet: Dictionary) -> void:
 func _prune_shots() -> void:
 	shot_origins = shot_origins.filter(func(shot: Dictionary) -> bool:
 		return battle.bullets.any(func(bullet: Dictionary) -> bool: return is_same(bullet, shot.bullet)))
+
+func play_impact(bullet: Dictionary, target: Vector2) -> void:
+	# 실제 적중에만 짧고 응집된 섬광을 더한다. 새 피해나 보상 호출은 없다.
+	if bullet.tier >= 1:
+		if impact_pulses.size() >= 16:
+			impact_pulses.pop_front()
+		impact_pulses.append({"pos":target,"born":motion.clock,"tier":bullet.tier,"linked":bullet.get("spirit",false)})
+	# 판정 직전의 실제 적중 통지만 받는다. 표시 효과가 피해를 호출하지 않는다.
+	for salvo: Dictionary in salvos:
+		if is_same(salvo.shot.bullet,bullet):
+			_append_salvo_point(salvo,_point(target))
+			salvo.ended = motion.clock
+
+func play_reward(target: Vector2) -> void:
+	# 실제 지급 통지의 아이콘만 오래 흩뿌린 뒤 지갑으로 모은다.
+	_sync_salvos()
+	if reward_bursts.size() >= 4:
+		reward_bursts.pop_front()
+	reward_bursts.append({"pos":target,"born":motion.clock,"tier":battle.power_tier()})
+
+func _append_salvo_point(salvo: Dictionary, point: Vector2) -> void:
+	var points: PackedVector2Array = salvo.points
+	var logical: Vector2 = battle._from_screen(point)
+	if points[-1].distance_to(logical) >= .5:
+		points.append(logical)
+		if points.size() > 64:
+			points.remove_at(1)
+		salvo.points = points
+
+func _sync_salvos() -> void:
+	if salvo_round != battle.round_number:
+		salvos.clear()
+		reward_bursts.clear()
+		impact_pulses.clear()
+		salvo_round = battle.round_number
+	for salvo: Dictionary in salvos:
+		if salvo.ended >= 0.0:
+			continue
+		var bullet: Dictionary = salvo.shot.bullet
+		if battle.bullets.any(func(item: Dictionary) -> bool: return is_same(item,bullet)):
+			_append_salvo_point(salvo,projectile_position(bullet))
+		else:
+			# 표적 소멸/장면 전환으로 사라진 탄에는 가짜 적중점을 추가하지 않는다.
+			salvo.ended = motion.clock
+	impact_pulses = impact_pulses.filter(func(pulse: Dictionary) -> bool: return motion.clock-pulse.born < .18)
+	var hold := .32
+	salvos = salvos.filter(func(salvo: Dictionary) -> bool: return salvo.ended < 0.0 or motion.clock - salvo.ended < hold)
+	reward_bursts = reward_bursts.filter(func(burst: Dictionary) -> bool: return motion.clock-burst.born < 1.0+burst.tier*.35)
+
+func salvo_strand(salvo: Dictionary, lane: int) -> PackedVector2Array:
+	var strand := PackedVector2Array()
+	var points: PackedVector2Array = salvo.points
+	if points.size() < 2:
+		return strand
+	var unit: float = battle.content_width / 540.0
+	for i in range(points.size()):
+		var tangent: Vector2 = battle._world(points[mini(i+1,points.size()-1)]) - battle._world(points[maxi(0,i-1)])
+		var t := float(i) / (points.size()-1)
+		# 같은 한 발의 마력 분지. 실제 지난 경로 양옆으로 펼쳐졌다 실제 적중점에 합류한다.
+		strand.append(battle._world(points[i]) + tangent.normalized().orthogonal() * sin(t*PI) * lane * (2.0 + salvo.tier*.7) * unit)
+	return strand
 
 func projectile_position(bullet: Dictionary) -> Vector2:
 	for shot in shot_origins:
@@ -195,6 +278,23 @@ func projectile_tail(bullet: Dictionary) -> Vector2:
 			return point.move_toward(previous, length * unit)
 	# 출발점이 없는 탄은 머리만 표시하여 임의의 뒤쪽 궤적을 만들지 않는다.
 	return point
+
+func projectile_ribbon(bullet: Dictionary) -> PackedVector2Array:
+	# 실제로 지난 유도 경로만 넓힌다. 사격 수·판정·기존 짧은 중심 꼬리는 그대로다.
+	var points := PackedVector2Array()
+	if bullet.tier == 0:
+		return points
+	for shot in shot_origins:
+		if not is_same(shot.bullet, bullet):
+			continue
+		var traveled: float = bullet.pos.distance_to(shot.start)
+		var length := minf(traveled, 40.0 + bullet.tier * 40.0)
+		if length < .01:
+			return points
+		for i in range(13):
+			points.append(_flight_point(shot, traveled - length + length * i / 12.0))
+		break
+	return points
 
 func _particle_texture(leaf: bool) -> ImageTexture:
 	# 신규 별·잎 입자 모양을 엔진에서 생성한다.
@@ -244,6 +344,9 @@ func sync(_delta: float) -> void:
 	_sync_enemies(unit)
 	if is_instance_valid(motion):
 		motion.sync(_delta)
+		_sync_salvos()
+	if is_instance_valid(salvo_layer):
+		salvo_layer.queue_redraw()
 	queue_redraw()
 
 func _point(pos: Vector2) -> Vector2:
@@ -361,10 +464,38 @@ func _sync_enemies(unit: float) -> void:
 			enemy_sprites[id].free()
 			enemy_sprites.erase(id)
 
+func _draw_salvos() -> void:
+	# 실제 궤적만 남기되 캐릭터/표적보다 뒤에서 읽히는 짧고 응집된 광류다.
+	if not is_instance_valid(battle) or not is_instance_valid(salvo_layer):
+		return
+	var unit: float = battle.content_width / 540.0
+	for salvo: Dictionary in salvos:
+		var fade: float = 1.0 if salvo.ended < 0.0 else clampf(1.0-(motion.clock-salvo.ended)/.32,0.0,1.0)
+		var color := Color("ffce6f") if salvo.linked else Color("62dba9")
+		var lanes: int = 1 if salvo.tier >= 3 else 0
+		for lane in range(-lanes,lanes+1):
+			var strand := salvo_strand(salvo,lane)
+			if strand.size() < 2:
+				continue
+			if lane == 0:
+				var width: float = (16.0 + salvo.tier * 16.0) * unit
+				salvo_layer.draw_polyline(strand,Color(color,fade*.23),width*1.4,true)
+				salvo_layer.draw_polyline(strand,Color(color,fade*.72),width,true)
+				salvo_layer.draw_polyline(strand,Color("fffacb",fade*.96),width*.34,true)
+			else:
+				salvo_layer.draw_polyline(strand,Color(color.lightened(.35),fade*.32),1.6*unit,true)
+
 func _draw() -> void:
 	if not is_instance_valid(battle):
 		return
 	var unit: float = battle.content_width / 540.0
+	for pulse: Dictionary in impact_pulses:
+		var age: float = clampf((motion.clock-pulse.born)/.18,0.0,1.0)
+		var at := _point(pulse.pos)
+		var side: float = (12.0+pulse.tier*12.0)*unit*(.8+age*.35)
+		var ink := Color("ffe0a0") if pulse.linked else Color("baf9e5")
+		draw_texture_rect(star_texture,Rect2(at-Vector2.ONE*side*.5,Vector2.ONE*side),false,Color(ink,(1.0-age)*.82))
+		draw_arc(at,side*.38,0.0,TAU,16,Color("fffacb",(1.0-age)*.65),1.8*unit,true)
 	for enemy in battle.enemies:
 		var p := _point(enemy.pos)
 		var width: float = (104.0 if enemy.boss else 42.0) * unit
@@ -375,9 +506,17 @@ func _draw() -> void:
 		var p := projectile_position(bullet)
 		var r: float = battle.projectile_radius(bullet.tier) * unit
 		var tail := projectile_tail(bullet)
+		var linked: bool = bullet.get("spirit", false)
+		var ink := Color("ffdf87") if linked else Color("6fddac")
+		var ribbon := projectile_ribbon(bullet)
+		for i in range(1, ribbon.size()):
+			var weight := float(i) / (ribbon.size() - 1)
+			# 길이/폭이 성장하되 초기 단발과 HUD를 가리지 않는 반투명 마력이다.
+			draw_line(ribbon[i-1], ribbon[i], Color(ink, .12 + weight * .18), r * (1.0 + weight * 1.8), true)
+			draw_line(ribbon[i-1], ribbon[i], Color("fffacb", weight * .7), maxf(1.0, r * weight * .6), true)
 		if tail.distance_squared_to(p) > 0.0001:
 			draw_line(tail, p, BROWN, r * 1.8 + 3, true)
-			draw_line(tail, p, Color("6fddac"), r * 1.8, true)
+			draw_line(tail, p, ink, r * 1.8, true)
 			draw_line(tail, p, Color("fffacb"), r * 0.65, true)
 		if bullet.tier>=2 and tail.distance_to(p)>12*unit:
 			var normal := (p-tail).normalized().orthogonal()
@@ -389,20 +528,20 @@ func _draw() -> void:
 				draw_polyline(strand,Color("bcf7d9"),2.5*unit,true)
 		draw_circle(p, r * 0.6, Color.WHITE)
 	var reward_visual_budget := 48
+	for burst: Dictionary in reward_bursts:
+		var amount := mini(3+int(burst.tier)*4,reward_visual_budget)
+		reward_visual_budget -= amount
+		var age: float = clampf((motion.clock-burst.born)/(1.0+burst.tier*.35),0.0,1.0)
+		var target: Vector2 = battle.wallet_label.position+battle.wallet_label.size*.5
+		for i in range(amount):
+			var angle := i*2.39996
+			var spread: Vector2 = Vector2(cos(angle),sin(angle))*(14.0+i*(3.0+burst.tier*1.7))*unit*sin(minf(age*2.0,1.0)*PI*.5)
+			var point: Vector2 = (_point(burst.pos)+spread).lerp(target,smoothstep(.65,1.0,age))
+			var diameter: float = (11.0+burst.tier)*unit
+			var icon := UiSkin.icon("material" if i%4==3 else "coin")
+			draw_texture_rect(icon,Rect2(point-Vector2.ONE*diameter*.5,Vector2.ONE*diameter),false,Color(1,1,1,minf((1.0-age)*8,1.0)))
 	for floating in battle.floats:
 		var p := _point(floating.pos)
-		if floating.text.begins_with("+") and floating.text.contains("별빛") and reward_visual_budget>0:
-			var amount:=mini(3+battle.power_tier()*2,reward_visual_budget)
-			reward_visual_budget-=amount
-			var age: float=clampf(1.0-floating.life,0.0,1.0)
-			var target: Vector2=battle.wallet_label.position+battle.wallet_label.size*.5
-			for i in range(amount):
-				var angle:=i*2.39996
-				var burst:=Vector2(cos(angle),sin(angle))*(14.0+i*3.0)*unit*sin(age*PI)
-				var point: Vector2=(_point(floating.pos)+burst).lerp(target,smoothstep(.45,1.0,age))
-				var diameter: float=(11.0+battle.power_tier())*unit
-				var icon:=UiSkin.icon("material" if i%4==3 else "coin")
-				draw_texture_rect(icon,Rect2(point-Vector2.ONE*diameter*.5,Vector2.ONE*diameter),false,Color(1,1,1,minf(floating.life*4,1.0)))
 		if not floating.text.begins_with("+") and battle.power_tier()>=2:
 			var impact_age: float=clampf(1.0-floating.life,0.0,1.0)
 			var impact_center: Vector2=_point(floating.pos+Vector2(0,30+impact_age*30))
