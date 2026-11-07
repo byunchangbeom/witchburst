@@ -27,7 +27,7 @@ func policy() -> void:
 	if b.buy_upgrade(kind):actions.append({"time":simulated,"action":"upgrade","kind":kind,"level":b.levels[kind]})
 
 func snapshot() -> Dictionary:
-	return {"time":simulated,"phase":b.phase,"round":b.round_number,"coins":b.coins,"materials":b.materials,"levels":b.levels.duplicate(),"inventory":b.inventory.duplicate(),"equipped":b.equipped,"spirit":b.spirit,"shots":b.total_shots,"spirit_shots":b.spirit_shots}
+	return {"time":simulated,"phase":b.phase,"round":b.round_number,"coins":b.coins,"materials":b.materials,"levels":b.levels.duplicate(),"inventory":b.inventory.duplicate(),"equipped":b.equipped,"spirit":b.spirit,"shots":b.total_shots,"spirit_shots":b.spirit_shots,"enemies":b.enemies.size(),"bullets":b.bullets.size(),"salvos":b.visuals.salvos.size(),"reward_bursts":b.visuals.reward_bursts.size(),"motion_time":b.visuals.motion.clock}
 
 func capture(label: String) -> void:
 	b._refresh_ui()

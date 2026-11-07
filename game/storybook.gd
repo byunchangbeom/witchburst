@@ -48,7 +48,7 @@ var party_shift := Vector2.ZERO
 var motion: Node2D
 
 func actor_height(kind: String) -> float:
-	return {"wand":68.0,"cannon":102.0,"spirit":42.0,"seed":50.0,"boss":136.0}[kind]
+	return {"wand":50.0,"cannon":76.0,"spirit":34.0,"seed":40.0,"boss":120.0}[kind]
 
 func _atlas(region: Rect2) -> AtlasTexture:
 	var texture := AtlasTexture.new()
@@ -82,6 +82,7 @@ func setup(owner_battle: Control) -> void:
 	spirit_texture = _atlas(Rect2(1558, 10, 500, 700))
 	background = _sprite(MEADOW)
 	background.z_index = -10
+	background.modulate = Color(1.0,1.0,1.0,.83)
 	salvo_layer = Node2D.new()
 	salvo_layer.name = "SalvoAfterglow"
 	salvo_layer.z_index = -3
@@ -477,9 +478,10 @@ func _draw_salvos() -> void:
 			if strand.size() < 2:
 				continue
 			if lane == 0:
-				salvo_layer.draw_polyline(strand,Color(color,fade*.14),18.0*unit,true)
-				salvo_layer.draw_polyline(strand,Color(color.darkened(.25),fade*.38),10.0*unit,true)
-				salvo_layer.draw_polyline(strand,Color("fffacb",fade*.82),3.6*unit,true)
+				var width: float = (16.0 + salvo.tier * 16.0) * unit
+				salvo_layer.draw_polyline(strand,Color(color,fade*.23),width*1.4,true)
+				salvo_layer.draw_polyline(strand,Color(color,fade*.72),width,true)
+				salvo_layer.draw_polyline(strand,Color("fffacb",fade*.96),width*.34,true)
 			else:
 				salvo_layer.draw_polyline(strand,Color(color.lightened(.35),fade*.32),1.6*unit,true)
 

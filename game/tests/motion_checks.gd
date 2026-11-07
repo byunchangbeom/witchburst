@@ -134,9 +134,20 @@ func weapon_landmark_checks() -> void:
 					var vector := Vector2.RIGHT.rotated(sector * PI / 4.0)
 					battle.enemies[0].pos = battle._from_screen(visual.witch_shadow.position + vector * 170.0)
 					battle.bullets.clear()
+					if kind == "actions":
+						# 간접 별비 포즈 자체도 보존·관측하되 실제 자동탄의 포즈와 혼동하지 않는다.
+						visual.sync(0.0)
+						if tier==3 and names[sector]=="S":
+							require(motion.pose_key==motion.SOUTH_SKILLS and motion.witch.frame==(4 if column>=6 else 0), "정지 S 시전·취소의 중립 전신 포즈 보존")
+						else:
+							require(motion.pose_key==family+"-actions" and motion.witch.frame==rows[sector]*8+column, "자동탄 직전 별비 원포즈 보존")
+						var gesture: Dictionary = probe.record(visual)
+						require(not gesture.is_empty() and gesture.get("rear_canvas_uv") != null and probe.tip(visual).distance_to(probe.back(visual))>.1, "별비 원포즈의 독립 두 그림점도 계속 관측")
+					var skill_before := [motion.skill_preparing,motion.skill_at,motion.cancel_at,battle.skill_uses,battle.cooldown]
 					battle._fire()
-					if tier==3 and names[sector]=="S" and kind=="actions":
-						require(motion.pose_key==motion.SOUTH_SKILLS and motion.witch.frame==(4 if column>=6 else 0), "정지 S 시전·취소는 관측된 중립 전신 선택")
+					if kind=="actions":
+						require(motion.pose_key==family+"-directions" and motion.witch.frame==rows[sector]*6+5 and motion.direct_firing, "별비 중 실제 자동탄은 해당 방향의 직접 사격 포즈 사용")
+						require(skill_before==[motion.skill_preparing,motion.skill_at,motion.cancel_at,battle.skill_uses,battle.cooldown], "자동탄 표현이 별비 준비·발동·취소·쿨다운을 변경하지 않음")
 					else:
 						require(motion.pose_key == family + "-" + kind and motion.witch.frame == rows[sector] * columns + column, "실제 발사의 방향·행동·프레임 선택")
 					var observed: Dictionary = probe.record(visual)
@@ -148,6 +159,8 @@ func weapon_landmark_checks() -> void:
 					var front: Vector2 = probe.tip(visual)
 					var rear: Vector2 = probe.back(visual)
 					require(front.distance_to(rear) > .1, "서로 다른 실제 그림 랜드마크")
+					if kind=="actions":
+						require((front-rear).normalized().dot(vector)>.1, "시전 중 자동탄의 가시 포신은 표적 방향 반평면을 향함")
 					var bullet: Dictionary = battle.bullets[0]
 					var start: Vector2 = visual.projectile_position(bullet)
 					bullet.pos += Vector2(0,-8)

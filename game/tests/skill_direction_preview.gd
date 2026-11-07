@@ -23,12 +23,12 @@ func capture(label: String) -> void:
 	if stationary:
 		assert(actual_speed==0.0 and b.witch==Vector2(270,575) and m.stride==0.0 and not m.moving and not m.legs.visible, "정지 fixture의 좌표·속도·보행 보존")
 		assert(b.skill_uses==(0 if observations.size()%30<12 else 1), "준비·취소 무발동과 실제 한 번 발동")
-		if case_tier==3 and case_direction=="S" and m.state.begins_with("skill_"):
+		if case_tier==3 and case_direction=="S" and m.state.begins_with("skill_") and not m.direct_firing:
 			assert(whole_body and m.witch.frame==(4 if m.state in ["skill_release","skill_recover"] else 0) and m.muzzle.y>m.breech.y, "정지 S 전신 중립과 실제 아래 관구")
 	var emitted_axes: Array = []
 	for shot: Dictionary in b.visuals.shot_origins:
 		emitted_axes.append([shot.axis.x, shot.axis.y])
-	observations.append({"index":observations.size(),"label":label,"case_direction":case_direction,"case_tier":case_tier,"state":m.state,"facing":m.facing,"move":m.move_direction,"pose_key":m.pose_key,"whole_body":whole_body,"upper_frame":m.witch.frame,"lower_frame":m.legs.frame,"lower_visible":m.legs.visible,"stride":m.stride,"muzzle":[m.muzzle.x,m.muzzle.y],"breech":[m.breech.x,m.breech.y],"emitted_axes":emitted_axes,"skill_uses":b.skill_uses,"cooldown":b.cooldown,"skill_age":m.clock-m.skill_at,"skill_targets":m.skill_targets,"max_speed_fixture":max_speed,"stationary_fixture":stationary,"actual_rule_speed":actual_speed,"rule_position":[b.witch.x,b.witch.y]})
+	observations.append({"index":observations.size(),"label":label,"case_direction":case_direction,"case_tier":case_tier,"state":m.state,"direct_firing":m.direct_firing,"facing":m.facing,"move":m.move_direction,"pose_key":m.pose_key,"whole_body":whole_body,"upper_frame":m.witch.frame,"lower_frame":m.legs.frame,"lower_visible":m.legs.visible,"stride":m.stride,"muzzle":[m.muzzle.x,m.muzzle.y],"breech":[m.breech.x,m.breech.y],"emitted_axes":emitted_axes,"skill_uses":b.skill_uses,"cooldown":b.cooldown,"skill_age":m.clock-m.skill_at,"skill_targets":m.skill_targets,"max_speed_fixture":max_speed,"stationary_fixture":stationary,"actual_rule_speed":actual_speed,"rule_position":[b.witch.x,b.witch.y]})
 func run() -> void:
 	directory=OS.get_environment("WITCHBURST_ARTIFACTS")
 	max_speed = "--max-speed" in OS.get_cmdline_user_args()

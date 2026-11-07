@@ -235,8 +235,11 @@ func _tick(dt: float) -> void:
 	else:
 		spawn_clock -= dt
 		if spawn_clock <= 0.0 and enemies.size() < 4:
-			_spawn_enemy()
-			spawn_clock = 1.8
+			# 초반 간격은 유지하고 성장 뒤 실제 적 공급을 화력에 맞춘다. 최대4·HP·판정·보상은 같다.
+			for _member in range(2 if power_tier() >= 2 else 1):
+				if enemies.size() < 4:
+					_spawn_enemy()
+			spawn_clock = encounter_interval()
 	for enemy in enemies:
 		if enemy.boss:
 			enemy.pos = Vector2(270 + sin(elapsed * 0.8) * 65, 312 + sin(elapsed) * 12)
@@ -268,6 +271,9 @@ func _tick(dt: float) -> void:
 	bullets = bullets.filter(func(b: Dictionary) -> bool: return b.life > 0.0)
 	if phase == Phase.FOREST and kills >= FOREST_GOAL:
 		_start_boss()
+
+func encounter_interval() -> float:
+	return 1.8 if power_tier() < 2 else .9 if power_tier() == 2 else .55
 
 func _spawn_enemy() -> void:
 	var x := random.randf_range(115, 425)
@@ -385,7 +391,7 @@ func restart_battle() -> void:
 	boss_time = BOSS_LIMIT
 	cooldown = 0.0
 	shot_clock = 0.2
-	spawn_clock = 1.8
+	spawn_clock = encounter_interval()
 	witch = Vector2(270, 625)
 	drag_target = witch
 	manual_grace = 0.0
@@ -560,11 +566,15 @@ func _button(text_value: String, color: Color) -> Button:
 	button.add_theme_color_override("font_color", INK)
 	button.add_theme_color_override("font_hover_color", INK)
 	button.add_theme_color_override("font_pressed_color", INK)
-	button.add_theme_color_override("font_disabled_color", Color("886d4c"))
+	button.add_theme_color_override("font_disabled_color", Color("776e60"))
 	button.add_theme_stylebox_override("normal", UiSkin.panel(3 if color.r > color.g else 2))
 	button.add_theme_stylebox_override("hover", UiSkin.panel(3 if color.r > color.g else 2, Color(1.04,1.04,1.04)))
 	button.add_theme_stylebox_override("pressed", UiSkin.panel(3 if color.r > color.g else 2, Color(.88,.88,.88)))
-	button.add_theme_stylebox_override("disabled", UiSkin.panel(1))
+	var unavailable := UiSkin.panel(0) as StyleBoxFlat
+	unavailable.bg_color = Color("e5dfd0")
+	unavailable.border_color = Color("b9ac94")
+	unavailable.set_border_width_all(1)
+	button.add_theme_stylebox_override("disabled", unavailable)
 	var focus := _panel_style(Color.TRANSPARENT, Color("db9c46"), 14)
 	focus.shadow_size = 0
 	button.add_theme_stylebox_override("focus", focus)
@@ -1053,7 +1063,7 @@ func _build_workshop() -> void:
 	workshop.visible = false
 
 func _refresh_workshop() -> void:
-	workshop_text.text = "장착: %s · 전투 일시정지\n뽑기 80/18/2%% · 제작 잎3 · 수치 가설\n환생 %d회(+%d%%) · 정령 %s" % [tool_name(equipped),rebirths,rebirths*25,"연계 65%" if spirit else "미해금"]
+	workshop_text.text = "장착: %s · 전투 일시정지\n뽑기 80/18/2%% · 제작 잎3\n환생 %d회(+%d%%) · 정령 %s" % [tool_name(equipped),rebirths,rebirths*25,"연계 65%" if spirit else "미해금"]
 	draw_button.disabled = coins < DRAW_COST or inventory.any(func(count: Variant) -> bool: return count >= 9998)
 	draw_button.text = "장비 보유 한도" if inventory.any(func(count: Variant) -> bool: return count >= 9998) else "뽑기 · 별빛 12"
 	craft_button.disabled = materials < CRAFT_COST or inventory[0] >= 9998
@@ -1075,3 +1085,19 @@ func _refresh_workshop() -> void:
 		button.queue_redraw()
 	claim_button.text = "보유 별빛 한도" if coins + pending_coins > 1000000000 else "접속 보상 %s 수령" % UiSkin.compact(pending_coins) if pending_coins > 0 else "받을 보상 없음"
 	claim_button.disabled = pending_coins <= 0 or coins + pending_coins > 1000000000
+	# 실행할 수 있는 성장 행동을 먼저 읽고, 완료/부족 상태는 뒤로 읽도록 한다.
+	var primary: Button = null
+	for action: Button in [merge_button,craft_button,draw_button,spirit_button,claim_button]:
+		if primary == null and not action.disabled:
+			primary = action
+	for action: Button in [draw_button,craft_button,merge_button,spirit_button,claim_button]:
+		var tone := "primary" if action == primary else "secondary"
+		if action.get_meta("action_tone", "") == tone:
+			continue
+		action.set_meta("action_tone", tone)
+		var face := UiSkin.panel(3 if action == primary else 2) as StyleBoxFlat
+		face.shadow_color = Color("543725",.18)
+		face.shadow_size = 3 if action == primary else 0
+		face.shadow_offset = Vector2(0,2)
+		action.add_theme_stylebox_override("normal",face)
+		action.add_theme_stylebox_override("hover",face)

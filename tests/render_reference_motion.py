@@ -41,6 +41,23 @@ def validate_directions(records, maximum=False, stationary=False):
             raise ValueError(f"시전/취소 전환 누락: {tier}/{direction}")
         if any(r["facing"] != direction for r in frames if r["state"].startswith("skill_")):
             raise ValueError(f"실제 시전 방향 불일치: {tier}/{direction}")
+        # 별비 상태는 유지하면서 실제 자동탄 순간의 직접 사격 포즈를 별도 검증한다.
+        rows = {"N": 0, "NE": 1, "E": 2, "SE": 3, "S": 4, "SW": 3, "W": 2, "NW": 1}
+        axes = {"N": (0,-1), "NE": (1,-1), "E": (1,0), "SE": (1,1),
+                "S": (0,1), "SW": (-1,1), "W": (-1,0), "NW": (-1,-1)}
+        for r in frames:
+            if not r.get("direct_firing"):
+                continue
+            expected = ("witch-wand" if tier == 0 else "witch-cannon") + ("-directions" if stationary else "-moving")
+            columns = 6 if stationary else 4
+            dx, dy = r["muzzle"][0]-r["breech"][0], r["muzzle"][1]-r["breech"][1]
+            tx, ty = axes[direction]
+            if (r.get("whole_body") or r.get("pose_key") != expected
+                    or r["upper_frame"] // columns != rows[direction]
+                    or (stationary and r["upper_frame"] % columns != 5)
+                    or dx*tx+dy*ty <= 0 or not r.get("emitted_axes")
+                    or any(x*tx+y*ty <= 0 for x,y in r["emitted_axes"])):
+                raise ValueError("별비 중 직접 자동탄 포즈/가시축 불일치")
         whole = [r for r in frames if r.get("whole_body")]
         if any(tier != 3 or direction != "S" or r.get("pose_key") != "witch-cannon-south-skills"
                or r["lower_visible"] or not 0 <= r["upper_frame"] < 8 for r in whole):
@@ -54,7 +71,7 @@ def validate_directions(records, maximum=False, stationary=False):
                 raise ValueError("정지 S 전신의 중립 위상 불일치")
             if tier == 3 and direction == "S" and any(
                     not r.get("whole_body") or r["muzzle"][1] <= r["breech"][1]
-                    for r in frames if r["state"].startswith("skill_")):
+                    for r in frames if r["state"].startswith("skill_") and not r.get("direct_firing")):
                 raise ValueError("정지 S 실제 전신/포구축 누락")
             if any(r["skill_uses"] != (0 if step < 12 else 1)
                    or (r["cooldown"] != 0 if step < 12 else r["cooldown"] <= 0)
@@ -74,6 +91,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--artifacts", type=Path, required=True)
     parser.add_argument("--engine", default=shutil.which("godot"))
+    parser.add_argument("--only", choices=["stages","boards","actions","skills","skills-max","skills-stationary","natural"])
     args = parser.parse_args()
     if not args.engine:
         raise SystemExit("기존 Godot4.7.2 필요")
@@ -148,6 +166,8 @@ def main():
                 ("skills-max", "skill_direction_preview", 480, ["--", "--max-speed"]),
                 ("skills-stationary", "skill_direction_preview", 480, ["--", "--stationary"]),
                 ("natural", "natural_growth_preview", 240, [])]:
+                if args.only and name != args.only:
+                    continue
                 execute(name, ["--audio-driver", "Dummy", "--script", f"res://tests/{script}.gd", *extra], count)
         if inputs(source) != pinned:
             raise RuntimeError("검사 도중 제품 입력 변경; 같은 소스 근거로 사용 불가")

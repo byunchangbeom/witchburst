@@ -45,6 +45,7 @@ var last_round := -1
 var last_tier := -1
 var shot_target := Vector2.ZERO
 var aim_axis := Vector2.UP
+var direct_firing := false
 var muzzle := Vector2.ZERO
 var breech := Vector2.ZERO
 var spirit_mouth := Vector2.ZERO
@@ -139,6 +140,8 @@ func on_shot(bullet: Dictionary, linked: bool) -> void:
 	if linked:
 		spirit_at = clock
 		spirit_direction = direction(shot_target - visual.spirit_sprite.position)
+	# 준비/별비의 시간은 유지하고 실제 자동탄이 나가는 순간만 직접 사격 자세를 고른다.
+	sync_party()
 
 func prepare_skill() -> void:
 	if not frozen() and battle.phase == battle.Phase.BOSS and battle.cooldown <= 0.0:
@@ -257,8 +260,15 @@ func sync_party() -> void:
 		columns = 6
 		column = int(stride) % 4
 		state = "walk"
+	# 별비의 간접 제스처를 자동사격의 포구로 쓰지 않는다. 입력/발동 시간은 그대로다.
+	direct_firing = age < .055 and state.begins_with("skill_")
+	if direct_firing:
+		facing = aim_direction
+		key = family + ("-moving" if moving else "-directions")
+		columns = 4 if moving else 6
+		column = int(stride) % 4 if moving else 5
 	var index := direction_row(facing) * columns + column
-	var whole := south_skill_pose(family, facing, state, stride if moving else 0.0)
+	var whole := south_skill_pose(family, facing, state, stride if moving else 0.0) if not direct_firing else {}
 	if not whole.is_empty():
 		key = whole.key
 		index = whole.index

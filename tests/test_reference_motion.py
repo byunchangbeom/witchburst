@@ -92,6 +92,17 @@ class ReferenceMotion(unittest.TestCase):
             next(r for r in broken if (r["case_tier"],r["case_direction"]) == (3,"S"))[key] = value
             with self.assertRaisesRegex(ValueError, "정지 S 실제 전신/포구축 누락"):
                 validate_directions(broken, stationary=True)
+        direct = copy.deepcopy(records)
+        shot = next(r for r in direct if (r["case_tier"],r["case_direction"]) == (3,"S"))
+        shot.update(direct_firing=True, whole_body=False, pose_key="witch-cannon-directions",
+                    upper_frame=29, emitted_axes=[[0,1]])
+        self.assertEqual(validate_directions(direct, stationary=True)["cases"],16)
+        for key, value in [("muzzle",[270,570]),("emitted_axes",[[0,-1]]),
+                           ("pose_key","witch-cannon-actions"),("upper_frame",28)]:
+            broken=copy.deepcopy(direct)
+            next(r for r in broken if r.get("direct_firing"))[key]=value
+            with self.assertRaisesRegex(ValueError,"직접 자동탄 포즈/가시축 불일치"):
+                validate_directions(broken, stationary=True)
 
     def test_whole_body_gait_is_measured_and_cannot_hide_single_frame(self):
         records = self.records()

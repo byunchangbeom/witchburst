@@ -207,3 +207,26 @@ WB-IMP-010/012의 중앙 접수와 공식 복구 구현은 bbf9f9c341f55a3b21e0d
 ## WORK4 · HV-Q-001/007/008과 기존 EA finding 연결
 
 호스트 마스크·효과 후보와 S 실제 전신8프레임을 정상 WORK4에서 통합하고, REVIEW3의 규칙/표현 시간 불일치 캡처를 수정했다. [구현·재현·실제 검증 한계](art-direction.md#2026-11-08--reference-motion-followup-work4-구현-반환)를 정본으로 연결한다. Python 계약6개 PASS이며 sandbox 제품 import는 사용자폴더/인증서 오류로 FAIL, 제품 회귀·신규1746PNG·독립 판독은 Controller 호스트 대기다. EA-003/005·R3-001 미수용, EA-004 미검증, EA-006/사용자 반려 OPEN을 보존한다. 이 보완은 같은 작업의 수정이며 새 사이클/완료가 아니다. 기존ID·WB-IMP-013·Writer 경계·원 receipt와 두 lock은 보존한다. 기록 커밋 PENDING_CONTROLLER_COMMIT / 중앙 전달 NOT_SENT.
+
+### WB-IMP-014 · 실제 GUI 스냅샷·좌표 맥락의 검증
+
+- 발견/Writer: Root의 b583 실제 macOS 검사. native-gui-attempts.json에 원문/그림/소유 PID를 기록했다.
+- 근거/영향: native 창 질의270×512와 후속 이미지/클릭 맥락36×104가 달랐고 입력이 거부됐다. 저장된 스냅샷 일부가 실제36×104이므로 도구 결함으로 단정하지 않고 가려짐/캡처 영역·사용 맥락 불일치를 조사한다. 이후 접근성 창 목록/CG onscreen 목록도 비어 안전한 실제 입력은 검증하지 못했다. 앱 프로세스 렌더 확인과 OS 입력을 구분한다.
+- 대응: 실패 자료 보존, 실제 owned 프로세스만 정상 종료, 임의 좌표 주입/전역 권한 변경 없음. fresh import 없는 첫 실행의 PNG preload 오류도 별도 실패로 남기고 import 후 정상 렌더를 확인했다. 원 사용자 진행은 사용하지 않았다.
+- 제안/중앙: screenshot 크기·crop/원점·window/PID 맥락을 클릭 직전 대조하고 가려진 작은 스냅샷은 전체 창 좌표로 해석하지 않는 공통 검사 절차. 원인 UNKNOWN/중앙 NOT_SENT, 코드 수정 완료로 보고하지 않는다.
+- 게임 채택: 게임 코드 변경이 아니라 검사 경계 기록. 기록 커밋 PENDING_CONTROLLER_PUBLICATION.
+
+### WB-IMP-015 · 자원 unpin 후 새 활성 참조 재보호
+
+- 발견/Writer: 독립 cycle_adoption_review, 2835 고정 소스 정적 검토 MR-001. 보고서는 runtime/task-recovery-20261107/managed-resources-adoption-review.md.
+- 근거/영향: REVIEWED(unpin) 뒤 call_pins가 선별 보존본 해시는 확인하지만 이후 새 활성 참조를 다시 검사하지 않는 공백을 관측했다. 새 참조의 자동 raw 재보호는 미검증이다.
+- 실제 대응: 원59와 필수 근거 raw는 unpin하지 않는다. 보호 inventory import만으로 삭제 권한은 생기지 않는다. release/READY는 다음 run/cycle close에서도 자동 회수될 수 있으므로 삭제 전 독립 검토를 끝내기 전에는 release하지 않는다.
+- 제안/중앙: unpin 이후 참조·수명 변경 회귀 및 재보호 계약 보완 요청. 중앙 NOT_SENT/미구현 확인, 게임은 제한적 운용 조건 채택 예정.
+- 채택/기록: 2835 고정61blob·166시험과 독립39시험 통과는 코드 검증이고 실제 게임 채택/등록/삭제는 아직 별도다. 기록 커밋 PENDING_CONTROLLER_PUBLICATION.
+
+### WB-IMP-016 · 미착수 고정 pin 검사와 새 실행기 채택의 경계
+
+- 발견/Writer: Root와 독립 cycle_adoption_review. 기존 recovery-record-publication의 원 검사 check-publication.py는 bbf current와 wrapper를 고정 요구한다.
+- 영향: 새2835 실행기/자원 원장을 요청받았어도 기존 입력을 몰래 고치거나 새current를 옛pin 검사 PASS로 검증했다고 보고할 수 없다.
+- 실제 대응: 기존 bbf 전용 작업의 정상 수용/발행 후 새 pin·원장 기록을 별도 정상 문서 작업으로 발행한다. 그동안2835 export·166/39회귀·보호 목록/회수 후보 조사를 병행한다. 원 task/attempt/실패/goal/check 입력 불변. 테스트를 속이는 wrapper 문자열이나 DB 수정을 사용하지 않는다.
+- 제안/중앙: 명시적 새 마스터 요구에 따른 미착수 task의 버전 변경/과거 입력 보존·공식 종결 계약 검토. 중앙 NOT_SENT, 현재 게임은 안전한 순서로 대응 중. 기록 커밋 PENDING_CONTROLLER_PUBLICATION.
