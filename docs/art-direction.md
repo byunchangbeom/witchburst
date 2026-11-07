@@ -292,3 +292,7 @@ P2 두 건은 표현 좌표를 따로 계산한 데서 반복됐다. 이전 포�
 관리 runtime은59/60 그대로, 호스트 독립1회는 별도 원장에 합산60으로 보존했다. 기존 task/calls/control/pin과 중앙 대기열의 불변을 확인했다. 현재 후속은 미커밋·main 미통합이며 중앙 전달용 기록 커밋은 미발행/NOT_SENT다. 정상 Controller 경계의 독립 수용/commit/통합을 완료했다고 표시하지 않는다.
 
 2026-11-07 자연플레이 확인용 복사본은 runtime/cycle-adoption-20261107/reference-profile/playable-1/game에서 실행했다. project.godot 저장dir만 witchburst-reference-preview-20261107로 격리하고 audio Dummy로 실행했다. 기존 사용자 저장은 읽거나 변경하지 않았다. 시작 프로세스/로그는 확인했지만 OS 창/입력을 직접 검증한 것은 아니다.
+
+### 공식 인수 후 실제 렌더 검사 복구 · 2026-11-07
+
+새bbf 관리 check0은 통과했으나 check1은 실제PNG73장 뒤90초 timeout으로 BLOCKED attempt10이 됐다. 원 receipt4277fd95647b416599ed8162f17a19a2와 attempt9/10을 보존한다. 같은 코드에 단계 로그만 추가한 격리 진단은129장을 완료했으므로 고정 제품 오류·창 가림 원인으로 확정하지 않는다. 별도 임시호스트 storybook-render-recovery에서 capture.gd의 자동 frame_post_draw 신호 대기를 명시 RenderingServer.force_draw(false)로 바꿨다. 기존 process_frame·실제 GPU·129장·치수/상태/포구·지형 검증은 유지하고 등록 check argv/timeout·제품 입력/저장/lifecycle은 변경하지 않았다. 공식 Godot RenderingServer API: https://docs.godotengine.org/en/stable/classes/class_renderingserver.html#class-renderingserver-method-force-draw . 동일 원 checker의 로컬 결과129장/37.321초/종료0. 이것은 새 관리 수용이 아니며 이후 정상 CHECK/REVIEW/통합/push가 필요하다. 전체 아트/사용자 반려/EA006은 OPEN이다.

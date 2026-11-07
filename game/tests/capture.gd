@@ -214,7 +214,9 @@ func capture_matrix(stage: String, phase: int, launch: bool = false, flight: flo
 		if not verify_only:
 			battle.queue_redraw()
 			await process_frame
-			await RenderingServer.frame_post_draw
+			# 창 가림/크기 전환 때 자동 draw 신호를 무기한 기다리지 않는다.
+			# 실제 GPU 프레임을 동기 생성하며 PNG 치수·상태 검증은 그대로 유지한다.
+			RenderingServer.force_draw(false)
 			var rendered := root.get_texture().get_image()
 			require(rendered != null and rendered.get_size() == dimensions, "실제 캡처 치수: " + filename)
 			require(rendered.get_pixel(0, 0) != rendered.get_pixel(dimensions.x / 2, dimensions.y / 2), "단색 빈 화면 거부")
@@ -301,7 +303,8 @@ func capture_party() -> void:
 					battle._refresh_ui()
 					battle.queue_redraw()
 					await process_frame
-					await RenderingServer.frame_post_draw
+					# 캡처 fixture만 명시 draw를 사용한다. 제품의 입력·lifecycle은 변경하지 않는다.
+					RenderingServer.force_draw(false)
 					var rendered := root.get_texture().get_image()
 					require(rendered != null and rendered.get_size() == dimensions, "드래그 PNG 실제 치수")
 					require(rendered.save_png(directory.path_join(filename)) == OK, "드래그 PNG 저장")
