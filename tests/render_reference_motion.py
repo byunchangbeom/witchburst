@@ -20,7 +20,7 @@ def inputs(source):
             if p.is_file() and ".godot" not in p.parts}
 
 
-def validate_directions(records, maximum=False):
+def validate_directions(records, maximum=False, stationary=False):
     """자료 누락/라벨만8방향인 자료/최고속 미도달을 거부한다. 시각 수용은 별도다."""
     expected = {(tier, direction) for tier in (0, 3)
                 for direction in ("N", "NE", "E", "SE", "S", "SW", "W", "NW")}
@@ -28,7 +28,8 @@ def validate_directions(records, maximum=False):
     if len(records) != 480:
         raise ValueError("방향 시퀀스480프레임 필요")
     for index, record in enumerate(records):
-        if record["index"] != index or record["max_speed_fixture"] != maximum:
+        if (record["index"] != index or record["max_speed_fixture"] != maximum
+                or record.get("stationary_fixture", False) != stationary or (maximum and stationary)):
             raise ValueError("프레임 순서/최고속 입력 불일치")
         key = record["case_tier"], record["case_direction"]
         groups.setdefault(key, []).append(record)
@@ -44,10 +45,26 @@ def validate_directions(records, maximum=False):
         if any(tier != 3 or direction != "S" or r.get("pose_key") != "witch-cannon-south-skills"
                or r["lower_visible"] or not 0 <= r["upper_frame"] < 8 for r in whole):
             raise ValueError("전신 프레임 계약 불일치")
-        gait = {("whole", r["upper_frame"] % 4) if r.get("whole_body") else ("split", r["lower_frame"])
-                for r in frames if r.get("whole_body") or r["lower_visible"]}
-        if len(gait) < 2:
-            raise ValueError(f"실제 하체 프레임 진행 누락: {tier}/{direction}")
+        if stationary:
+            if any(abs(r["actual_rule_speed"]) > .01 or r["lower_visible"]
+                   or r["rule_position"] != [270, 575] or abs(r["stride"]) > .001 for r in frames):
+                raise ValueError(f"정지 fixture에 이동/보행 잔류: {tier}/{direction}")
+            if any(r["upper_frame"] != (4 if r["state"] in ("skill_release", "skill_recover") else 0)
+                   for r in whole):
+                raise ValueError("정지 S 전신의 중립 위상 불일치")
+            if tier == 3 and direction == "S" and any(
+                    not r.get("whole_body") or r["muzzle"][1] <= r["breech"][1]
+                    for r in frames if r["state"].startswith("skill_")):
+                raise ValueError("정지 S 실제 전신/포구축 누락")
+            if any(r["skill_uses"] != (0 if step < 12 else 1)
+                   or (r["cooldown"] != 0 if step < 12 else r["cooldown"] <= 0)
+                   for step, r in enumerate(frames)):
+                raise ValueError("정지 준비/취소/발동의 횟수·쿨다운 불일치")
+        else:
+            gait = {("whole", r["upper_frame"] % 4) if r.get("whole_body") else ("split", r["lower_frame"])
+                    for r in frames if r.get("whole_body") or r["lower_visible"]}
+            if len(gait) < 2:
+                raise ValueError(f"실제 하체 프레임 진행 누락: {tier}/{direction}")
         if maximum and sum(abs(r["actual_rule_speed"]-520) < .1 for r in frames) < 20:
             raise ValueError(f"최고속520 실제 이동 부족: {tier}/{direction}")
     return {"cases": len(groups), "frames": len(records), "visual_acceptance": "PENDING_INDEPENDENT_REVIEW"}
@@ -118,7 +135,7 @@ def main():
                 record = {"captures": {p.name: digest(p) for p in pngs}, "returncode": result.returncode}
                 observations = dest / "skill-observations.json"
                 if observations.exists():
-                    record["coverage"] = validate_directions(json.loads(observations.read_text()), name == "skills-max")
+                    record["coverage"] = validate_directions(json.loads(observations.read_text()), name == "skills-max", name == "skills-stationary")
                 record["observations"] = {p.name: digest(p) for p in dest.glob("*.json")}
                 manifest["suites"][name] = record
                 print(f"PASS {name}: {len(pngs)}PNG", flush=True)
@@ -129,6 +146,7 @@ def main():
                 ("actions", "action_preview", 400, []),
                 ("skills", "skill_direction_preview", 480, []),
                 ("skills-max", "skill_direction_preview", 480, ["--", "--max-speed"]),
+                ("skills-stationary", "skill_direction_preview", 480, ["--", "--stationary"]),
                 ("natural", "natural_growth_preview", 240, [])]:
                 execute(name, ["--audio-driver", "Dummy", "--script", f"res://tests/{script}.gd", *extra], count)
         if inputs(source) != pinned:

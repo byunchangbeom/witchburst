@@ -1,5 +1,7 @@
 # 마녀포격단 · Witchburst
 
+현재 WORK5는 S 시전 시간재현을 수정하고 공급된 오른발 방출·정지 중립 전신, 정지 시전480상태와 동기 GPU 캡처 경로를 연결한 후보입니다. 개별 제품 assertion은 실패0이지만 공식 검사는 sandbox의 Godot 경로/인증서 오류로 import FAIL이며 새 실제 화면·독립 Art·사용자 수용은 대기입니다. [이번 반환·근거와 한계](docs/art-direction.md#2026-11-08--reference-motion-followup-work5-반환)를 따르며 아래는 이전 시점 이력입니다.
+
 현재 `reference-motion-followup`은 기반 a724565의 실제 프레임·원작대조 UI에 성장 탄도 리본/정령 색 구별과 최고속 이동·취소 회귀를 추가한 후보입니다. `python3 tests/run.py`는 sandbox의 Godot 사용자/편집기 경로 접근 거부로 import에서 실패했고 수정 후 GPU·독립 검토는 Controller 호스트 대기입니다. 아래 과거 검사 이력과 구분하며 사용자 디자인 반려는 OPEN입니다. 상세 변경·검증 한계는 [아트 반환 기록](docs/art-direction.md#2026-11-07-reference-motion-followup--이번-제품-변경과-반환), 현재 pin/공식 완료1·OPEN1과 보존 기록은 [사이클 기록](docs/production-cycles.md)을 따릅니다.
 
 현행 중앙 문서 선택은 aa96f24이며 게임 실행기7304344는 유지한다. [연속 사이클 계획](docs/production-cycles.md)·[자료 원장](docs/storage-ledger.json)을 따르며 정상 사이클 경계에서 중단하지 않는다.

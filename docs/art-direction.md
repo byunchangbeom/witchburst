@@ -390,3 +390,28 @@ WLM003: 일부 cannon-actions N/NE의 두 관구처럼 보이는 원통의 의�
 Controller 재개 순서: 최종 허용 diff를 기록 → 격리 소스에서 S 작은 재현과 tests/run.py 전체 → 같은 소스에서 tests/render_reference_motion.py --artifacts <새 고유 경로> 실행(129장면+17보드+400행동+480방향+480최고속+240자연=1746PNG) → 이미지 판독 가능한 별도 실제 세션의 독립 검토다. 특히 N/NE3행·action333, S 준비/발동/회복/취소/최고속·정지, 초기→성장→공방→보스→승패/재시작·저장/복귀를 다시 확인한다. 원본13이미지·과거 manifest·기존 반려는 보존한다. 전체 재생·OS 입력·청취·사람 재미·실기기는 별도 근거가 필요하다.
 
 EA-003/005·R3-001은 수정 후보 통합/독립 재검토 대기, EA-004는 모든 전환/실시간/OS 등 미검증, EA-006과 사용자 원작/디자인 반려는 **OPEN**이다. 제품 검사로 반려를 닫거나 본 task로 사이클 완료 수를 올리지 않는다. 호스트 인계1746PNG와 과거 자동 PASS도 이번 최종 입력의 수용으로 승격하지 않는다. 실제 검토/커밋/통합/push/정리/사이클 종료는 Controller가 수행한다.
+
+
+## 2026-11-08 · reference-motion-followup WORK5 반환
+
+현재 HEAD/worker_base `912e1f05a0f3d950bea95b6132728a7dd6ce2a4a`와 공식 DB의 선행 storybook-visuals CLOSED/attempt11·통합a724565, 논의 DISCUSSED, 본 작업 WORK/attempt5를 읽기 전용 확인했다. Root의 reference-work5-host-handoff.json과 기존 docs/design.md 인계·신규 PNG를 보존했다. review-source-v3의66파일 SHA 불일치0, 기존 독립 CHANGES_REQUIRED와 신규 raw 두 보고서를 읽었다. 기억 검색은 관련 항목이 없어 미적용이다. commit/checkout/다른 에이전트/운영 호출·새 채택/DB수정/중앙/원격 작업은 하지 않았다. 기존 CHECK4 실패·STOP·호출·원문과 원작 반려는 그대로다.
+
+### 작은 재현과 변경
+
+- 수정 전 격리 개별 `--south-only`는61개 중2실패로 기존 반례를 재현했다. 제품 불변 상태에서 준비18틱(.15초)→.28초, 발동 뒤10틱(.0833초)→.20초로 관측만 고치자109개·제품실패0이었다. STEP1/120·최고 stride16위상/초·방출.14초·회복.30초를 바꾸지 않았고 assertion 삭제/완화도 없다. 이후 새 정지·원본축 회귀를 포함한 작은 재현은254개·제품실패0이다.
+- SRAW002의3→7 보행 위상 반례에 Root image_gen 공급 단일 오른발앞 PNG를7번 방출 셀로 통합했다. 원8셀 PNG와0..6을 재사용하며 원본은 편집하지 않았다. 새7은 원본1199×1312, 본체1092px를 표시높이1128 기준으로 대응하고 발기준626.5,1159·실제 관구631,859/뒤점625,708을 연결한다. 별도 파일/trim/canvas/발 피벗이며 전신 미러·전체 squash가 아니다. 실제1x 크기·머리/의상/지지발 연결의 시각 수용은 대기다.
+- 기존0..6의 포구/뒤점도 공급된 독립 raw 보고서의 실제 source_png_xy를 사용했다. 독립 raw의 셀 분할과 기존 metadata의1px 차이는 절대 PNG좌표→현재 source_cell→trim 변환으로 보존한다. 이전 Worker 관측은 south-moving-observations.json의 previous_worker_records_0_to_6와 Git912e1에 남는다. pose_probe는 표적이나 제품 포구에서 기대점을 만들지 않으며 raw 판독의 제한을 명시한다.
+- 정지 S의 원actions37/38은 전면 몸에 위쪽 무기/시선을 보였다. 같은 전신 자산의 두 발 중립0/4를 정지 준비·발동·회복·취소에도 연결하고 stride를 진행하지 않는다. 움직이면 실제 네 위상을 사용한다. 기존 모션 검사의 정지 S 기대를 새 실제 선택에 맞춰 바꾸되 원본관측·실제 포구축·초기탄도 검사는 모두 수행한다. 전투/입력/피해/쿨다운/저장 코드는 변경하지 않았다.
+- action_preview/frame_board/natural_growth_preview의 frame_post_draw 대기를 기존 capture/skill_direction과 같은 force_draw(false) 동기 GPU 렌더로 바꿨다. process_frame·실제 이미지 저장·개수·규칙/표현시간·실패전파·180초 제한을 유지한다. action178 timeout의 새 실제GPU 해결 판정은 미검증이다.
+- 보드1행의 정지 S 준비/발동/회복도 제품과 같은0/4를 선택한다. 기존 정상480/최고속480을 유지하고 skills-stationary480을 추가했다. 정지 좌표·속도0·stride0·숨은 하체·S전신/실제축·발동횟수/쿨다운과 상태 커버리지를 검사한다. `--verify-states`는 같은 규칙·표현을 headless로 실행하고 method.json에 HEADLESS_STATE_ONLY/실제PNG없음을 기록한다. 공식 제품 실행기에도 정지480상태 검사를 연결했다.
+
+### 새 실행 결과와 한계
+
+- 공식 `python3 tests/run.py --artifacts /tmp/witchburst-work5-product-official`은 **FAIL import**다. 종료0이어도 Godot의 사용자 경로·인증서·editor_settings 접근 ERROR 때문에 다음 검사를 실행하지 않은 정상 거부다. 경로/인증서 우회·엔진 복제·전역 설정 변경은 하지 않았다.
+- 기존 import 캐시를 가진 새 격리 프로젝트의 **개별 실행**에서 smoke8017 / motion749 / ui44 / actions74 / experience1294·제품 assertion 실패0, capture-stages 상태준비 종료0이었다. 모두 sandbox 사용자 경로/인증서 ERROR가 있으므로 전체검사/관리 PASS로 올리지 않는다. 신규 frame_board/action_preview/natural_growth_preview 파싱도 제품 오류0이다. 중간 정지 fixture의 시작 좌표·보스 재이동 실패 및 모션의 이전 프레임 기대 실패는 진단 후 고쳤으며 자료를 보존한다.
+- 같은 사본의 정상/최고속/정지 시전 각480상태에 validate_directions를 적용해 각각16case/480state를 확인했다. **실제 PNG는0장**이고 OS입력·실시간 재생·효과 도착의 시각 판독 증거가 아니다. 개별 원로그/receipt: `/private/var/folders/9m/t9pdnp2x7t3ctz1ycll3rj680000gn/T/witchburst-work5-verified-r9zti1kf/`. 수정 전/시간만 수정한 재현·중간 실패는 같은 tmp 루트의 witchburst-work5-small-zrfftlts 및 witchburst-work5-components-w77_25xg에 보존했다.
+- Python 원본/누락거부 계약8개와 기존 host_gui9개는 통과했다. 전체 unittest22개 실행에서는 entrypoints의 직접 부트스트랩·의도 제품실패 전파·capture상태실패 전파3개가 sandbox import 환경 오류로 실패했다. 기존 테스트를 삭제/skip하거나 결과를 전체 PASS로 표시하지 않는다.
+
+원작 reference-review/reference-{85,89,2,8}.png, 공급8셀/새1셀 원본과 912e1의 reference-attempt4-host/stages 첫전투·성장·공방·실패 및 S보드를 직접 열었다. 원작은 작은 사수 위 공격·획득 밀도, 간결한3강화와 수집/결과 구분이 우선이다. 912e1 화면의 S정지 위쪽 관구와 원8셀 마지막 위상 반례를 이번 후보에 연결했다. 신규 Godot 이미지가 없으므로 묶음 후 같은 단계/배율 원작 대조는 **미검증**이다. EA-003/005의 실제 접합·전환 해결, EA-004의 모든 전환/최고속/OS/실시간/청취, EA-006 원작 이탈·사용자 디자인 수용은 OPEN이다. 음향 NOT_HEARD, 사람 재미·실기기는 NOT_MEASURED다.
+
+Controller는 새 고정 커밋에서 공식 제품 검사와 `python3 tests/render_reference_motion.py --artifacts /새/경로`를 실행한다. 단계129·1x보드17·행동400·정상480·최고속480·정지480·자연성장240의 같은 소스 자료를 이미지 판독 가능한 별도 Experience/Art가 원작/목표/실제와 대조해야 한다. 이번 반환/호출은 새 제작 사이클 완료가 아니며 기존 EA/반려·원 기록을 닫지 않는다.

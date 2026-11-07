@@ -20,7 +20,7 @@ func pose(key: String,index: int,point: Vector2,height: float,flip: bool=false) 
 	return actor
 func save(name: String) -> void:
 	await process_frame
-	await RenderingServer.frame_post_draw
+	RenderingServer.force_draw(false)
 	assert(root.get_texture().get_image().save_png(directory.path_join(name+".png"))==OK)
 func panel() -> void:
 	if is_instance_valid(layer):layer.free()
@@ -48,7 +48,12 @@ func run() -> void:
 			var actions := ["대기A","대기B","턴/접지","반동","회복","별비 준비","별비 발동","별비 회복"]
 			for i in range(8):
 				var x:=110.0+i*140
-				pose(family+"-actions",row*8+i,Vector2(x,190),height,flip)
+				var action: String = "skill_prepare" if i==5 else "skill_release" if i==6 else "skill_recover" if i==7 else "ready"
+				var whole: Dictionary = b.visuals.motion.south_skill_pose(family,dir,action,0.0)
+				if not whole.is_empty():
+					pose(whole.key,whole.index,Vector2(x,190),height)
+				else:
+					pose(family+"-actions",row*8+i,Vector2(x,190),height,flip)
 				label_at(actions[i],Vector2(x-42,204),15)
 			for i in range(8):
 				var moving:=i>=4
@@ -64,7 +69,7 @@ func run() -> void:
 			for i in range(8):
 				var x:=110.0+i*140
 				var action := "skill_prepare" if i<4 else "skill_release"
-				var whole: Dictionary = b.visuals.motion.moving_skill_pose(family,dir,action,float(i%4))
+				var whole: Dictionary = b.visuals.motion.south_skill_pose(family,dir,action,float(i%4))
 				if not whole.is_empty():
 					pose(whole.key,whole.index,Vector2(x,560),height)
 				else:

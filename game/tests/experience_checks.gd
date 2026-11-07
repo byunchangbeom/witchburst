@@ -24,6 +24,7 @@ func fresh() -> Control:
 
 func run() -> void:
 	south_skill_checks()
+	stationary_skill_checks()
 	if "--south-only" in OS.get_cmdline_user_args():
 		print("S 이동 시전 작은 재현: ", checks, "개, 실패 ", failures)
 		quit(1 if failures else 0)
@@ -119,7 +120,8 @@ func south_skill_checks() -> void:
 	var before := [b.boss_hp,b.skill_uses,b.cooldown]
 	var gait := {}
 	b.dragging = true
-	for i in range(18):
+	# STEP=1/120. stride는 초당 최대16위상이므로 네 자세에 .25초 이상 필요하다.
+	for i in range(ceili(.28 / b.STEP)):
 		b.drag_target = b.witch+Vector2(60 if (i/3)%2==0 else -60,0)
 		var start: Vector2 = b.witch
 		b.advance(b.STEP)
@@ -138,16 +140,60 @@ func south_skill_checks() -> void:
 	v.sync(0.0)
 	require(m.state=="skill_release" and m.pose_key==m.SOUTH_SKILLS and m.witch.frame>=4 and b.skill_uses==before[1]+1, "S 전신 방출과 실제 한 번 발동")
 	var observation := preload("res://tests/pose_probe.gd").new()
-	require(observation.tip(v).distance_to(m.muzzle)<.01 and observation.back(v).distance_to(m.breech)<.01, "Worker 원본 관측점과 새 Sprite의 포구/뒤점 변환 일치; 독립 Art 수용 별도")
-	for i in range(10):
+	require(observation.tip(v).distance_to(m.muzzle)<.01 and observation.back(v).distance_to(m.breech)<.01, "독립 raw 관측점과 새 Sprite의 포구/뒤점 변환 일치; 게임 통합 Art 수용 별도")
+	# 방출 .14초를 지나 회복 구간(.14~.30초)에서 관측한다.
+	for i in range(ceili(.20 / b.STEP)):
 		b.drag_target = b.witch+Vector2(60 if (i/3)%2==0 else -60,0)
 		b.advance(b.STEP)
 		v.sync(b.STEP)
+		require(observation.tip(v).distance_to(m.muzzle)<.01 and observation.back(v).distance_to(m.breech)<.01 and m.aim_axis.y>.9, "이동 방출/회복의 서로 다른 원본 셀·관측점·S 축 일치")
 	require(m.state=="skill_recover" and m.pose_key==m.SOUTH_SKILLS and not m.legs.visible, "S 이동 회복도 전신 자세 유지")
 	b.drag_target = b.witch
 	b.advance(b.STEP)
 	v.sync(b.STEP)
-	require(not m.moving and m.pose_key=="witch-cannon-actions" and not m.legs.visible, "이동 중단은 기존 정지 회복으로 복귀")
+	require(not m.moving and m.pose_key==m.SOUTH_SKILLS and m.witch.frame==4 and not m.legs.visible, "이동 중단은 S 중립 전신 회복으로 복귀")
+	b.free()
+
+func stationary_skill_checks() -> void:
+	# 정지 S의 원actions37/38은 포구가 위를 향했다. 실제 제품 상태와 원본 관측을 대조한다.
+	var b := fresh()
+	b.equipped = 2
+	b.witch = Vector2(270,575)
+	b._start_boss()
+	b.shot_clock = 10.0
+	b.dragging = true
+	b.drag_target = b.witch
+	var v: Node2D = b.visuals
+	v.sync(0.0)
+	var m: Node2D = v.motion
+	b.enemies[0].pos = b._from_screen(v.witch_shadow.position+Vector2(0,150))
+	b.skill_button.button_down.emit()
+	var before := [b.boss_hp,b.skill_uses,b.cooldown]
+	var position: Vector2 = b.witch
+	var stride: float = m.stride
+	var observation := preload("res://tests/pose_probe.gd").new()
+	m.previous_rule = b.witch
+	for i in range(ceili(.28 / b.STEP)):
+		b.advance(b.STEP)
+		v.sync(b.STEP)
+		require(m.state=="skill_prepare" and m.pose_key==m.SOUTH_SKILLS and m.witch.frame==0 and not m.legs.visible, "정지 S 준비는 두 발 중립 전신이며 보행하지 않음")
+		require(b.witch==position and m.stride==stride and before==[b.boss_hp,b.skill_uses,b.cooldown], "정지 준비는 좌표·보행위상·피해·쿨다운 보존")
+	b.skill_button.mouse_exited.emit()
+	v.sync(0.0)
+	require(m.state=="skill_settle" and m.pose_key==m.SOUTH_SKILLS and m.witch.frame==0 and before==[b.boss_hp,b.skill_uses,b.cooldown], "정지 S 취소는 같은 중립 자세로 무발동")
+	# 실제 _tick은 보스를 원래 경로로 이동하므로 재시전 직전에만 판독 표적을 S에 둔다.
+	b.enemies[0].pos = b._from_screen(v.witch_shadow.position+Vector2(0,150))
+	b.skill_button.button_down.emit()
+	require(b.cast_skill(), "정지 S도 기존 입력 시점에 발동")
+	v.sync(0.0)
+	require(m.state=="skill_release" and m.pose_key==m.SOUTH_SKILLS and m.witch.frame==4 and not m.legs.visible, "정지 S 발동은 중립 방출 전신")
+	require(b.skill_uses==before[1]+1 and b.boss_hp<before[0] and b.cooldown==b.SKILL_COOLDOWN, "정지 S 실제 피해·횟수·쿨다운 즉시 한 번 발동")
+	for i in range(ceili(.20 / b.STEP)):
+		b.advance(b.STEP)
+		v.sync(b.STEP)
+		require(observation.tip(v).distance_to(m.muzzle)<.01 and observation.back(v).distance_to(m.breech)<.01 and m.aim_axis.y>.9, "정지 방출/회복의 실제 원본 포구축이 S로 향함")
+		require(b.witch==position and m.stride==stride and not m.moving and not m.legs.visible and m.witch.frame==4, "정지 방출/회복에도 이동·보행 진행 없음")
+	require(m.state=="skill_recover" and m.pose_key==m.SOUTH_SKILLS, "정지 S 실제 .20초 회복 전신")
 	b.free()
 
 func salvo_checks() -> void:

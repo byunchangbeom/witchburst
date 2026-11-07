@@ -45,7 +45,7 @@ class ReferenceMotion(unittest.TestCase):
         for record, cell in zip(raw["records"], cells):
             self.assertEqual(cell["region"], record["region"])
             self.assertEqual(cell["leg_regions"], [], "전신 셀은 절단용 마스크를 쓰지 않음")
-            self.assertEqual(cell["file_override"], "cannon-south-moving-skills.png")
+            self.assertEqual(cell["file_override"], record.get("file", "cannon-south-moving-skills.png"))
             for key, observed in [("muzzle_uv", "front"), ("breech_uv", "back")]:
                 for axis in range(2):
                     decoded = cell[key][axis]*cell["region"][axis+2]+cell["trim_offset"][axis]
@@ -53,6 +53,45 @@ class ReferenceMotion(unittest.TestCase):
             self.assertGreater(record["front"][1], record["back"][1], "실제 S 포구는 뒤점보다 아래")
             for axis in range(2):
                 self.assertEqual(cell["foot"][axis]+cell["trim_offset"][axis], record["sole"][axis])
+
+    def test_right_step_preserves_source_scale_and_independent_axis(self):
+        game = Path(__file__).resolve().parents[1] / "game"
+        image = (game / "assets/art/cannon-south-release-right-step.png").read_bytes()
+        self.assertEqual(hashlib.sha256(image).hexdigest(), "64a622a039522fdcdce45417011c81519ededf16ed29cdd7c0bdfe72db2c33e6")
+        self.assertEqual(struct.unpack(">II", image[16:24]), (1199, 1312))
+        cells = json.loads((game / "assets/art/cannon-south-moving-skills.json").read_text())["cells"]
+        cell = cells[7]
+        self.assertEqual([c["file_override"] for c in cells[:7]], ["cannon-south-moving-skills.png"]*7)
+        # 독립 raw 판독의 관구631,859/뒤점625,708과 발 기준626.5,1159.
+        for key, point in [("muzzle_uv", [631, 859]), ("breech_uv", [625, 708])]:
+            for axis in range(2):
+                self.assertAlmostEqual(cell[key][axis]*cell["region"][axis+2]+cell["trim_offset"][axis], point[axis])
+        self.assertEqual([cell["foot"][a]+cell["trim_offset"][a] for a in range(2)], [626.5,1159])
+        self.assertAlmostEqual(1092 / cell["display_canvas_height"], 397/410, delta=.005)
+
+    def test_stationary_coverage_rejects_motion_wrong_s_axis_and_trigger(self):
+        records = self.records()
+        for r in records:
+            step = r["index"] % 30
+            r.update(stationary_fixture=True, max_speed_fixture=False, actual_rule_speed=0,
+                     rule_position=[270,575], stride=0, lower_visible=False,
+                     skill_uses=0 if step < 12 else 1, cooldown=0 if step < 12 else 8)
+            if (r["case_tier"], r["case_direction"]) == (3, "S"):
+                r.update(whole_body=True, pose_key="witch-cannon-south-skills", muzzle=[270,600],
+                         breech=[270,580], upper_frame=4 if r["state"] in ("skill_release", "skill_recover") else 0)
+        self.assertEqual(validate_directions(records, stationary=True)["cases"], 16)
+        for key, value, message in [("stride", 1, "이동/보행 잔류"),
+                                    ("rule_position", [271,575], "이동/보행 잔류"),
+                                    ("skill_uses", 2, "횟수·쿨다운 불일치")]:
+            broken = copy.deepcopy(records)
+            broken[0][key] = value
+            with self.assertRaisesRegex(ValueError, message):
+                validate_directions(broken, stationary=True)
+        for key, value in [("muzzle", [270,570]), ("whole_body", False)]:
+            broken = copy.deepcopy(records)
+            next(r for r in broken if (r["case_tier"],r["case_direction"]) == (3,"S"))[key] = value
+            with self.assertRaisesRegex(ValueError, "정지 S 실제 전신/포구축 누락"):
+                validate_directions(broken, stationary=True)
 
     def test_whole_body_gait_is_measured_and_cannot_hide_single_frame(self):
         records = self.records()

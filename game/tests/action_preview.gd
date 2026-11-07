@@ -25,7 +25,7 @@ func capture(title: String) -> void:
 	b.title_label.text=title
 	b.visuals.sync(1.0/24.0)
 	await process_frame
-	await RenderingServer.frame_post_draw
+	RenderingServer.force_draw(false)
 	assert(root.get_texture().get_image().save_png(directory.path_join("action-%03d.png"%observations.size()))==OK)
 	if observations.size()%16==0:print("연속 실행 frame ",observations.size())
 	observations.append({"index":observations.size(),"label":title,"time":m.clock,"state":m.state,"key":m.pose_key,"frame":m.witch.frame,"facing":m.facing,"move":m.move_direction,"stride":m.stride,"skill_uses":b.skill_uses,"cooldown":b.cooldown})

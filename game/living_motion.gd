@@ -170,8 +170,9 @@ func reset_actions() -> void:
 	transition_at = -100.0
 	skill_preparing = false
 
-func moving_skill_pose(family: String, aim: String, action: String, gait: float) -> Dictionary:
+func south_skill_pose(family: String, aim: String, action: String, gait: float) -> Dictionary:
 	# S 접합은 잘라 붙이지 않고 호스트가 공급한 실제 전신8프레임으로 재생한다.
+	# 정지 시전은 gait=0으로 두 발이 내려온 중립 자세를 유지한다.
 	if family != "witch-cannon" or aim != "S" or not action.begins_with("skill_"):
 		return {}
 	var row := 1 if action in ["skill_release", "skill_recover"] else 0
@@ -257,7 +258,7 @@ func sync_party() -> void:
 		column = int(stride) % 4
 		state = "walk"
 	var index := direction_row(facing) * columns + column
-	var whole := moving_skill_pose(family, facing, state, stride) if moving else {}
+	var whole := south_skill_pose(family, facing, state, stride if moving else 0.0)
 	if not whole.is_empty():
 		key = whole.key
 		index = whole.index

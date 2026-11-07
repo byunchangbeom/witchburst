@@ -135,7 +135,10 @@ func weapon_landmark_checks() -> void:
 					battle.enemies[0].pos = battle._from_screen(visual.witch_shadow.position + vector * 170.0)
 					battle.bullets.clear()
 					battle._fire()
-					require(motion.pose_key == family + "-" + kind and motion.witch.frame == rows[sector] * columns + column, "실제 발사의 방향·행동·프레임 선택")
+					if tier==3 and names[sector]=="S" and kind=="actions":
+						require(motion.pose_key==motion.SOUTH_SKILLS and motion.witch.frame==(4 if column>=6 else 0), "정지 S 시전·취소는 관측된 중립 전신 선택")
+					else:
+						require(motion.pose_key == family + "-" + kind and motion.witch.frame == rows[sector] * columns + column, "실제 발사의 방향·행동·프레임 선택")
 					var observed: Dictionary = probe.record(visual)
 					var status: String = observed.get("status", "")
 					var read_by_art := status.begins_with("OBSERVED_") or status == "FRONT_MARKER_REJECTED_PROPOSED_PHYSICAL_PAIR"

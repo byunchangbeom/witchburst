@@ -5,7 +5,7 @@ var south_landmarks: Dictionary = {}
 
 func record(visual: Node2D) -> Dictionary:
 	if visual.motion.pose_key == "witch-cannon-south-skills":
-		# 신규8셀은 Worker 원본 판독이다. 기존90점 독립 Art 출처와 구분한다.
+		# 공급된 독립 raw 관측을 trim 전 좌표로 변환했다. 게임 통합 수용과는 별도다.
 		if south_landmarks.is_empty():
 			south_landmarks = JSON.parse_string(FileAccess.get_file_as_string("res://tests/south-moving-observations.json"))
 		return south_landmarks.frames[visual.motion.pose_key][str(visual.motion.witch.frame)]

@@ -1,5 +1,7 @@
 # Witchburst 워크플로우·하네스 개선 대기열
 
+WORK5(912e1 기반)의 기존 HV-Q-002/005/006/007·EA-003/004/005/006 후속은 [아트 반환](art-direction.md#2026-11-08--reference-motion-followup-work5-반환)에 기록한다. 실제 작은 시간재현·공급7번/정지S 프레임·동기렌더와 회귀를 보완했으나 공식 import환경 FAIL·새GPU/독립통합판독·사용자 원작수용은 대기다. 기존 WB-IMP-013/원문보호46·미가용13·실패/STOP/Writer경계를 유지하고 새ID·사이클완료·중앙전달로 세지 않는다. 기록커밋은 Controller 발행 대기다. 아래 상태/집계는 각 시점 이력이다.
+
 ## 2026-11-07 reference-motion-followup · 현재 작업 경계
 
 attempt3 현행: 기반a517e2e와 선행CLOSED/논의DISCUSSED를 읽기 전용 확인했다. 이전timeout/전송종료·attempt1/2 import 실패·호출/원문을 보존하고 작은Python검사→격리 개별 제품 실행으로 접근을 바꿨다. 실제 제품 실패0과 환경오류/공식계약 미통과·새GPU/독립판독 대기를 [아트 현행 반환](art-direction.md#2026-11-07-reference-motion-followup--attempt3-회수와-현행-반환)에 연결했다. 기존HV-Q-002/005/006/007·EA-003/004/005/006/WLM003의 후속이며 새ID/사이클완료로 세지 않는다. 추가에이전트·DB/상태전이·중앙수정·commit/통합/push 없음. 기록커밋은 Controller 발행 대기다. 아래 attempt1 관측은 당시 이력이다.

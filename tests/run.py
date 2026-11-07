@@ -56,6 +56,7 @@ def main():
                   ("ui", ["--headless", "--script", "res://tests/ui_checks.gd"]),
                   ("actions", ["--headless", "--script", "res://tests/action_checks.gd"]),
                   ("experience", ["--headless", "--script", "res://tests/experience_checks.gd"]),
+                  ("skills-stationary", ["--headless", "--script", "res://tests/skill_direction_preview.gd", "--", "--stationary", "--verify-states"]),
                   ("capture-stages", ["--headless", "--script", "res://tests/capture.gd", "--", "--verify-stages"])]
         if args.capture:
             checks.append(("capture", ["--audio-driver", "Dummy", "--script", "res://tests/capture.gd"]))

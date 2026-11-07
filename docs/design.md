@@ -265,3 +265,17 @@ Root가 실제 도구로 UI그림/9patch를 공급하고 같은 후속 브랜치
 
 
 WORK4 Worker 반환: S 이동 시전은 공급된 실제 전신8프레임을 stride에 연결하고, 준비/발동/회복/취소의 기존 절단 합성을 대신한다. capture의 상태 대기와 자연 성장600초 가속은 규칙·표현 시간을 함께 진행하도록 수정했다. 자산 계약·작은 재현·검사 결과와 한계는 [아트 기록](art-direction.md#2026-11-08--reference-motion-followup-work4-구현-반환)에 연결한다. Python 계약6개 PASS, Godot 제품 검사는 sandbox import 환경 오류로 미실행이며 새1x보드/연속자료·독립Art·사용자 수용은 대기다. 기존 EA003/005·R3-001의 실제 해소와 EA006 원작 반려를 완료로 바꾸지 않는다.
+
+
+## 2026-11-08 · 정상 WORK5 실제 실패 진단과 아트 후속 인계
+
+실제 CHECK4는 8017/749/44/74 실패0 뒤 experience1101 중2실패로 정상 WORK5가 됐다. 기존 task/attempt/입력/실패를 보존하며 새 task로 우회하지 않는다. Controller/Worker4/Root 보조 렌더가 모두 반환된 단일 Writer 경계에서 Root가 이 사실과 신규1프레임을 인계하고 반환한다.
+
+- 진단: task-recovery-20261107/south-test-diagnostic/{receipt.json,south.log}. 원제품 불변·개인 임시 fixture에 print만 넣었다. STEP은1/120이므로 준비18번=.15초에는 stride2.4, 자세0/1/2만 도달한다(HP720/사용0/cooldown0 모두 보존). 발동뒤10번=.0833초는 아직 skill_release다. 규칙/입력을 바꾸거나 assertion을 삭제/완화하지 말고 실제시간으로4보행과 .14~.30초 회복에 충분히 도달하게 재현을 수정한 뒤 전체 제품 검사를 재실행한다.
+- 새 독립 source 판독: art-inputs/cannon-south-independent.json의 SRAW002는 prepare3 오른발앞→release7 왼발앞 위상 불일치를 지적한다. 기존PNG0..6을 재사용하고 Root가 공급한 cannon-south-release-right-step.png를 실제release7 후보로 통합한다. 원본/계약은 art-inputs/cannon-south-right-step-contract.json, 독립새1프레임판독은 cannon-south-right-step-independent.json이 생성되면 반드시 읽는다. 상체/무기 전체 미러나 정지그림 squash로 대신하지 않는다. 다른 raw해상도이므로 불투명 본체·실제 부츠 접지·머리 크기를 대응하고 실제 포구/가시 rear점을 관측해 metadata/pose_probe를 연결한다.
+- 정지S 방향 반례: 독립 Art가 원raw actions37/38과 실제912e1의 1x S 보드 첫행을 열어 정면 몸인데 포구/시선은 우상향임을 확인했다. 현재 새전신은 moving만 선택하므로 정지 시전에는 이 문제가 남는다. 같은 새S 전신 자산을 정지 준비/발동/회복/취소에도 적절한 중립 보행위상으로 재사용해 방향/발원축을 맞추고 실제 정지S도 캡처/검사한다. 기존 입력 반응·규칙/쿨다운/판정 불변. 정지시다리보행은진행하지않는다.
+- Root912e1 전체렌더는 성공이 아니다. reference-attempt4-host의 stages129/boards17만 성공했고 actions178/400에서180초 frame_post_draw 대기 timeout으로 FAIL이다. 원문/부분화면/관리CHECK실패를 보존한다. capture/skill_direction은 이미 RenderingServer.force_draw(false)로 실제 GPU동기렌더하고 있으나 action_preview/frame_board/natural_growth에는 await frame_post_draw가 남았다. 같은 실제 렌더 방식으로 대기 교착을 고치고 시간제한/실패전파를 완화하지 않는다. 제품모션시간과규칙시간assert도 유지한다.
+- tests/render_reference_motion.py와 skill_direction_preview에 정지 시전 검토를 추가해 같은 source의 normal480/max480뿐 아니라 stationary 양무기×8방향도 실제 자료로 남긴다. 정지속도0/좌표보존, 준비·발동·회복·취소와 실제정지다리/pose·효과축을 관측한다. 원래 moving/max 커버리지를 줄이거나 기존검사를 skip하지 않는다. 새고정commit 전체 생성/독립Art 전에는 수용하지 않는다.
+- 전체 아트/EA006/사용자 반려 OPEN, 원문13미가용·보호사본46과 WB013도 그대로 유지한다. 새 정상 Worker5가 실제수정/검사하고 Controller commit/신규관리check/독립review/통합/push한다.
+
+WORK5 실제 반환: 시간 관측 반례부터 재현·수정하고 공급 오른발7번/정지S중립 전신/독립raw축·동기렌더·정지480상태 회귀를 연결했다. 개별 제품실패0과 공식 import환경 FAIL, 실제GPU·독립Art/사용자 수용 대기는 [아트 반환](art-direction.md#2026-11-08--reference-motion-followup-work5-반환)에 구분한다. 위 Root 인계와 이전 실패/집계는 보존한다.

@@ -35,7 +35,7 @@ func capture(label: String) -> void:
 	assert(absf(b.visuals.motion.clock-simulated)<.001, "자연 성장 봇의 규칙·표현 시간 일치")
 	b.queue_redraw()
 	await process_frame
-	await RenderingServer.frame_post_draw
+	RenderingServer.force_draw(false)
 	assert(root.get_texture().get_image().save_png(directory.path_join("natural-%03d.png"%frames.size()))==OK)
 	var observation:=snapshot()
 	observation["label"]=label
