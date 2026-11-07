@@ -196,6 +196,23 @@ func projectile_tail(bullet: Dictionary) -> Vector2:
 	# 출발점이 없는 탄은 머리만 표시하여 임의의 뒤쪽 궤적을 만들지 않는다.
 	return point
 
+func projectile_ribbon(bullet: Dictionary) -> PackedVector2Array:
+	# 실제로 지난 유도 경로만 넓힌다. 사격 수·판정·기존 짧은 중심 꼬리는 그대로다.
+	var points := PackedVector2Array()
+	if bullet.tier == 0:
+		return points
+	for shot in shot_origins:
+		if not is_same(shot.bullet, bullet):
+			continue
+		var traveled: float = bullet.pos.distance_to(shot.start)
+		var length := minf(traveled, 40.0 + bullet.tier * 40.0)
+		if length < .01:
+			return points
+		for i in range(13):
+			points.append(_flight_point(shot, traveled - length + length * i / 12.0))
+		break
+	return points
+
 func _particle_texture(leaf: bool) -> ImageTexture:
 	# 신규 별·잎 입자 모양을 엔진에서 생성한다.
 	var picture := Image.create(16, 16, false, Image.FORMAT_RGBA8)
@@ -375,9 +392,17 @@ func _draw() -> void:
 		var p := projectile_position(bullet)
 		var r: float = battle.projectile_radius(bullet.tier) * unit
 		var tail := projectile_tail(bullet)
+		var linked: bool = bullet.get("spirit", false)
+		var ink := Color("ffdf87") if linked else Color("6fddac")
+		var ribbon := projectile_ribbon(bullet)
+		for i in range(1, ribbon.size()):
+			var weight := float(i) / (ribbon.size() - 1)
+			# 길이/폭이 성장하되 초기 단발과 HUD를 가리지 않는 반투명 마력이다.
+			draw_line(ribbon[i-1], ribbon[i], Color(ink, .12 + weight * .18), r * (1.0 + weight * 1.8), true)
+			draw_line(ribbon[i-1], ribbon[i], Color("fffacb", weight * .7), maxf(1.0, r * weight * .6), true)
 		if tail.distance_squared_to(p) > 0.0001:
 			draw_line(tail, p, BROWN, r * 1.8 + 3, true)
-			draw_line(tail, p, Color("6fddac"), r * 1.8, true)
+			draw_line(tail, p, ink, r * 1.8, true)
 			draw_line(tail, p, Color("fffacb"), r * 0.65, true)
 		if bullet.tier>=2 and tail.distance_to(p)>12*unit:
 			var normal := (p-tail).normalized().orthogonal()

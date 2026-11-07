@@ -1,0 +1,3 @@
+#!/bin/sh
+# 현재 명시 채택은 docs/executor-adoptions.json; 이전 lock은 이력으로 보존한다.
+exec env GIT_OPTIONAL_LOCKS=0 PYTHONDONTWRITEBYTECODE=1 python3 /Users/nhn/.local/state/harness-v/witchburst/task-recovery-20261107/executor-bbf9f9c/hv.py --state /Users/nhn/.local/state/harness-v/witchburst "$@"

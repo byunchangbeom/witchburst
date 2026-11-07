@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "purpose": "별도 명시 승인한 사이클 실행기. 기존 harness.lock17d4e6b와 문서 선택 채택은 보존",
+  "commit": "73043445a1349252f9433e04397d1c43f4702430",
+  "source_repository": "/Users/nhn/brainspace/workspace/harness-v",
+  "path": "/Users/nhn/.local/state/harness-v/witchburst/cycle-adoption-20261107/harness-7304344",
+  "state": "/Users/nhn/.local/state/harness-v/witchburst",
+  "environment": {
+    "GIT_OPTIONAL_LOCKS": "0"
+  },
+  "adoption_receipt": "/Users/nhn/.local/state/harness-v/witchburst/cycle-adoption-20261107/adoption-receipt.json",
+  "legacy_pin_file": "harness.lock",
+  "legacy_commit": "17d4e6b58e5ad7ed8c62dab0db1f6efe652633ed",
+  "workflow_document": {
+    "commit": "73043445a1349252f9433e04397d1c43f4702430",
+    "path": "docs/game-production-workflow.md",
+    "sha256": "bb136465aacd15cee9d5d2f6f5057354ba972cb0500a5c4866d6b45f2e8df94b"
+  },
+  "cycle_document": {
+    "commit": "73043445a1349252f9433e04397d1c43f4702430",
+    "path": "docs/production-cycles.md",
+    "sha256": "c902482b56cb78b9739e587d9bdc1128628b444ddfdec9544dbbb198a0bf97ec"
+  }
+}

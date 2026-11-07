@@ -3,6 +3,8 @@ extends SceneTree
 var b: Control
 var directory: String
 var observations: Array[Dictionary]=[]
+var max_speed := false
+var actual_speed := 0.0
 func _initialize() -> void:run.call_deferred()
 func capture(label: String) -> void:
 	b._refresh_ui()
@@ -15,9 +17,10 @@ func capture(label: String) -> void:
 	var emitted_axes: Array = []
 	for shot: Dictionary in b.visuals.shot_origins:
 		emitted_axes.append([shot.axis.x, shot.axis.y])
-	observations.append({"index":observations.size(),"label":label,"state":m.state,"facing":m.facing,"move":m.move_direction,"upper_frame":m.witch.frame,"lower_frame":m.legs.frame,"lower_visible":m.legs.visible,"stride":m.stride,"muzzle":[m.muzzle.x,m.muzzle.y],"breech":[m.breech.x,m.breech.y],"emitted_axes":emitted_axes,"skill_uses":b.skill_uses})
+	observations.append({"index":observations.size(),"label":label,"state":m.state,"facing":m.facing,"move":m.move_direction,"upper_frame":m.witch.frame,"lower_frame":m.legs.frame,"lower_visible":m.legs.visible,"stride":m.stride,"muzzle":[m.muzzle.x,m.muzzle.y],"breech":[m.breech.x,m.breech.y],"emitted_axes":emitted_axes,"skill_uses":b.skill_uses,"max_speed_fixture":max_speed,"actual_rule_speed":actual_speed})
 func run() -> void:
 	directory=OS.get_environment("WITCHBURST_ARTIFACTS")
+	max_speed = "--max-speed" in OS.get_cmdline_user_args()
 	root.size=Vector2i(540,960)
 	root.content_scale_size=Vector2i(540,960)
 	var names := ["N","NE","E","SE","S","SW","W","NW"]
@@ -41,8 +44,12 @@ func run() -> void:
 			var travel:=aim.rotated(PI*.5)
 			for step in range(30):
 				b.dragging=true
-				b.drag_target=(b.witch+travel*3).clamp(Vector2(110,500),Vector2(430,650))
+				# 3프레임마다 되돌려 경계에 붙지 않고 기존520속도의 전환을 캡처한다.
+				var offset := travel * (60.0 if (step / 3) % 2 == 0 else -60.0) if max_speed else travel * 3.0
+				b.drag_target=(b.witch+offset).clamp(Vector2(110,500),Vector2(430,650))
+				var before: Vector2 = b.witch
 				b.advance(1.0/24.0)
+				actual_speed = b.witch.distance_to(before) * 24.0
 				# 8방향을 모두 볼 수 있게 표적 위치만 통제한다. 새로운 적 이동 규칙이 아니다.
 				b.enemies[0].pos=b._from_screen(b.visuals.witch_shadow.position+aim*150)
 				if step==0:b.skill_button.button_down.emit()
