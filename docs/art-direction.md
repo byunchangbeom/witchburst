@@ -296,3 +296,19 @@ P2 두 건은 표현 좌표를 따로 계산한 데서 반복됐다. 이전 포�
 ### 공식 인수 후 실제 렌더 검사 복구 · 2026-11-07
 
 새bbf 관리 check0은 통과했으나 check1은 실제PNG73장 뒤90초 timeout으로 BLOCKED attempt10이 됐다. 원 receipt4277fd95647b416599ed8162f17a19a2와 attempt9/10을 보존한다. 같은 코드에 단계 로그만 추가한 격리 진단은129장을 완료했으므로 고정 제품 오류·창 가림 원인으로 확정하지 않는다. 별도 임시호스트 storybook-render-recovery에서 capture.gd의 자동 frame_post_draw 신호 대기를 명시 RenderingServer.force_draw(false)로 바꿨다. 기존 process_frame·실제 GPU·129장·치수/상태/포구·지형 검증은 유지하고 등록 check argv/timeout·제품 입력/저장/lifecycle은 변경하지 않았다. 공식 Godot RenderingServer API: https://docs.godotengine.org/en/stable/classes/class_renderingserver.html#class-renderingserver-method-force-draw . 동일 원 checker의 로컬 결과129장/37.321초/종료0. 이것은 새 관리 수용이 아니며 이후 정상 CHECK/REVIEW/통합/push가 필요하다. 전체 아트/사용자 반려/EA006은 OPEN이다.
+
+### 관리 리뷰 P2 실제 보완 · BLOCKED11 이력 보존
+
+원 리뷰 `storybook-visuals:10:review-host-storybook-host-render-2`(artifact6a8069c99df54dcaba0b65fac9e2e8eb)는 CHANGES_REQUIRED였다. (1) 정지 sync(0)만 사용한 이동 지형 검사 (2) 제품과 검사 양쪽에서 표적 방향을 합성한 포신 축의 독립성 누락을 지적했다. 원 반려/attempt9→10 timeout→11과 원입력을 보존하며 부분 Art로 관리 수용을 대체하지 않는다.
+
+P2-1: capture/smoke는 실제 _process와 같은 advance→sync(dt>0)로 보행과 자동복귀를 진행한다. 움직이는 중 발사·분리 하체가 활성화됐는지 확인하고 PNG manifest에 actual moving/state/upper/lower frame을 기록한다. 로컬8017제품+134모션+44UI+74행동 및 새129장 PASS. moving/return12장(2무기×3비율×2상태)이 실제 release와 legs_visible였다.
+
+P2-2: 기존 PNG6장을 바꾸지 않고 독립 Art가 directions release10·moving40·actions4/5/6/7의40셀, 총90셀의 실제 가시 포신 뒤점을 직접 판독했다. 원문 `task-recovery-20261107/independent-weapon-landmarks-final.json`, SHA453198bdd714de5e59724cda42b04c7a1abc8a05356b9746d144f0b36a718bcf. 최초50 중 뒤점2개의 재판독 수정도 원문에 보존했다. 제품은 cropped-region UV를 Sprite에 변환하고, 검사측은 별도 canvas UV와 실제 Sprite변환으로 대조한다. 양쪽에서 표적 좌표를 사용한 가상 뒤점 계산을 제거했다. 발사 가능한90셀×좌우반전144조합의 실제 _fire를 거쳐 초기 탄도가 그림 축에서 나오는지 검사한다. 원PNG SHA도 교차한다. 로컬 제품8017+모션748+UI44+행동74 PASS 뒤 판독상태 gate를 추가했다. 최종 소스의 새 관리 검사/독립 리뷰는 아직 별도 필요하다.
+
+독립 Art가 cannon-actions6(N release)/14(NE release)의 기존 front를 각각 관구 가장자리/사실상 투명 픽셀로 반려했다. 제안한 실제 상단 관구 중심을 제품muzzle과 독립 검사에 적용했다. 나머지88 front는 기존 수동 표기이며 신규 독립 front 수용이 아니다. 새90 front alpha 직접 대조에서 추가 저alpha 후보0; 이 값은 관구 의미/전체아트 수용 근거가 아니다. 가시 짧은 목/칼라의 수동 오차±3 canvas px를 보존한다. 수치상 변환 일치를 그림의 무오차 수용으로 승격하지 않는다.
+
+WLM003: 일부 cannon-actions N/NE의 두 관구처럼 보이는 원통의 의미와 자동사격 담당 관구의 아트 일관성 OPEN. 선택한 가시 관구의 좌표 연결만 검증한다. WLM004: .055~.16 반동 actions col3은 이번90셀 밖이다. 이미 발사한 탄은 저장된 출발점/축을 사용하고 반동 중 재사격은 먼저 관측된 release를 고르는 회귀를 추가했으나 col3 그림 자체의 축 판독 완료는 아니다. EA006·원작 이탈·전체 사용자 디자인 반려는 OPEN. 다음 정상 reference-motion-followup은 새 실제 motion/포구/아트 자료와 기존 원작85/89/2/8을 직접 대조해 이 차이를 보완한다.
+
+실제 실행 입력: `motion-landmarks-skills`의8방향×2무기480프레임(생성/독립 판독 상태는 해당 source-manifest·runtime 보고서에서 조회). skill_direction_preview는 명시GPU draw와 실제 포구/뒤점·발사시 저장축을 기록한다. 이 보조 호스트 자료를 원 관리 check receipt로 가장하지 않는다. 다음 공식 host 인수 뒤 새로운 관리 CHECK/REVIEW/통합/push/정리를 수행한다.
+
+같은game54의 새 실제480프레임이78.838초/종료0으로 생성됐다. 고정입력은 motion-landmarks-skills/source-manifest.json이다. 제안한2포구의 실제실행 범위 판독은 별도독립 Experience/Art의 task-recovery-20261107/weapon-landmarks-render-review.md를 조회하며, 이 작성시점은 검토진행중이다. 새관리수용/전체아트PASS로 표시하지 않는다.

@@ -270,6 +270,27 @@
       "reference_policy": "기존sunlit-meadow 지형배치 편집, 원작85는단순도형/명도/빈공간 비교만. 원작 캐릭터/UI/자산 복사 없음",
       "copy_policy": "생성 원본 바이트 동일 복사; game engine에서 기존 지형 canvas 크기로 표시 정규화",
       "status": "OPEN cycle reference-aligned-improvement rev2의 호스트 대표장면 후보. main 미통합/디자인 수용 아님"
+    },
+    {
+      "id": "independent-visible-weapon-landmarks-20261107",
+      "files": [
+        "game/assets/art/motion-atlas.json",
+        "game/tests/weapon-axis-landmarks.json"
+      ],
+      "kind": "기존 자체 PNG의 수동 위치 주석; 신규/복제 이미지 없음",
+      "creator": "독립 Experience/Art /root/experience_art_review 직접 PNG·1x 눈금 보드 판독, Root가 제품 crop UV와 검사 canvas UV로 연결",
+      "source": "/Users/nhn/.local/state/harness-v/witchburst/task-recovery-20261107/independent-weapon-landmarks-final.json",
+      "source_sha256": "453198bdd714de5e59724cda42b04c7a1abc8a05356b9746d144f0b36a718bcf",
+      "png_sources": {
+        "witch-wand-directions": "6cfce2b3eb1db016cf383cecdce548df22ba1da6c3ef99e668c96c01da1d8649",
+        "witch-cannon-directions": "4710983f265477da18405d96b8fae7d677bb3ae40f202f05b60369149f98164d",
+        "witch-wand-moving": "739bbb5dc0f93a5c5a28e30da25b540d1dce9a9b8b064dc4a5cd58db3319d55f",
+        "witch-cannon-moving": "2634bf88ef9f872e478dbb84c0c4001f67943643cd4f2bf1dde5a65340237be6",
+        "witch-wand-actions": "f50ba5b1ac84b822369bf67e141fe09b5baae1729c074dec8f47adf5b59f48a5",
+        "witch-cannon-actions": "7fb9c0ecef8df406414984d33a578b2af8656b217177997e437b979aa319f5bf"
+      },
+      "method": "가시 shaft/neck 뒤점90셀 및 cannon-actions6/14의 실제 front 제안2셀; 표적 역산 없음. 기존88 front는 이번 신규독립수용이 아님. 뒤점2개 재판독 수정 이력 원문 보존. 수동 오차±3 canvas px",
+      "acceptance": "좌표 관측/로컬 적용 범위. 전체아트/관구의미/사용자수용 OPEN, 새 관리 검증·실제 렌더 판독 별도"
     }
   ],
   "verification": {
@@ -476,18 +497,6 @@
     "user_acceptance": "OPEN",
     "note": "기존 자산별 과거 inspection/PENDING 상태는 이력으로 보존. 원작 이탈과 S접합 미해결. 기술 PASS와 분리"
   },
-  "current_host_candidate": {
-    "manifest": "runtime/cycle-continuation-20261107/review-source-final.json",
-    "sha256": "2d7f28ef9d6b5d99a01dd9828f5a834861c5185b964428c8d9dfbd1469cca950",
-    "game_inputs": 53,
-    "new_PNGs": false,
-    "reuse": "existing actual action/walk/skill/enemy/UI/background source PNG bytes; metadata masks and Godot state/geometry/VFX only",
-    "input_policy": "real bot earned rewards/actions, no currency/inventory/HP injection; manual native UI proof separate",
-    "independent_recheck": "POSITIVE_SCOPED for specific EA005 island + failed-result workshop overlap; overall CHANGES_REQUIRED/EA006 OPEN",
-    "user_acceptance": "OPEN",
-    "main_integrated": false,
-    "independent_report_sha256": "fa265f050c2cef309caea84b75438a78b4f30ece08d7b25b1a00906234aebc59"
-  },
   "previous_independent_review_profile": {
     "verdict": "CHANGES_REQUIRED",
     "reviewer": "/root/experience_art_review",
@@ -515,5 +524,28 @@
     ],
     "user_acceptance": "OPEN",
     "managed_acceptance": false
+  },
+  "previous_host_candidate_game53": {
+    "manifest": "runtime/cycle-continuation-20261107/review-source-final.json",
+    "sha256": "2d7f28ef9d6b5d99a01dd9828f5a834861c5185b964428c8d9dfbd1469cca950",
+    "game_inputs": 53,
+    "new_PNGs": false,
+    "reuse": "existing actual action/walk/skill/enemy/UI/background source PNG bytes; metadata masks and Godot state/geometry/VFX only",
+    "input_policy": "real bot earned rewards/actions, no currency/inventory/HP injection; manual native UI proof separate",
+    "independent_recheck": "POSITIVE_SCOPED for specific EA005 island + failed-result workshop overlap; overall CHANGES_REQUIRED/EA006 OPEN",
+    "user_acceptance": "OPEN",
+    "main_integrated": false,
+    "independent_report_sha256": "fa265f050c2cef309caea84b75438a78b4f30ece08d7b25b1a00906234aebc59"
+  },
+  "current_host_candidate": {
+    "manifest": "runtime/task-recovery-20261107/motion-recovery-source.json",
+    "status": "HOST_RECOVERY_CANDIDATE_PENDING_MANAGED_CHECK",
+    "game_inputs": 54,
+    "new_PNGs": false,
+    "reuse": "기존 PNG 전부 바이트 보존; 가시 포신 위치 주석·표현 축·실제 보행 fixture만 보완",
+    "independent_back_landmarks": "90셀 관측, source PNG6장의 SHA와 직접 alpha 대조",
+    "front_status": "2셀 독립 Art 제안 적용; 나머지88 기존 수동표기. 전체 front/중복관구 의미/전체Art 수용 OPEN",
+    "user_acceptance": "OPEN",
+    "main_integrated": false
   }
 }

@@ -35,6 +35,13 @@ func until_phase(target: int, limit: float) -> void:
 		battle.advance(1.0 / 60.0)
 	require(battle.phase == target, "캡처할 전투 상태 도달 실패: %d" % target)
 
+func advance_motion(seconds: float) -> void:
+	# 실제 _process와 같은 순서로 규칙과 표현을 갱신한다.
+	for frame in range(int(ceil(seconds * 60.0))):
+		var dt := minf(1.0 / 60.0, seconds - frame / 60.0)
+		battle.advance(dt)
+		battle.visuals.sync(dt)
+
 func _run() -> void:
 	var isolation := OS.get_environment("WITCHBURST_TEST_ROOT")
 	var project_path := ProjectSettings.globalize_path("res://").simplify_path()
@@ -252,17 +259,22 @@ func capture_party() -> void:
 				if cases[index] != "default":
 					battle.dragging = true
 					battle._drag_position(battle._world(targets[index]))
-					battle.advance(0.8)
+					advance_motion(0.8)
 				if cases[index] == "return":
 					battle.dragging = false
-					battle.advance(4.0)
+					advance_motion(4.0)
 					require(battle.manual_grace == 0.0 and battle.witch.distance_to(targets[index]) > 20, "해제 후 실제 자동 이동")
+				if cases[index] == "moving":
+					battle._drag_position(battle._world(Vector2(65, 490)))
+					advance_motion(0.1)
 				battle.total_shots = 2
 				battle.bullets.clear()
 				battle.visuals.emitter_life.fill(0.0)
 				battle._fire()
 				battle.visuals.shot_tween.pause()
 				battle.visuals.sync(0.0)
+				if cases[index] in ["moving", "return"]:
+					require(battle.visuals.motion.moving and battle.visuals.motion.legs.visible and battle.visuals.motion.pose_key.ends_with("-moving"), "실제 보행·분리 하체의 이동 발사 자세 활성화")
 				var sprite: Sprite2D = battle.visuals.witch_sprite
 				var tip := Vector2(1061, 504.5) if equipped == -1 else Vector2(1250, 504.5)
 				var muzzle: Vector2 = preload("res://tests/pose_probe.gd").new().tip(battle.visuals)
@@ -285,8 +297,7 @@ func capture_party() -> void:
 				if cases[index] == "moving":
 					battle._drag_position(battle._world(Vector2(65, 490)))
 					# 발사 뒤 실제 본체만 이동한 순간. 충돌 이전의 8단위 비행을 판독한다.
-					battle.advance(1.0 / 120.0)
-					battle.visuals.sync(0.0)
+					advance_motion(1.0 / 60.0)
 					main.pos = rule_start
 					require(battle.visuals.projectile_position(main).distance_to(muzzle) < 0.01, "본체 이동 후 발사 기준 고정")
 					main.pos = rule_start + Vector2(0, -8)
@@ -295,6 +306,9 @@ func capture_party() -> void:
 				var filename := "party-%s-%s-%dx%d.png" % ["starter" if equipped == -1 else "cannon", cases[index], dimensions.x, dimensions.y]
 				var item := {"path": filename, "stage": "party-%s-%s" % ["starter" if equipped == -1 else "cannon", cases[index]],
 					"size": [dimensions.x, dimensions.y], "party": measured, "terrain": [],
+					"motion": {"moving": battle.visuals.motion.moving, "state": battle.visuals.motion.state,
+						"upper_frame": battle.visuals.motion.witch.frame, "lower_frame": battle.visuals.motion.legs.frame,
+						"legs_visible": battle.visuals.motion.legs.visible},
 					"party_shot": {"muzzle": [muzzle.x, muzzle.y], "launch": [launch.x, launch.y],
 						"emitter": [emitter.x, emitter.y], "spirit_tip": [spirit_tip.x, spirit_tip.y],
 						"spirit_launch": [linked_launch.x, linked_launch.y], "initial": [initial.x, initial.y],

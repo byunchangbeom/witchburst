@@ -1,5 +1,12 @@
 extends RefCounted
 ## 실제 표시 AtlasTexture와 Sprite 변환을 읽는 검사측 그림 랜드마크다.
+var landmarks: Dictionary = {}
+
+func record(visual: Node2D) -> Dictionary:
+	if landmarks.is_empty():
+		landmarks = JSON.parse_string(FileAccess.get_file_as_string("res://tests/weapon-axis-landmarks.json"))
+	return landmarks.frames.get(visual.motion.pose_key, {}).get(str(visual.motion.witch.frame), {})
+
 func _landmark(visual: Node2D, actor: AnimatedSprite2D, uv: Vector2) -> Vector2:
 	var picture := actor.sprite_frames.get_frame_texture(actor.animation, actor.frame)
 	var key: String = visual.motion.pose_key if actor == visual.motion.witch else "spirit-directions"
@@ -10,6 +17,10 @@ func _landmark(visual: Node2D, actor: AnimatedSprite2D, uv: Vector2) -> Vector2:
 	return visual.to_local(actor.to_global(point - picture.get_size()*.5 + actor.offset))
 
 func tip(visual: Node2D) -> Vector2:
+	var observed := record(visual)
+	if not observed.is_empty():
+		var point: Array = observed.muzzle_canvas_uv
+		return _landmark(visual, visual.motion.witch, Vector2(point[0], point[1]))
 	# 실제 각 방향 release 그림의 밝은 별/포구를 독립 판독한 위치.
 	var row: int = visual.motion.direction_row(visual.motion.facing)
 	if visual.motion.pose_key.ends_with("-moving"):
@@ -21,11 +32,10 @@ func tip(visual: Node2D) -> Vector2:
 	return _landmark(visual, visual.motion.witch, (wand if visual.battle.power_tier() == 0 else cannon)[row])
 
 func back(visual: Node2D) -> Vector2:
-	# 8방향 자세 안에서 실제 표적을 향하는 마법 궤도. 이미지 전체는 회전하지 않는다.
-	var origin := tip(visual)
-	var target: Dictionary = visual.battle._enemy_by_id(visual.battle.bullets[0].target)
-	var axis: Vector2 = (visual._point(target.pos) - origin).normalized()
-	return origin - axis * 20.0 * visual.battle.content_width / 540.0
+	# 제품 metadata/포신 헬퍼나 적 좌표를 사용하지 않는 독립 Art 판독 원문이다.
+	var observed := record(visual)
+	var uv: Array = observed.rear_canvas_uv
+	return _landmark(visual, visual.motion.witch, Vector2(uv[0],uv[1]))
 
 func spirit_tip(visual: Node2D) -> Vector2:
 	var mouths := [Vector2(.5,.26),Vector2(.72,.38),Vector2(.83,.46),Vector2(.71,.49),Vector2(.5,.48)]

@@ -25,6 +25,7 @@ func fresh(fixture: bool = false) -> Control:
 
 func run() -> void:
 	directional_checks()
+	weapon_landmark_checks()
 	var product := fresh()
 	var fixture := fresh(true)
 	for battle in [product, fixture]:
@@ -93,6 +94,68 @@ func run() -> void:
 	print("생동감·fixture 회귀: ", checks, "개, 실패 ", failures)
 	quit(1 if failures else 0)
 
+func weapon_landmark_checks() -> void:
+	# 실제 발사 선택과 좌우 반전, 프레임별 그림 랜드마크·초기 탄도를 교차한다.
+	var battle := fresh()
+	var visual: Node2D = battle.visuals
+	var motion: Node2D = visual.motion
+	var probe := preload("res://tests/pose_probe.gd").new()
+	var names := ["E","SE","S","SW","W","NW","N","NE"]
+	var rows := [2,3,4,3,2,1,0,1]
+	var independent: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tests/weapon-axis-landmarks.json"))
+	for key: String in independent.sources:
+		var file: String = motion.metadata[key].file
+		require(FileAccess.get_sha256("res://assets/art/" + file) == independent.sources[key], "독립 Art가 실제 판독한 원 PNG와 검사 대상이 동일")
+	battle.spirit = false
+	while battle.enemies.size() > 1:
+		battle.enemies.pop_back()
+	for tier in [0,3]:
+		battle.equipped = tier - 1
+		visual.sync(0.0)
+		var family := "witch-wand" if tier == 0 else "witch-cannon"
+		for kind in ["directions", "moving", "actions"]:
+			var columns := 6 if kind == "directions" else 4 if kind == "moving" else 8
+			var poses := [5] if kind == "directions" else [0,1,2,3] if kind == "moving" else [4,5,6,7]
+			for sector in range(8):
+				for column: int in poses:
+					motion.clock += 1.0
+					motion.reset_actions()
+					motion.moving = kind == "moving"
+					motion.stride = column + .15
+					motion.move_direction = names[sector]
+					motion.skill_direction = names[sector]
+					if kind == "actions":
+						motion.skill_preparing = column == 5
+						if column == 4: motion.cancel_at = motion.clock
+						if column == 6: motion.skill_at = motion.clock
+						if column == 7: motion.skill_at = motion.clock - .20
+					var vector := Vector2.RIGHT.rotated(sector * PI / 4.0)
+					battle.enemies[0].pos = battle._from_screen(visual.witch_shadow.position + vector * 170.0)
+					battle.bullets.clear()
+					battle._fire()
+					require(motion.pose_key == family + "-" + kind and motion.witch.frame == rows[sector] * columns + column, "실제 발사의 방향·행동·프레임 선택")
+					var observed: Dictionary = probe.record(visual)
+					var status: String = observed.get("status", "")
+					var read_by_art := status.begins_with("OBSERVED_") or status == "FRONT_MARKER_REJECTED_PROPOSED_PHYSICAL_PAIR"
+					require(read_by_art and observed.get("rear_canvas_uv") != null, "발사 프레임마다 독립 Art가 실제 판독한 가시 뒤점이 있음")
+					if not read_by_art or observed.get("rear_canvas_uv") == null:
+						continue
+					var front: Vector2 = probe.tip(visual)
+					var rear: Vector2 = probe.back(visual)
+					require(front.distance_to(rear) > .1, "서로 다른 실제 그림 랜드마크")
+					var bullet: Dictionary = battle.bullets[0]
+					var start: Vector2 = visual.projectile_position(bullet)
+					bullet.pos += Vector2(0,-8)
+					var first: Vector2 = visual.projectile_position(bullet)
+					require(start.distance_to(front) < .01 and (first-start).normalized().dot((front-rear).normalized()) > .9999, "가시 포신 축으로 초기 비행; 표적 좌표로 기대값 합성 없음")
+					if kind == "directions":
+						motion.clock += .08
+						visual.sync(0.0)
+						require(motion.state == "recoil" and visual.projectile_position(bullet).distance_to(first) < .01, "범위 밖 반동 자세가 이미 발사한 탄의 고정 축을 바꾸지 않음")
+						battle._fire()
+						require(motion.pose_key == family + "-directions" and motion.witch.frame == rows[sector] * columns + column, "반동 중 재사격도 관측된 release 자세를 먼저 선택")
+	battle.free()
+
 func directional_checks() -> void:
 	var battle := fresh()
 	var visual: Node2D = battle.visuals
@@ -121,8 +184,9 @@ func directional_checks() -> void:
 			var origin: Vector2 = bullet.pos
 			bullet.pos += Vector2(0,-8)
 			var axis: Vector2 = (visual.projectile_position(bullet) - start).normalized()
-			var target_axis: Vector2 = (visual._point(enemy.pos) - start).normalized()
-			require(axis.dot(target_axis) > .9999 and start.distance_to(preload("res://tests/pose_probe.gd").new().tip(visual)) < .01, "그림 포구에서 실제 표적으로 발사, 전체 이미지 회전 없음")
+			var probe := preload("res://tests/pose_probe.gd").new()
+			var painted_axis: Vector2 = (probe.tip(visual) - probe.back(visual)).normalized()
+			require(axis.dot(painted_axis) > .9999 and start.distance_to(probe.tip(visual)) < .01, "독립 판독한 실제 포신 축으로 출발, 전체 이미지 회전 없음")
 			bullet.pos = origin
 			var before: float = motion.stride
 			motion.shot_at = motion.clock - 1.0

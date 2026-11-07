@@ -1,0 +1,1743 @@
+{
+  "provenance": {
+    "review": "/Users/nhn/.local/state/harness-v/witchburst/task-recovery-20261107/independent-weapon-landmarks-final.json",
+    "review_sha256": "453198bdd714de5e59724cda42b04c7a1abc8a05356b9746d144f0b36a718bcf",
+    "scope": "COMPLETE_REQUESTED_90_BACK_POINTS_WITH_TWO_FRONT_REJECTIONS",
+    "reviewer": "/root/experience_art_review",
+    "rear": "독립 Art의 PNG 가시 shaft/neck 뒤점; 수동 판독 오차±3 canvas px",
+    "front": "88셀은 기존 수동 포구 표기이며 신규 독립 front 수용 아님. cannon-actions6/14는 독립 Art가 기존값을 반려하고 제안한 가시 관구 중심을 적용; 두 관구 의미/전체아트 수용은 별도 OPEN",
+    "target_used": false
+  },
+  "sources": {
+    "witch-wand-directions": "6cfce2b3eb1db016cf383cecdce548df22ba1da6c3ef99e668c96c01da1d8649",
+    "witch-cannon-directions": "4710983f265477da18405d96b8fae7d677bb3ae40f202f05b60369149f98164d",
+    "witch-wand-moving": "739bbb5dc0f93a5c5a28e30da25b540d1dce9a9b8b064dc4a5cd58db3319d55f",
+    "witch-cannon-moving": "2634bf88ef9f872e478dbb84c0c4001f67943643cd4f2bf1dde5a65340237be6",
+    "witch-wand-actions": "f50ba5b1ac84b822369bf67e141fe09b5baae1729c074dec8f47adf5b59f48a5",
+    "witch-cannon-actions": "7fb9c0ecef8df406414984d33a578b2af8656b217177997e437b979aa319f5bf"
+  },
+  "frames": {
+    "witch-wand-directions": {
+      "5": {
+        "muzzle_canvas_uv": [
+          0.8779,
+          0.2361
+        ],
+        "rear_canvas_uv": [
+          0.8296943,
+          0.3449782
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "11": {
+        "muzzle_canvas_uv": [
+          0.9041,
+          0.2458
+        ],
+        "rear_canvas_uv": [
+          0.8122271,
+          0.3449782
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "17": {
+        "muzzle_canvas_uv": [
+          0.8863,
+          0.4221
+        ],
+        "rear_canvas_uv": [
+          0.7641921,
+          0.4672489
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "23": {
+        "muzzle_canvas_uv": [
+          0.8657,
+          0.5512
+        ],
+        "rear_canvas_uv": [
+          0.7336245,
+          0.5458515
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "29": {
+        "muzzle_canvas_uv": [
+          0.5921,
+          0.7775
+        ],
+        "rear_canvas_uv": [
+          0.5764192,
+          0.6899563
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      }
+    },
+    "witch-cannon-directions": {
+      "5": {
+        "muzzle_canvas_uv": [
+          0.6408,
+          0.0646
+        ],
+        "rear_canvas_uv": [
+          0.6724891,
+          0.1746725
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "11": {
+        "muzzle_canvas_uv": [
+          0.8213,
+          0.2217
+        ],
+        "rear_canvas_uv": [
+          0.7860262,
+          0.3100437
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "17": {
+        "muzzle_canvas_uv": [
+          0.9294,
+          0.5321
+        ],
+        "rear_canvas_uv": [
+          0.8384279,
+          0.5414847
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "23": {
+        "muzzle_canvas_uv": [
+          0.851,
+          0.7215
+        ],
+        "rear_canvas_uv": [
+          0.7554585,
+          0.6375546
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "29": {
+        "muzzle_canvas_uv": [
+          0.5105,
+          0.8303
+        ],
+        "rear_canvas_uv": [
+          0.5327511,
+          0.6681223
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      }
+    },
+    "witch-wand-moving": {
+      "0": {
+        "muzzle_canvas_uv": [
+          0.8688,
+          0.1892
+        ],
+        "rear_canvas_uv": [
+          0.8321429,
+          0.275
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "1": {
+        "muzzle_canvas_uv": [
+          0.8106,
+          0.1899
+        ],
+        "rear_canvas_uv": [
+          0.7686833,
+          0.2821429
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "2": {
+        "muzzle_canvas_uv": [
+          0.7595,
+          0.1844
+        ],
+        "rear_canvas_uv": [
+          0.7295374,
+          0.2785714
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "3": {
+        "muzzle_canvas_uv": [
+          0.7241,
+          0.1913
+        ],
+        "rear_canvas_uv": [
+          0.6892857,
+          0.2857143
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "4": {
+        "muzzle_canvas_uv": [
+          0.9137,
+          0.2345
+        ],
+        "rear_canvas_uv": [
+          0.8464286,
+          0.3060498
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "5": {
+        "muzzle_canvas_uv": [
+          0.8917,
+          0.2612
+        ],
+        "rear_canvas_uv": [
+          0.8185053,
+          0.3345196
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "6": {
+        "muzzle_canvas_uv": [
+          0.8333,
+          0.2513
+        ],
+        "rear_canvas_uv": [
+          0.7615658,
+          0.3238434
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "7": {
+        "muzzle_canvas_uv": [
+          0.8337,
+          0.2426
+        ],
+        "rear_canvas_uv": [
+          0.7607143,
+          0.3096085
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "8": {
+        "muzzle_canvas_uv": [
+          0.9489,
+          0.4463
+        ],
+        "rear_canvas_uv": [
+          0.8428571,
+          0.475
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "9": {
+        "muzzle_canvas_uv": [
+          0.878,
+          0.4516
+        ],
+        "rear_canvas_uv": [
+          0.7686833,
+          0.4785714
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "10": {
+        "muzzle_canvas_uv": [
+          0.8574,
+          0.4495
+        ],
+        "rear_canvas_uv": [
+          0.7544484,
+          0.475
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "11": {
+        "muzzle_canvas_uv": [
+          0.8606,
+          0.4505
+        ],
+        "rear_canvas_uv": [
+          0.7535714,
+          0.4785714
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "12": {
+        "muzzle_canvas_uv": [
+          0.8708,
+          0.5054
+        ],
+        "rear_canvas_uv": [
+          0.7607143,
+          0.4875445
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "13": {
+        "muzzle_canvas_uv": [
+          0.8533,
+          0.5273
+        ],
+        "rear_canvas_uv": [
+          0.7437722,
+          0.5053381
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "14": {
+        "muzzle_canvas_uv": [
+          0.7861,
+          0.5256
+        ],
+        "rear_canvas_uv": [
+          0.6868327,
+          0.5053381
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "15": {
+        "muzzle_canvas_uv": [
+          0.7933,
+          0.5224
+        ],
+        "rear_canvas_uv": [
+          0.6785714,
+          0.4982206
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "16": {
+        "muzzle_canvas_uv": [
+          0.5658,
+          0.688
+        ],
+        "rear_canvas_uv": [
+          0.5392857,
+          0.6107143
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "17": {
+        "muzzle_canvas_uv": [
+          0.5944,
+          0.6693
+        ],
+        "rear_canvas_uv": [
+          0.5765125,
+          0.5928571
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "18": {
+        "muzzle_canvas_uv": [
+          0.5487,
+          0.6615
+        ],
+        "rear_canvas_uv": [
+          0.5373665,
+          0.5928571
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "19": {
+        "muzzle_canvas_uv": [
+          0.5257,
+          0.6728
+        ],
+        "rear_canvas_uv": [
+          0.5107143,
+          0.5892857
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      }
+    },
+    "witch-cannon-moving": {
+      "0": {
+        "muzzle_canvas_uv": [
+          0.7215,
+          0.0877
+        ],
+        "rear_canvas_uv": [
+          0.7107143,
+          0.2035714
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "1": {
+        "muzzle_canvas_uv": [
+          0.6965,
+          0.0896
+        ],
+        "rear_canvas_uv": [
+          0.6903915,
+          0.1964286
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "2": {
+        "muzzle_canvas_uv": [
+          0.6826,
+          0.0888
+        ],
+        "rear_canvas_uv": [
+          0.6761566,
+          0.2142857
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "3": {
+        "muzzle_canvas_uv": [
+          0.6574,
+          0.0854
+        ],
+        "rear_canvas_uv": [
+          0.6392857,
+          0.2071429
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "4": {
+        "muzzle_canvas_uv": [
+          0.7975,
+          0.1901
+        ],
+        "rear_canvas_uv": [
+          0.7785714,
+          0.2633452
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "5": {
+        "muzzle_canvas_uv": [
+          0.7656,
+          0.1792
+        ],
+        "rear_canvas_uv": [
+          0.7402135,
+          0.2704626
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "6": {
+        "muzzle_canvas_uv": [
+          0.7489,
+          0.1894
+        ],
+        "rear_canvas_uv": [
+          0.6903915,
+          0.2775801
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "7": {
+        "muzzle_canvas_uv": [
+          0.7498,
+          0.1905
+        ],
+        "rear_canvas_uv": [
+          0.7,
+          0.2704626
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "8": {
+        "muzzle_canvas_uv": [
+          0.9283,
+          0.462
+        ],
+        "rear_canvas_uv": [
+          0.8214286,
+          0.4714286
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "9": {
+        "muzzle_canvas_uv": [
+          0.9036,
+          0.4745
+        ],
+        "rear_canvas_uv": [
+          0.7864769,
+          0.475
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "10": {
+        "muzzle_canvas_uv": [
+          0.9115,
+          0.4726
+        ],
+        "rear_canvas_uv": [
+          0.8149466,
+          0.4714286
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "11": {
+        "muzzle_canvas_uv": [
+          0.8844,
+          0.4685
+        ],
+        "rear_canvas_uv": [
+          0.7928571,
+          0.4714286
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "12": {
+        "muzzle_canvas_uv": [
+          0.8682,
+          0.6031
+        ],
+        "rear_canvas_uv": [
+          0.7535714,
+          0.5302491
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "13": {
+        "muzzle_canvas_uv": [
+          0.8411,
+          0.6232
+        ],
+        "rear_canvas_uv": [
+          0.747331,
+          0.5409253
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "14": {
+        "muzzle_canvas_uv": [
+          0.8268,
+          0.62
+        ],
+        "rear_canvas_uv": [
+          0.6868327,
+          0.5266904
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "15": {
+        "muzzle_canvas_uv": [
+          0.8171,
+          0.6309
+        ],
+        "rear_canvas_uv": [
+          0.7071429,
+          0.5480427
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "16": {
+        "muzzle_canvas_uv": [
+          0.5732,
+          0.6011
+        ],
+        "rear_canvas_uv": [
+          0.5714286,
+          0.4535714
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "17": {
+        "muzzle_canvas_uv": [
+          0.5796,
+          0.613
+        ],
+        "rear_canvas_uv": [
+          0.569395,
+          0.4714286
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "18": {
+        "muzzle_canvas_uv": [
+          0.5551,
+          0.604
+        ],
+        "rear_canvas_uv": [
+          0.5516014,
+          0.45
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "19": {
+        "muzzle_canvas_uv": [
+          0.5631,
+          0.6085
+        ],
+        "rear_canvas_uv": [
+          0.5642857,
+          0.4571429
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      }
+    },
+    "witch-wand-actions": {
+      "4": {
+        "muzzle_canvas_uv": [
+          0.7981,
+          0.5695
+        ],
+        "rear_canvas_uv": [
+          0.7286432,
+          0.6515152
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "5": {
+        "muzzle_canvas_uv": [
+          0.7778,
+          0.2605
+        ],
+        "rear_canvas_uv": [
+          0.7626263,
+          0.3838384
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "6": {
+        "muzzle_canvas_uv": [
+          0.776,
+          0.165
+        ],
+        "rear_canvas_uv": [
+          0.7373737,
+          0.2979798
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "7": {
+        "muzzle_canvas_uv": [
+          0.7202,
+          0.6133
+        ],
+        "rear_canvas_uv": [
+          0.6666667,
+          0.6919192
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "12": {
+        "muzzle_canvas_uv": [
+          0.7892,
+          0.5905
+        ],
+        "rear_canvas_uv": [
+          0.7336683,
+          0.6733668
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "13": {
+        "muzzle_canvas_uv": [
+          0.7773,
+          0.3513
+        ],
+        "rear_canvas_uv": [
+          0.7222222,
+          0.4723618
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "14": {
+        "muzzle_canvas_uv": [
+          0.7787,
+          0.2317
+        ],
+        "rear_canvas_uv": [
+          0.7171717,
+          0.3567839
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "15": {
+        "muzzle_canvas_uv": [
+          0.7366,
+          0.6698
+        ],
+        "rear_canvas_uv": [
+          0.6515152,
+          0.7236181
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "20": {
+        "muzzle_canvas_uv": [
+          0.7909,
+          0.5832
+        ],
+        "rear_canvas_uv": [
+          0.6984925,
+          0.6262626
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "21": {
+        "muzzle_canvas_uv": [
+          0.7263,
+          0.3972
+        ],
+        "rear_canvas_uv": [
+          0.6767677,
+          0.520202
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "22": {
+        "muzzle_canvas_uv": [
+          0.7729,
+          0.2597
+        ],
+        "rear_canvas_uv": [
+          0.7121212,
+          0.3787879
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "23": {
+        "muzzle_canvas_uv": [
+          0.7446,
+          0.6674
+        ],
+        "rear_canvas_uv": [
+          0.6565657,
+          0.7020202
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "28": {
+        "muzzle_canvas_uv": [
+          0.8015,
+          0.6172
+        ],
+        "rear_canvas_uv": [
+          0.7135678,
+          0.6331658
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "29": {
+        "muzzle_canvas_uv": [
+          0.7484,
+          0.3867
+        ],
+        "rear_canvas_uv": [
+          0.6919192,
+          0.4924623
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "30": {
+        "muzzle_canvas_uv": [
+          0.8145,
+          0.3023
+        ],
+        "rear_canvas_uv": [
+          0.7373737,
+          0.4120603
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "31": {
+        "muzzle_canvas_uv": [
+          0.7208,
+          0.6921
+        ],
+        "rear_canvas_uv": [
+          0.6313131,
+          0.7135678
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "36": {
+        "muzzle_canvas_uv": [
+          0.7559,
+          0.5936
+        ],
+        "rear_canvas_uv": [
+          0.6884422,
+          0.6010101
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "37": {
+        "muzzle_canvas_uv": [
+          0.6823,
+          0.3999
+        ],
+        "rear_canvas_uv": [
+          0.6212121,
+          0.510101
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "38": {
+        "muzzle_canvas_uv": [
+          0.7901,
+          0.2905
+        ],
+        "rear_canvas_uv": [
+          0.7272727,
+          0.4040404
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "39": {
+        "muzzle_canvas_uv": [
+          0.6812,
+          0.7504
+        ],
+        "rear_canvas_uv": [
+          0.6111111,
+          0.7121212
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_wand_shaft_or_grip_center",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      }
+    },
+    "witch-cannon-actions": {
+      "4": {
+        "muzzle_canvas_uv": [
+          0.7172,
+          0.1094
+        ],
+        "rear_canvas_uv": [
+          0.7323232,
+          0.2424242
+        ],
+        "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+      },
+      "5": {
+        "muzzle_canvas_uv": [
+          0.5607,
+          0.1651
+        ],
+        "rear_canvas_uv": [
+          0.5678392,
+          0.2979798
+        ],
+        "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+      },
+      "6": {
+        "muzzle_canvas_uv": [
+          0.520202,
+          0.1212121
+        ],
+        "rear_canvas_uv": [
+          0.5555556,
+          0.2272727
+        ],
+        "status": "FRONT_MARKER_REJECTED_PROPOSED_PHYSICAL_PAIR",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "PROPOSED_VISIBLE_FRONT_BACK_PAIR_ONLY_REQUIRES_PRODUCT_APPLY_AND_INDEPENDENT_RENDER_CHECK",
+        "front_provenance": "OBSERVED_PROPOSED_CENTER_FOR_UPRIGHT_VISIBLE_OPENING",
+        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+      },
+      "7": {
+        "muzzle_canvas_uv": [
+          0.6961,
+          0.1126
+        ],
+        "rear_canvas_uv": [
+          0.7323232,
+          0.2474747
+        ],
+        "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+      },
+      "12": {
+        "muzzle_canvas_uv": [
+          0.7485,
+          0.1819
+        ],
+        "rear_canvas_uv": [
+          0.7424242,
+          0.2562814
+        ],
+        "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+      },
+      "13": {
+        "muzzle_canvas_uv": [
+          0.5441,
+          0.1914
+        ],
+        "rear_canvas_uv": [
+          0.5628141,
+          0.3266332
+        ],
+        "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+      },
+      "14": {
+        "muzzle_canvas_uv": [
+          0.469697,
+          0.1407035
+        ],
+        "rear_canvas_uv": [
+          0.510101,
+          0.2512563
+        ],
+        "status": "FRONT_MARKER_REJECTED_PROPOSED_PHYSICAL_PAIR",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "PROPOSED_VISIBLE_FRONT_BACK_PAIR_ONLY_REQUIRES_PRODUCT_APPLY_AND_INDEPENDENT_RENDER_CHECK",
+        "front_provenance": "OBSERVED_PROPOSED_CENTER_FOR_UPRIGHT_VISIBLE_OPENING",
+        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+      },
+      "15": {
+        "muzzle_canvas_uv": [
+          0.7236,
+          0.1723
+        ],
+        "rear_canvas_uv": [
+          0.7323232,
+          0.2512563
+        ],
+        "status": "OBSERVED_BACK_WITH_MULTI_PORT_ART_AMBIGUITY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": "같은 그림에 별도의 관구처럼 보이는 원통이 있다. 이중포구의 의도/어느 관구가 실제 자동사격을 담당하는지는 독립 Art 수용하지 않았다."
+      },
+      "20": {
+        "muzzle_canvas_uv": [
+          0.8198,
+          0.6388
+        ],
+        "rear_canvas_uv": [
+          0.7070707,
+          0.6414141
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "21": {
+        "muzzle_canvas_uv": [
+          0.7855,
+          0.29
+        ],
+        "rear_canvas_uv": [
+          0.718593,
+          0.4292929
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "22": {
+        "muzzle_canvas_uv": [
+          0.7719,
+          0.1435
+        ],
+        "rear_canvas_uv": [
+          0.7121212,
+          0.2727273
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "23": {
+        "muzzle_canvas_uv": [
+          0.8184,
+          0.6617
+        ],
+        "rear_canvas_uv": [
+          0.7121212,
+          0.6666667
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "28": {
+        "muzzle_canvas_uv": [
+          0.8266,
+          0.6736
+        ],
+        "rear_canvas_uv": [
+          0.7070707,
+          0.6281407
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "29": {
+        "muzzle_canvas_uv": [
+          0.7633,
+          0.3215
+        ],
+        "rear_canvas_uv": [
+          0.7135678,
+          0.4623116
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "30": {
+        "muzzle_canvas_uv": [
+          0.7493,
+          0.1335
+        ],
+        "rear_canvas_uv": [
+          0.6969697,
+          0.2663317
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "31": {
+        "muzzle_canvas_uv": [
+          0.806,
+          0.6978
+        ],
+        "rear_canvas_uv": [
+          0.7020202,
+          0.6683417
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "36": {
+        "muzzle_canvas_uv": [
+          0.7274,
+          0.6909
+        ],
+        "rear_canvas_uv": [
+          0.6363636,
+          0.6313131
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "37": {
+        "muzzle_canvas_uv": [
+          0.7306,
+          0.3992
+        ],
+        "rear_canvas_uv": [
+          0.6633166,
+          0.5505051
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "38": {
+        "muzzle_canvas_uv": [
+          0.6942,
+          0.1465
+        ],
+        "rear_canvas_uv": [
+          0.6515152,
+          0.2979798
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      },
+      "39": {
+        "muzzle_canvas_uv": [
+          0.544,
+          0.7675
+        ],
+        "rear_canvas_uv": [
+          0.5454545,
+          0.6414141
+        ],
+        "status": "OBSERVED_MANUAL_BACK_ONLY",
+        "uncertainty_canvas_px": [
+          3,
+          3
+        ],
+        "point_kind": "visible_barrel_collar_or_neck_axis_point",
+        "axis_acceptance": "BACK_POINT_OBSERVED_FRONT_AND_RENDER_TRANSFORM_NOT_GLOBALLY_ACCEPTED",
+        "front_provenance": "NOT_NEWLY_ACCEPTED",
+        "art_ambiguity_open": null
+      }
+    }
+  }
+}

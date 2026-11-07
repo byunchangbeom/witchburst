@@ -250,8 +250,11 @@ func sync_party() -> void:
 		witch.material.set_shader_parameter("split_part",0)
 	var mark: Array = metadata[key].cells[index].muzzle_uv
 	muzzle = _pixel(witch, key, index, Vector2(mark[0],mark[1]))
-	aim_axis = (shot_target - muzzle).normalized() if age < .29 else Vector2.UP
-	breech = muzzle - aim_axis * 20.0 * unit
+	# 독립 Art가 실제 관측한 포신 두 점을 동일 Sprite 변환으로 옮긴다.
+	# 표적 좌표에서 포신을 역산하지 않는다. 비발사 자세의 미관측점은 축 0이다.
+	var back_mark: Array = metadata[key].cells[index].get("breech_uv", mark)
+	breech = _pixel(witch, key, index, Vector2(back_mark[0],back_mark[1]))
+	aim_axis = (muzzle - breech).normalized()
 	visual.witch_muzzle.position = visual.witch_sprite.to_local(to_global(muzzle))
 	var fox_column := int(clock * 4.0) % 2
 	if clock - spirit_at < .12:

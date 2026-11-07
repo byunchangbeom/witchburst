@@ -1150,6 +1150,10 @@
         "trim_offset": [
           31,
           4
+        ],
+        "breech_uv": [
+          0.8594595,
+          0.3440367
         ]
       },
       {
@@ -1366,6 +1370,10 @@
         "trim_offset": [
           24,
           7
+        ],
+        "breech_uv": [
+          0.8350515,
+          0.3444976
         ]
       },
       {
@@ -1582,6 +1590,10 @@
         "trim_offset": [
           33,
           0
+        ],
+        "breech_uv": [
+          0.7932961,
+          0.5169082
         ]
       },
       {
@@ -1798,6 +1810,10 @@
         "trim_offset": [
           25,
           -8
+        ],
+        "breech_uv": [
+          0.772973,
+          0.6214953
         ]
       },
       {
@@ -2014,6 +2030,10 @@
         "trim_offset": [
           17,
           -9
+        ],
+        "breech_uv": [
+          0.6388889,
+          0.7625571
         ]
       }
     ]
@@ -2252,6 +2272,10 @@
         "trim_offset": [
           28,
           4
+        ],
+        "breech_uv": [
+          0.7283237,
+          0.161435
         ]
       },
       {
@@ -2468,6 +2492,10 @@
         "trim_offset": [
           8,
           14
+        ],
+        "breech_uv": [
+          0.8229665,
+          0.2753623
         ]
       },
       {
@@ -2684,6 +2712,10 @@
         "trim_offset": [
           17,
           6
+        ],
+        "breech_uv": [
+          0.8413462,
+          0.5870647
         ]
       },
       {
@@ -2900,6 +2932,10 @@
         "trim_offset": [
           18,
           -11
+        ],
+        "breech_uv": [
+          0.7828283,
+          0.7440758
         ]
       },
       {
@@ -3116,6 +3152,10 @@
         "trim_offset": [
           18,
           -16
+        ],
+        "breech_uv": [
+          0.5621622,
+          0.7347826
         ]
       }
     ]
@@ -4451,7 +4491,11 @@
             141
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8142857,
+          0.6271186
+        ]
       },
       {
         "region": [
@@ -4752,7 +4796,11 @@
             143
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.9090909,
+          0.3296089
+        ]
       },
       {
         "region": [
@@ -5011,7 +5059,11 @@
             146
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8867925,
+          0.2472527
+        ]
       },
       {
         "region": [
@@ -5264,7 +5316,11 @@
             145
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8417266,
+          0.679558
+        ]
       },
       {
         "region": [
@@ -6637,7 +6693,11 @@
             133
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8571429,
+          0.6153846
+        ]
       },
       {
         "region": [
@@ -6920,7 +6980,11 @@
             132
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8541667,
+          0.375
+        ]
       },
       {
         "region": [
@@ -7227,7 +7291,11 @@
             133
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8571429,
+          0.2426036
+        ]
       },
       {
         "region": [
@@ -7516,7 +7584,11 @@
             135
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8248175,
+          0.6783626
+        ]
       },
       {
         "region": [
@@ -8595,7 +8667,11 @@
             135
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8088235,
+          0.5730994
+        ]
       },
       {
         "region": [
@@ -8794,7 +8870,11 @@
             133
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.858209,
+          0.443787
+        ]
       },
       {
         "region": [
@@ -9005,7 +9085,11 @@
             136
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8466667,
+          0.2848837
+        ]
       },
       {
         "region": [
@@ -9294,7 +9378,11 @@
             135
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8208955,
+          0.6549708
+        ]
       },
       {
         "region": [
@@ -10589,7 +10677,11 @@
             132
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8181818,
+          0.6094675
+        ]
       },
       {
         "region": [
@@ -10854,7 +10946,11 @@
             128
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8321678,
+          0.430303
+        ]
       },
       {
         "region": [
@@ -11143,7 +11239,11 @@
             133
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8466258,
+          0.3529412
+        ]
       },
       {
         "region": [
@@ -11354,7 +11454,11 @@
             130
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7902098,
+          0.7005988
+        ]
       },
       {
         "region": [
@@ -12148,7 +12252,11 @@
             135
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7898551,
+          0.6140351
+        ]
       },
       {
         "region": [
@@ -12329,7 +12437,11 @@
             134
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7446809,
+          0.5058824
+        ]
       },
       {
         "region": [
@@ -12558,7 +12670,11 @@
             136
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8525641,
+          0.3953488
+        ]
       },
       {
         "region": [
@@ -12763,7 +12879,11 @@
             139
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7253521,
+          0.7485714
+        ]
       }
     ]
   },
@@ -13720,7 +13840,11 @@
             144
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7697842,
+          0.198895
+        ]
       },
       {
         "region": [
@@ -13889,7 +14013,11 @@
             132
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.5483871,
+          0.2130178
+        ]
       },
       {
         "region": [
@@ -13909,8 +14037,8 @@
           179.0
         ],
         "muzzle_uv": [
-          0.626029090909091,
-          0.0698950276243094
+          0.5151515,
+          0.0662983
         ],
         "source_cell": [
           1190,
@@ -14088,7 +14216,11 @@
             144
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.5575758,
+          0.1823204
+        ]
       },
       {
         "region": [
@@ -14323,7 +14455,11 @@
             144
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7720588,
+          0.2044199
+        ]
       },
       {
         "region": [
@@ -15216,7 +15352,11 @@
             134
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8208955,
+          0.1578947
+        ]
       },
       {
         "region": [
@@ -15421,7 +15561,11 @@
             129
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.5677419,
+          0.2228916
+        ]
       },
       {
         "region": [
@@ -15441,8 +15585,8 @@
           175.0
         ],
         "muzzle_uv": [
-          0.7065826086956521,
-          0.0763090395480226
+          0.5093168,
+          0.0621469
         ],
         "source_cell": [
           1190,
@@ -15632,7 +15776,11 @@
             140
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.5590062,
+          0.1864407
+        ]
       },
       {
         "region": [
@@ -15789,7 +15937,11 @@
             135
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7801418,
+          0.1627907
+        ]
       },
       {
         "region": [
@@ -16814,7 +16966,11 @@
             130
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7808219,
+          0.6167665
+        ]
       },
       {
         "region": [
@@ -17007,7 +17163,11 @@
             124
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.778481,
+          0.3416149
+        ]
       },
       {
         "region": [
@@ -17248,7 +17408,11 @@
             139
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8037975,
+          0.2215909
+        ]
       },
       {
         "region": [
@@ -17459,7 +17623,11 @@
             130
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7916667,
+          0.6467066
+        ]
       },
       {
         "region": [
@@ -18292,7 +18460,11 @@
             137
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7517241,
+          0.637931
+        ]
       },
       {
         "region": [
@@ -18485,7 +18657,11 @@
             118
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8089172,
+          0.3806452
+        ]
       },
       {
         "region": [
@@ -18666,7 +18842,11 @@
             138
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8113208,
+          0.2228571
+        ]
       },
       {
         "region": [
@@ -18793,7 +18973,11 @@
             135
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7762238,
+          0.6802326
+        ]
       },
       {
         "region": [
@@ -19446,7 +19630,11 @@
             136
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.6737589,
+          0.6531792
+        ]
       },
       {
         "region": [
@@ -19645,7 +19833,11 @@
             128
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7692308,
+          0.5393939
+        ]
       },
       {
         "region": [
@@ -19730,7 +19922,11 @@
             134
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7662338,
+          0.2573099
+        ]
       },
       {
         "region": [
@@ -19827,7 +20023,11 @@
             137
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.55,
+          0.6609195
+        ]
       }
     ]
   },
@@ -20772,7 +20972,11 @@
             218
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8925234,
+          0.260223
+        ]
       },
       {
         "region": [
@@ -20965,7 +21169,11 @@
             208
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8756219,
+          0.2548263
+        ]
       },
       {
         "region": [
@@ -21146,7 +21354,11 @@
             215
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8921569,
+          0.2669173
+        ]
       },
       {
         "region": [
@@ -21333,7 +21545,11 @@
             215
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8844221,
+          0.2706767
+        ]
       },
       {
         "region": [
@@ -21508,7 +21724,11 @@
             209
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8672566,
+          0.2884615
+        ]
       },
       {
         "region": [
@@ -21767,7 +21987,11 @@
             204
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8564815,
+          0.3137255
+        ]
       },
       {
         "region": [
@@ -21930,7 +22154,11 @@
             207
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8666667,
+          0.3062016
+        ]
       },
       {
         "region": [
@@ -22069,7 +22297,11 @@
             209
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8669528,
+          0.2961538
+        ]
       },
       {
         "region": [
@@ -22256,7 +22488,11 @@
             206
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8319328,
+          0.5097276
+        ]
       },
       {
         "region": [
@@ -22413,7 +22649,11 @@
             201
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8056872,
+          0.5238095
+        ]
       },
       {
         "region": [
@@ -22594,7 +22834,11 @@
             205
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8245614,
+          0.5117188
+        ]
       },
       {
         "region": [
@@ -22793,7 +23037,11 @@
             205
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8268398,
+          0.515625
+        ]
       },
       {
         "region": [
@@ -23088,7 +23336,11 @@
             193
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8009259,
+          0.5860656
+        ]
       },
       {
         "region": [
@@ -23203,7 +23455,11 @@
             188
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8,
+          0.6108787
+        ]
       },
       {
         "region": [
@@ -23420,7 +23676,11 @@
             195
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8039216,
+          0.597561
+        ]
       },
       {
         "region": [
@@ -23571,7 +23831,11 @@
             193
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7990868,
+          0.5942623
+        ]
       },
       {
         "region": [
@@ -23794,7 +24058,11 @@
             228
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.5454545,
+          0.7060932
+        ]
       },
       {
         "region": [
@@ -23987,7 +24255,11 @@
             221
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.5891089,
+          0.6985294
+        ]
       },
       {
         "region": [
@@ -24168,7 +24440,11 @@
             226
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.5658537,
+          0.6859206
+        ]
       },
       {
         "region": [
@@ -24445,7 +24721,11 @@
             228
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.5586854,
+          0.6810036
+        ]
       }
     ]
   },
@@ -24588,7 +24868,11 @@
             222
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.752381,
+          0.1801471
+        ]
       },
       {
         "region": [
@@ -24787,7 +25071,11 @@
             218
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7609756,
+          0.1710037
+        ]
       },
       {
         "region": [
@@ -24944,7 +25232,11 @@
             221
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7574257,
+          0.1881919
+        ]
       },
       {
         "region": [
@@ -25089,7 +25381,11 @@
             220
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7461929,
+          0.1808118
+        ]
       },
       {
         "region": [
@@ -25258,7 +25554,11 @@
             207
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8268398,
+          0.2286822
+        ]
       },
       {
         "region": [
@@ -25433,7 +25733,11 @@
             201
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8237885,
+          0.2420635
+        ]
       },
       {
         "region": [
@@ -25596,7 +25900,11 @@
             204
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.6801471,
+          0.2431373
+        ]
       },
       {
         "region": [
@@ -25747,7 +26055,11 @@
             199
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.796748,
+          0.244
+        ]
       },
       {
         "region": [
@@ -25922,7 +26234,11 @@
             188
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.827451,
+          0.5230126
+        ]
       },
       {
         "region": [
@@ -26163,7 +26479,11 @@
             186
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8192771,
+          0.5400844
+        ]
       },
       {
         "region": [
@@ -26422,7 +26742,11 @@
             191
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8425197,
+          0.5289256
+        ]
       },
       {
         "region": [
@@ -26543,7 +26867,11 @@
             191
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.8433735,
+          0.5371901
+        ]
       },
       {
         "region": [
@@ -26718,7 +27046,11 @@
             208
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7786885,
+          0.6833977
+        ]
       },
       {
         "region": [
@@ -26851,7 +27183,11 @@
             209
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7949791,
+          0.6923077
+        ]
       },
       {
         "region": [
@@ -27002,7 +27338,11 @@
             210
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.75,
+          0.6743295
+        ]
       },
       {
         "region": [
@@ -27195,7 +27535,11 @@
             202
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.7773279,
+          0.7233202
+        ]
       },
       {
         "region": [
@@ -27382,7 +27726,11 @@
             234
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.5905172,
+          0.5578947
+        ]
       },
       {
         "region": [
@@ -27521,7 +27869,11 @@
             236
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.6036036,
+          0.5714286
+        ]
       },
       {
         "region": [
@@ -27708,7 +28060,11 @@
             233
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.5909091,
+          0.556338
+        ]
       },
       {
         "region": [
@@ -27847,7 +28203,11 @@
             236
           ]
         ],
-        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged"
+        "join_extension_note": "only skin/warm pixels connected to actual foot-reaching boot component; original PNG unchanged",
+        "breech_uv": [
+          0.5877193,
+          0.5574913
+        ]
       }
     ]
   }

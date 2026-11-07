@@ -761,15 +761,24 @@ func _party_checks() -> void:
 			battle.dragging = true
 			battle._drag_position(battle._world(Vector2(440, 660)))
 			battle.shot_clock = 1000
+			visual.motion.previous_rule = battle.witch
+			var walking_frames := {}
 			for frame in range(50):
 				battle.advance(1.0 / 60.0)
-				visual.sync(0.0)
+				visual.sync(1.0 / 60.0)
+				if visual.motion.state == "walk":
+					walking_frames[visual.motion.witch.frame] = true
 				var measured: Dictionary = probe.measure(battle)
 				require(measured.min_diagonal > 650 and measured.max_diagonal < 1480, "드래그 경계로 이동 중에도 실제 발·그림자 풀밭 유지")
+			require(walking_frames.size() >= 2, "지형 회귀가 정지 그림 대신 실제 보행 프레임을 거침")
+			battle._drag_position(battle._world(Vector2(65, 490)))
+			battle.advance(1.0 / 60.0)
+			visual.sync(1.0 / 60.0)
 			battle.total_shots = 2
 			battle.bullets.clear()
 			battle._fire()
 			visual.shot_tween.pause()
+			require(visual.motion.moving and visual.motion.legs.visible, "지형 회귀가 실제 이동 발사·분리 하체를 거침")
 			var sprite: Sprite2D = visual.witch_sprite
 			var tip := Vector2(1061, 504.5) if equipped == -1 else Vector2(1250, 504.5)
 			var actual: Vector2 = preload("res://tests/pose_probe.gd").new().tip(visual)
@@ -784,7 +793,7 @@ func _party_checks() -> void:
 			battle.manual_grace = 0.0
 			for frame in range(180):
 				battle.advance(1.0 / 60.0)
-				visual.sync(0.0)
+				visual.sync(1.0 / 60.0)
 				var measured: Dictionary = probe.measure(battle)
 				require(measured.min_diagonal > 650 and measured.max_diagonal < 1480, "해제 후 자동 이동 중 풀밭 유지")
 	battle.free()

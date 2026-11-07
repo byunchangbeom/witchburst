@@ -236,3 +236,5 @@ Root가 실제 도구로 UI그림/9patch를 공급하고 같은 후속 브랜치
 마스터 최신 명시 지시가 원 task의 이전7304344 실행기 참조보다 우선한다. 현재 채택 실행기는 bbf9f9c341f55a3b21e0d44850f5e6c288037cc6 고정 사본 `/Users/nhn/.local/state/harness-v/witchburst/task-recovery-20261107/executor-bbf9f9c/hv.py`다. 기존 두 lock은 바이트 보존 이력이며 혼용하지 않는다. 실행기 운영은 Controller가 담당한다. 이전 task goal/check/attempt는 수정하지 않는다. 현재 initial-play는 공식 완료1, 개선은 OPEN1이다. ui-design-discussion은 실제 회의로 DISCUSSED다.
 
 원본 호스트 living-motion의 game53 입력은 review-source-final.json(SHA256 2d7f28ef9d6b5d99a01dd9828f5a834861c5185b964428c8d9dfbd1469cca950)과 같다. 참고 영상/보드/Art 보고서는 cycle-continuation-20261107에 있고 부분 판독은 관리 검사를 대체하지 않는다. 기존 allowed 밖의 docs/improvement-queue.md·storage-ledger.json·production-cycles.md·executor-adoptions.json 및 AGENTS/tools는 원본에 보존해 docs를 소유한 정상 후속 Writer가 현재 실제 상태와 대조해 발행한다. 전체 아트·EA006 원작 이탈·사용자 디자인 반려는 OPEN이며 기술 PASS로 닫지 않는다.
+
+현재 복구 후 추가 검토: BLOCKED11의 두 실제 P2를 별도 호스트에서 보완 중이다. 실제 보행/분리하체를 거치는 지형/포구 검증과 독립 Art90셀 뒤점을 연결하며 기존 입력·물리·저장을 보존한다. 세부 source SHA/동일 소스 캡처/잔여WLM003/004 및 전체아트 OPEN은 art-direction.md를 따른다. 기술 수용 뒤 docs를 소유한 정상 후속에서 WB-IMP-010/012 기록을 발행하며 기존 living-motion 원본73파일은 계속 보존한다.

@@ -9,10 +9,13 @@ func capture(label: String) -> void:
 	b.title_label.text=label
 	b.visuals.sync(1.0/24.0)
 	await process_frame
-	await RenderingServer.frame_post_draw
+	RenderingServer.force_draw(false)
 	assert(root.get_texture().get_image().save_png(directory.path_join("skill-%03d.png"%observations.size()))==OK)
 	var m: Node2D=b.visuals.motion
-	observations.append({"index":observations.size(),"label":label,"state":m.state,"facing":m.facing,"move":m.move_direction,"upper_frame":m.witch.frame,"lower_frame":m.legs.frame,"lower_visible":m.legs.visible,"stride":m.stride,"muzzle":[m.muzzle.x,m.muzzle.y],"skill_uses":b.skill_uses})
+	var emitted_axes: Array = []
+	for shot: Dictionary in b.visuals.shot_origins:
+		emitted_axes.append([shot.axis.x, shot.axis.y])
+	observations.append({"index":observations.size(),"label":label,"state":m.state,"facing":m.facing,"move":m.move_direction,"upper_frame":m.witch.frame,"lower_frame":m.legs.frame,"lower_visible":m.legs.visible,"stride":m.stride,"muzzle":[m.muzzle.x,m.muzzle.y],"breech":[m.breech.x,m.breech.y],"emitted_axes":emitted_axes,"skill_uses":b.skill_uses})
 func run() -> void:
 	directory=OS.get_environment("WITCHBURST_ARTIFACTS")
 	root.size=Vector2i(540,960)
